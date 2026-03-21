@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="../Style/Login.css">
+    <script src="../Script/TogglePassword.js" defer></script>
+</head>
+<body>
+    <div class="backgroundImage"></div>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>
+    </header>
+    <main>
+        <div class="parentDiv">
+            <div class="containerLogin">
+                <h1>Login</h1>
+                <form method="post">
+                    <p>Email</p>
+                    <input class="textbox" type="text" name="email" placeholder="email@address.com" required>
+                    <p>Password</p>
+                    <div id="containerPassword">
+                        <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
+                        <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show/Hide" >
+                    </div>
+                    <p>Forgot your password ?</p>
+                    <div>
+                        <p id="noAccount">No account ?</p> <a  id="signup" href="Signup.html">Signup</a>
+                    </div>
+                    <div class="erreur" style="color: red; margin-bottom: 1rem;">
+                    </div>
+                    <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
+                    </div>
+                    
+                    <div id="boutonContainer"></div>
+                </form>
+            </div>
+        </div>
+    </main> 
+</body>
+</html>
