@@ -1,0 +1,101 @@
+.backgroundImage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("../Assets/img/fondRando.jfif") center/cover;
+    opacity: 0.35;
+    z-index: -1;
+}
+
+.containerLogin {
+    background-color: white;
+    padding: 15px;
+    border: black solid 0.5px;
+    border-radius: 7px;
+    margin: 50px auto;
+    width: 25%;
+}
+
+.textbox {
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: #F9F4F4;
+    padding: 5px;
+    width: 95% ;
+}
+
+
+#containerAddress {
+    position: relative; 
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#suggestions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    z-index: 1000;
+}
+
+#suggestions li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#suggestions li:hover {
+    background-color: #eee;
+}
+
+#iconAddress {
+    position: absolute;
+    right: 10px;
+    top: 50%; 
+    transform: translateY(-50%); 
+    width: 20px; 
+    cursor: pointer;
+}
+
+#boutonContainer {
+    display: flex;
+    justify-content: center;
+}
+
+@media screen and (max-width: 1000px) {
+    .containerLogin {
+        width: 30%;
+    }
+}
+
+@media screen and (max-width: 836px) {
+    .containerLogin {
+        width: 35%;
+    }
+}
+
+@media screen and (max-width: 712px) {
+    .containerLogin {
+        width: 45%;
+    }
+}
+
+@media screen and (max-width: 577px) {
+    .containerLogin {
+        width: 55%;
+    }
+}
+
+@media screen and (max-width: 475px) {
+    .containerLogin {
+        width: 65%;
+    }
+}
