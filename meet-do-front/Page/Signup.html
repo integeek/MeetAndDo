@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="stylesheet" href="../Style/Signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+    <script src="../Script/TogglePassword.js" defer></script>
+    <script src="../Script/ValidatorCriters.js" defer></script>
+</head>
+
+<body>
+    <div class="backgroundImage"></div>
+    <main>
+        <div class="containerLogin">
+            <h1>Signup</h1>
+            <form method="post" class="groupForm">
+                <p>Email</p>
+                <input class="textbox" type="text" name="email" placeholder="email@address.com" required>
+                <p>Password</p>
+                <div class="containerPassword">
+                    <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
+                    <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show/Hide" >
+                </div> 
+                <p>Confirm password</p>
+                <div class="containerPassword">
+                    <input class="textbox" type="password" id="password2" name="password2" placeholder="********" required>
+                    <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
+                </div> 
+                <div class="validatorCriters">
+                    <span class="digit"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one number</span>
+                    <span class="uppercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one uppercase letter</span>
+                    <span class="lowercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one lowercase letter</span>
+                    <span class="length"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least 8 characters</span>
+                </div>
+
+                <div class="linkConnexion">
+                    <p id="noAccount">Already have an account ?</p> <a id="login" href="Login.html">Login</a>
+                </div>
+
+                <div id="mention">
+                    <input type="checkbox" id="mention" name="mention" required/>
+                    <div id="mentionTexte"><label id="" for="mention">I confirm that I have read and accept the </label><a  id="login" href="MentionLegales">general terms of use</a></div>
+                </div>
+                <div class="erreur" style="color: red; margin-bottom: 1rem;">
+                </div>
+                <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
+                </div>
+
+                <div id="boutonContainer"></div>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

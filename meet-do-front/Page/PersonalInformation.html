@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your informations</title>
+    <link rel="stylesheet" href="../Style/PersonalInformation.css">
+    <script src="../Script/AddressSearch.js" defer></script>
+</head>
+
+<body>
+    <div class="backgroundImage"></div>
+    <main>
+        <div class="containerLogin">
+            <h1>Your informations</h1>
+            <form action="" method="post">
+                <p>Lastname *</p>
+                <input class="textbox" type="text" name="nom" required>
+                <p>Firstname *</p>
+                <input class="textbox" type="text" name="prenom" required>
+                <p>Address (optional)</p>
+                <div id="containerAddress">
+                    <input class="textbox" type="text" name="adresse" id="adresse" placeholder="Entrez une adresse...">
+                    <img id="iconAddress" src="../Assets/img/icon-pin.png" alt="Adresse">
+                    <ul id="suggestions"></ul>
+                </div>
+
+                <div class="erreur" style="color: red; margin-bottom: 1rem;">
+                </div>
+                <div id="boutonContainer"></div>
+            </form>
+            <script src="../component/BoutonBleu.js"></script>
+        </div>
+    </main>
+    <footer id="footer-container" class="footer-container">
+    </footer>
+</body>
+</html>
