@@ -7,10 +7,22 @@
     <title>Your informations</title>
     <link rel="stylesheet" href="../Style/PersonalInformation.css">
     <script src="../Script/AddressSearch.js" defer></script>
+    <link rel="stylesheet" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css">
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
 </head>
 
 <body>
     <div class="backgroundImage"></div>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>	
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar();
+        </script>
+    </header>
     <main>
         <div class="containerLogin">
             <h1>Your informations</h1>
@@ -29,11 +41,16 @@
                 <div class="erreur" style="color: red; margin-bottom: 1rem;">
                 </div>
                 <div id="boutonContainer"></div>
+                <script>
+                    document.getElementById('boutonContainer').innerHTML = BoutonBleu("Confirm");
+                </script>
             </form>
-            <script src="../component/BoutonBleu.js"></script>
         </div>
     </main>
     <footer id="footer-container" class="footer-container">
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
     </footer>
 </body>
 </html>

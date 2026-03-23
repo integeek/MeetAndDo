@@ -9,10 +9,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
     <script src="../Script/TogglePassword.js" defer></script>
     <script src="../Script/ValidatorCriters.js" defer></script>
+    <link rel="stylesheet" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css">
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
 </head>
 
 <body>
     <div class="backgroundImage"></div>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>	
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar();
+        </script>
+    </header>
     <main>
         <div class="containerLogin">
             <h1>Signup</h1>
@@ -48,11 +60,18 @@
                 </div>
                 <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
                 </div>
-
                 <div id="boutonContainer"></div>
+                <script>
+                    document.getElementById('boutonContainer').innerHTML = BoutonBleu("Signup");
+                </script>
             </form>
         </div>
     </main>
+    <footer id="footer-container" class="footer-container">
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
 </body>
 
 </html>

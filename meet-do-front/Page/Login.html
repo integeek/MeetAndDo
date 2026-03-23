@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="../Style/Login.css">
+    <link rel="stylesheet" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css">
     <script src="../Script/TogglePassword.js" defer></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
 </head>
 <body>
     <div class="backgroundImage"></div>
     <header>
-        <div id="navbar-container" class="navbar-container"></div>
+        <div id="navbar-container" class="navbar-container"></div>	
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar();
+        </script>
     </header>
     <main>
         <div class="parentDiv">
@@ -34,9 +43,17 @@
                     </div>
                     
                     <div id="boutonContainer"></div>
+                    <script>
+                        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Login");
+                    </script>
                 </form>
             </div>
         </div>
     </main> 
+    <footer id="footer-container" class="footer-container">
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
 </body>
 </html>
