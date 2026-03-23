@@ -1,0 +1,99 @@
+
+@font-face {
+    font-family: "Inter";
+    src: url(../assets/font/Inter-VariableFont_opsz\,wght.ttf);
+}
+
+.navbar-container {
+    background-color: rgb(255, 255, 255);
+    width: 100%;
+    box-shadow: 0px 1px 5px 0px;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Inter";
+}
+
+#logo {
+    width: 8vh;
+    height: 8vh;
+    padding: 4px;
+    margin-left: 20px;
+}
+
+.navbar-container a {
+    list-style: none;
+    width: 10rem;
+    height: 3rem;
+    padding-inline-start: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: black;
+}
+
+.navLinks li {
+    list-style-type: none;
+}
+
+.navbar-container a:hover {
+    color: white;
+}
+
+.navLinks li:hover {
+    background-color: #004AAD;
+    border-radius: 10px;
+    color: white;
+}
+
+.navbar-container ul {
+    display: flex;
+    padding: 0;
+    margin-left: 50px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+#navbarGrow {
+    flex-grow: 1;
+}
+
+#profilImg {
+    width: 5vh;
+    height: 5vh;
+}
+
+.annonce a {
+    margin-left: 20px;
+    border :1px solid black;
+    border-radius: 10px;
+}
+
+.annonce a:hover {
+    background: #004AAD;
+    border: 1px solid #004AAD;
+}
+
+#profil {
+    margin-left: 1rem;
+    width: 7rem;
+    padding: 0px 6px;
+    margin-right: 20px;
+    border: 1px solid black;
+    display: flex;
+    border-radius: 10px;
+    justify-content: space-between;
+}
+
+#profil:hover{
+    color: #004AAD;
+    border: 1px solid #004AAD;
+}
