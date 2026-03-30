@@ -1,34 +1,67 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Req,
+  HttpCode,
+} from '@nestjs/common';
+import * as express from 'express';
 import { AuthenticationService } from './authentication.service';
-import { CreateAuthenticationDto } from './dto/create-authentication.dto';
-import { UpdateAuthenticationDto } from './dto/update-authentication.dto';
+import { JwtService } from '@nestjs/jwt';
+import RegisterDto from './dto/register.dto';
+import JwtAuthenticationGuard from './guard/jwt-authentication.guard';
+import { LocalAuthenticationGuard } from './guard/localAuthentication.guard';
+import type RequestWithUser from './requestWithUser.interface';
 
 @Controller('authentication')
 export class AuthenticationController {
-  constructor(private readonly authenticationService: AuthenticationService) {}
+  constructor(private readonly authenticationService: AuthenticationService, private readonly jwtService : JwtService,) {}
 
-  @Post()
-  create(@Body() createAuthenticationDto: CreateAuthenticationDto) {
-    return this.authenticationService.create(createAuthenticationDto);
+@Post('register')
+  async register(@Body() registrationData: RegisterDto) {
+    return this.authenticationService.register(registrationData);
   }
 
+  @UseGuards(JwtAuthenticationGuard)
+  @Post('log-out')
+  async logOut(
+    @Req() request: RequestWithUser,
+    @Res() response: express.Response,
+  ) {
+    response.setHeader(
+      'Set-Cookie',
+      this.authenticationService.getCookieForLogOut(),
+    );
+    return response.sendStatus(200);
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
   @Get()
-  findAll() {
-    return this.authenticationService.findAll();
+  authenticate(@Req() request: RequestWithUser) {
+    const user = request.user;
+    user.password = '';
+    return user;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authenticationService.findOne(+id);
+@HttpCode(200)
+@UseGuards(LocalAuthenticationGuard)
+@Post('login')
+async logIn(
+  @Req() request: RequestWithUser,
+  @Res() response: express.Response,
+) {
+  const { user } = request;
+
+  if (!user.enabled) {
+    return response.status(403).send('User is disabled');
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthenticationDto: UpdateAuthenticationDto) {
-    return this.authenticationService.update(+id, updateAuthenticationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authenticationService.remove(+id);
-  }
+  const cookie = this.authenticationService.getCookieWithJwtToken(user.id, user.role);
+  response.setHeader('Set-Cookie', cookie);
+  user.password = '';
+  return response.send(user);
+}
 }
