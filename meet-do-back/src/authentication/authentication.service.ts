@@ -6,7 +6,10 @@ import CreateUserDto from 'src/user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
-import { SupabaseService } from 'src/supabase/supabase.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import CompleteRegisterDto from './dto/complete-register.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 enum PostgresErrorCode {
   UniqueViolation = '23505',
@@ -18,22 +21,27 @@ export class AuthenticationService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly supabaseService: SupabaseService
+    private readonly mailerService: MailerService,
   ) {}
 
   public async register(registrationData: RegisterDto) {
     const hashedPassword = await bcrypt.hash(registrationData.password, 10);
+    const verificationToken = crypto.randomUUID();
     try {
       const createUserDto: CreateUserDto = {
-        lastname: registrationData.lastname,
-        firstname: registrationData.firstname,
         email: registrationData.email,
         password: hashedPassword,
         role: 'USER',
-        enabled: true,
-        address: registrationData.address,
+        enabled: false,
+        verification_token: verificationToken,
       };
       const createdUser = await this.userService.create(createUserDto);
+      await this.mailerService.sendMail({
+        to: createdUser.email,
+        subject: 'Confirmez votre inscription sur Meet&Do !',
+        text: `Bonjour, votre compte a bien été créé. Afin de le valider, merci de cliquer sur le lien suivant : .../complete-registration?token=${verificationToken}`,
+      });
+
       createdUser.password = '';
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
@@ -47,6 +55,26 @@ export class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  public async completeProfile(data: CompleteRegisterDto) {
+    const user = await this.userService.getByVerificationToken(data.verificationToken);
+    if (!user) {
+      throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.userService.update(user.id, {
+      lastname: data.lastname,
+      firstname: data.firstname,
+      address: data.address,
+      enabled: true,
+      verification_token: '',
+    });
+    await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Merci pour votre inscription sur Meet&Do !',
+        text: `Bonjour ${data.firstname}, votre inscription a bien été confirmée.`
+     });
   }
 
   public getCookieForLogOut() {
@@ -89,5 +117,31 @@ export class AuthenticationService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
       'JWT_EXPIRATION_TIME',
     )}`;
+  }
+
+  // authentication.service.ts
+  public async requestResetPassword(data: RequestResetPasswordDto) {
+    const user = await this.userService.getByEmail(data.email);
+    const resetToken = crypto.randomUUID();
+    await this.userService.update(user.id, {
+      verification_token: resetToken,
+    });
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Réinitialisation de votre mot de passe Meet&Do',
+      text: `Cliquez ici pour réinitialiser votre mot de passe :
+      http://localhost:3000/authentication/reset-password?token=${resetToken}`,
+    });
+  }
+
+  public async resetPassword(data: ResetPasswordDto) {
+    const user = await this.userService.getByVerificationToken(data.verification_token);
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+    await this.userService.update(user.id, {
+      password: hashedPassword,
+      verification_token: '',
+    });
   }
 }

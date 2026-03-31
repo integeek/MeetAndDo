@@ -15,12 +15,18 @@ import RegisterDto from './dto/register.dto';
 import JwtAuthenticationGuard from './guard/jwt-authentication.guard';
 import { LocalAuthenticationGuard } from './guard/localAuthentication.guard';
 import type RequestWithUser from './requestWithUser.interface';
+import CompleteRegisterDto from './dto/complete-register.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('authentication')
 export class AuthenticationController {
-  constructor(private readonly authenticationService: AuthenticationService, private readonly jwtService : JwtService,) {}
+  constructor(
+    private readonly authenticationService: AuthenticationService, 
+    private readonly jwtService : JwtService
+  ) {}
 
-@Post('register')
+  @Post('register')
   async register(@Body() registrationData: RegisterDto) {
     return this.authenticationService.register(registrationData);
   }
@@ -46,22 +52,37 @@ export class AuthenticationController {
     return user;
   }
 
-@HttpCode(200)
-@UseGuards(LocalAuthenticationGuard)
-@Post('login')
-async logIn(
-  @Req() request: RequestWithUser,
-  @Res() response: express.Response,
-) {
-  const { user } = request;
+  @HttpCode(200)
+  @UseGuards(LocalAuthenticationGuard)
+  @Post('login')
+  async logIn(
+    @Req() request: RequestWithUser,
+    @Res() response: express.Response,
+  ) {
+    const { user } = request;
 
-  if (!user.enabled) {
-    return response.status(403).send('User is disabled');
+    if (!user.enabled) {
+      return response.status(403).send('User is disabled');
+    }
+
+    const cookie = this.authenticationService.getCookieWithJwtToken(user.id, user.role);
+    response.setHeader('Set-Cookie', cookie);
+    user.password = '';
+    return response.send(user);
   }
 
-  const cookie = this.authenticationService.getCookieWithJwtToken(user.id, user.role);
-  response.setHeader('Set-Cookie', cookie);
-  user.password = '';
-  return response.send(user);
-}
+  @Post('complete-profile')
+  async completeProfile(@Body() data: CompleteRegisterDto) {
+    return this.authenticationService.completeProfile(data);
+  }
+
+  @Post('request-reset-password')
+  async requestResetPassword(@Body() data: RequestResetPasswordDto) {
+    return this.authenticationService.requestResetPassword(data);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() data: ResetPasswordDto) {
+    return this.authenticationService.resetPassword(data);
+  }
 }

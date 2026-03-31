@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -12,13 +13,11 @@ export class UserService {
       .getAdminClient()
       .from('users')
       .insert({
-        lastname: userData.lastname,
-        firstname: userData.firstname,
         email: userData.email,
         password: userData.password,
         role: userData.role,
         enabled: userData.enabled,
-        address: userData.address,
+        verification_token: userData.verification_token,
       })
       .select()
       .single();
@@ -75,4 +74,49 @@ export class UserService {
     }
     return data;
   }
+  async getByVerificationToken(token: string) {
+  const { data, error } = await this.supabaseService
+    .getAdminClient()
+    .from('users')
+    .select('*')
+    .eq('verification_token', token)
+    .maybeSingle();
+
+  if (error) {
+    this.logger.error(`getByVerificationToken erreur: ${error.message}`);
+    throw new HttpException(
+      'Something went wrong',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  if (!data) {
+    throw new HttpException(
+      'Invalid or expired token',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  return data;
+}
+
+async update(id: number, updateData: Partial<UpdateUserDto>) {
+  const { data, error } = await this.supabaseService
+    .getAdminClient()
+    .from('users')
+    .update(updateData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    this.logger.error(`update erreur: ${error.message}`);
+    throw new HttpException(
+      'Something went wrong',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  return data;
+}
 }
