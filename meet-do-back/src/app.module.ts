@@ -31,8 +31,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       },
       defaults: {
-        from: '"MeetAndDo" <integeek789@gmail.com>',
-      },
+        from: '"MeetAndDo" <meetdosav@gmail.com>',
+      }, 
     }),
   ],
   controllers: [AppController],

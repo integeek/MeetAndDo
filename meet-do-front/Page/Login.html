@@ -12,6 +12,8 @@
     <script src="../Component/Navbar/Navbar.js"></script>
     <script src="../Component/Footer/Footer.js"></script>
     <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Script/Login.js" defer></script>
+
 </head>
 <body>
     <div class="backgroundImage"></div>
@@ -25,7 +27,7 @@
         <div class="parentDiv">
             <div class="containerLogin">
                 <h1>Login</h1>
-                <form method="post">
+                <form id="loginForm">
                     <p>Email</p>
                     <input class="textbox" type="text" name="email" placeholder="email@address.com" required>
                     <p>Password</p>
@@ -33,7 +35,21 @@
                         <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
                         <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show/Hide" >
                     </div>
-                    <p>Forgot your password ?</p>
+                    <p id="forgotPassword">Forgot your password ?</p>
+                    <div id="forgotModal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <span id="closeModal" class="close">&times;</span>
+                            <h2>Reset password</h2>
+                            <p>Enter your email address to receive a reset link.</p>
+                            <input class="textbox" type="email" id="forgotEmail" name="forgotEmail" placeholder="email@address.com">
+                            <div class="erreurModal" style="color: red; margin-bottom: 1rem;"></div>
+                            <div class="successModal" style="color: green; margin-bottom: 1rem;"></div>
+                            <div id="sendResetLink"></div>
+                            <script>
+                                document.getElementById('sendResetLink').innerHTML = BoutonBleu("Send Reset Link");
+                            </script>                        
+                        </div>
+                    </div>
                     <div>
                         <p id="noAccount">No account ?</p> <a  id="signup" href="Signup.html">Signup</a>
                     </div>

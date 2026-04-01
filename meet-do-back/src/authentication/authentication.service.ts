@@ -39,7 +39,7 @@ export class AuthenticationService {
       await this.mailerService.sendMail({
         to: createdUser.email,
         subject: 'Confirmez votre inscription sur Meet&Do !',
-        text: `Bonjour, votre compte a bien été créé. Afin de le valider, merci de cliquer sur le lien suivant : .../complete-registration?token=${verificationToken}`,
+        text: `Bonjour, votre compte a bien été créé. Afin de le valider, merci de cliquer sur le lien suivant : http://127.0.0.1:5500/meet-do-front/Page/PersonalInformation.html?token=${verificationToken}`,
       });
 
       createdUser.password = '';
@@ -55,6 +55,7 @@ export class AuthenticationService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    return { message: 'Registration successful, please check your email' };
   }
 
   public async completeProfile(data: CompleteRegisterDto) {
@@ -75,6 +76,8 @@ export class AuthenticationService {
         subject: 'Merci pour votre inscription sur Meet&Do !',
         text: `Bonjour ${data.firstname}, votre inscription a bien été confirmée.`
      });
+    return { message: 'Registration successful' };
+
   }
 
   public getCookieForLogOut() {
@@ -119,7 +122,6 @@ export class AuthenticationService {
     )}`;
   }
 
-  // authentication.service.ts
   public async requestResetPassword(data: RequestResetPasswordDto) {
     const user = await this.userService.getByEmail(data.email);
     const resetToken = crypto.randomUUID();
@@ -129,19 +131,21 @@ export class AuthenticationService {
 
     await this.mailerService.sendMail({
       to: user.email,
-      subject: 'Réinitialisation de votre mot de passe Meet&Do',
-      text: `Cliquez ici pour réinitialiser votre mot de passe :
-      http://localhost:3000/authentication/reset-password?token=${resetToken}`,
+      subject: 'Reset your Meet&Do password',
+      text: `Click here to reset your password:
+      http://127.0.0.1:5500/meet-do-front/Page/NewPassword.html?token=${resetToken}`,
     });
+    return { message: 'Please check your email' };
   }
 
   public async resetPassword(data: ResetPasswordDto) {
     const user = await this.userService.getByVerificationToken(data.verification_token);
-    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     await this.userService.update(user.id, {
       password: hashedPassword,
       verification_token: '',
     });
+    return { message: 'Your password has been successfully changed.' };
   }
 }

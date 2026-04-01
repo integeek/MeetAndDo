@@ -1,4 +1,4 @@
-const adresseInput = document.getElementById('adresse');
+const adresseInput = document.getElementById('address');
 const suggestionsContainer = document.getElementById('suggestions');
 
 adresseInput.addEventListener('input', async () => {

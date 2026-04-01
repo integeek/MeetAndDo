@@ -8,5 +8,5 @@ export class ResetPasswordDto {
   @MinLength(8)
   @IsString()
   @IsNotEmpty()
-  newPassword: string;
+  password: string;
 }
