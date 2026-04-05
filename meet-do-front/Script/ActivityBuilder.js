@@ -12,6 +12,8 @@ const activityDraft = {
   prix: "",
 };
 
+const ACTIVITY_API_URL = "http://localhost:3000/activity";
+
 function formatEventDate(dateString) {
   const date = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(date.getTime())) return dateString;
@@ -132,6 +134,105 @@ function addEventSlot() {
   renderEventDateChip();
 }
 
+function buildActivityPayload() {
+  return {
+    titre: activityDraft.titre,
+    description: activityDraft.description,
+    categories: activityDraft.categories,
+    adresse: {
+      numeroRue: activityDraft.numeroRue,
+      nomRue: activityDraft.nomRue,
+      ville: activityDraft.ville,
+      codePostal: activityDraft.codePostal,
+    },
+    tailleGroupe: Number(activityDraft.tailleGroupe),
+    prix: Number(activityDraft.prix),
+    evenements: activityDraft.evenements,
+  };
+}
+
+function setSubmitFeedback(message, isError = false) {
+  const feedback = document.getElementById("activity-submit-feedback");
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.classList.toggle("text-danger", isError);
+  feedback.classList.toggle("text-success", !isError && Boolean(message));
+}
+
+async function submitActivityForm(event) {
+  const form = event.currentTarget;
+
+  if (!form.checkValidity()) {
+    event.preventDefault();
+    form.reportValidity();
+    return;
+  }
+
+  if (!activityDraft.categories.length) {
+    event.preventDefault();
+    const categoryField = document.getElementById("activity-category");
+    categoryField?.setCustomValidity("Sélectionne au moins une catégorie.");
+    categoryField?.reportValidity();
+    categoryField?.setCustomValidity("");
+    return;
+  }
+
+  if (!activityDraft.evenements.length) {
+    event.preventDefault();
+    const eventDateField = document.getElementById("activity-event-date");
+    eventDateField?.setCustomValidity(
+      "Ajoute au moins un événement avec une date et une heure.",
+    );
+    eventDateField?.reportValidity();
+    eventDateField?.setCustomValidity("");
+    return;
+  }
+
+  event.preventDefault();
+  setSubmitFeedback("Création de l'activité en cours...");
+
+  const formData = new FormData();
+  formData.append("payload", JSON.stringify(buildActivityPayload()));
+
+  activityDraft.images.forEach((imageFile) => {
+    formData.append("images", imageFile);
+  });
+
+  try {
+    const response = await fetch(ACTIVITY_API_URL, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    setSubmitFeedback("Activité créée avec succès.");
+    form.reset();
+    activityDraft.titre = "";
+    activityDraft.images = [];
+    activityDraft.description = "";
+    activityDraft.categories = [];
+    activityDraft.evenements = [];
+    activityDraft.numeroRue = "";
+    activityDraft.nomRue = "";
+    activityDraft.ville = "";
+    activityDraft.codePostal = "";
+    activityDraft.tailleGroupe = "";
+    activityDraft.prix = "";
+    renderCategoryChip();
+    renderEventDateChip();
+  } catch (error) {
+    console.error("Erreur lors de la création de l'activité :", error);
+    setSubmitFeedback(
+      "Impossible d'envoyer le formulaire pour l'instant. Vérifie que le backend est disponible.",
+      true,
+    );
+  }
+}
+
 function updateDraftField(event) {
   const { name, value, files, type } = event.target;
   if (!name) return;
@@ -167,35 +268,14 @@ function initActivityBuilderForm() {
   if (!form) return;
 
   form.addEventListener("input", updateDraftField);
-  form.addEventListener("submit", (event) => {
-    if (!form.checkValidity()) {
-      event.preventDefault();
-      form.reportValidity();
-      return;
-    }
-
-    if (!activityDraft.categories.length) {
-      event.preventDefault();
-      const categoryField = document.getElementById("activity-category");
-      categoryField?.setCustomValidity("Sélectionne au moins une catégorie.");
-      categoryField?.reportValidity();
-      categoryField?.setCustomValidity("");
-      return;
-    }
-
-    if (!activityDraft.evenements.length) {
-      event.preventDefault();
-      const eventDateField = document.getElementById("activity-event-date");
-      eventDateField?.setCustomValidity(
-        "Ajoute au moins un événement avec une date et une heure.",
-      );
-      eventDateField?.reportValidity();
-      eventDateField?.setCustomValidity("");
-    }
-  });
+  form.addEventListener("submit", submitActivityForm);
   document
     .getElementById("add-event-slot-button")
     ?.addEventListener("click", addEventSlot);
+  const submitButtonContainer = document.getElementById("activity-submit-button");
+  if (submitButtonContainer) {
+    submitButtonContainer.innerHTML = BoutonBleu("Créer l'activité");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
