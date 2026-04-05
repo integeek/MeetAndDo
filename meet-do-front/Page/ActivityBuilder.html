@@ -20,7 +20,227 @@
     <!-- <header>
       <div id="navbar-container" class="navbar-container"></div>
     </header> -->
-    <main class="container py-4 py-md-5"></main>
+    <main class="container py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1>Créer une activité</h1>
+        </div>
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <form id="activity-builder-form" class="row g-4" novalidate>
+            <div class="col-12">
+              <label for="activity-title" class="form-label fw-semibold">
+                Nom de l'activité
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="activity-title"
+                name="titre"
+                placeholder="Ex. Atelier Macaron"
+                autocomplete="off"
+                required
+              />
+              <div class="form-text">
+                Ce nom sera utilisé pour l'affichage de l'activité.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-images" class="form-label fw-semibold">
+                Photos de l'activité
+              </label>
+              <input
+                type="file"
+                class="form-control form-control-lg"
+                id="activity-images"
+                name="images"
+                accept="image/*"
+                multiple
+                required
+              />
+              <div class="form-text">
+                Tu peux sélectionner une ou plusieurs photos.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-description" class="form-label fw-semibold">
+                Description de l'activité
+              </label>
+              <textarea
+                class="form-control"
+                id="activity-description"
+                name="description"
+                rows="6"
+                placeholder="Décris l'activité, son déroulé, ce qui est inclus, et ce que les participants vont vivre."
+              ></textarea>
+              <div class="form-text">
+                Cette description sera affichée sur la page de l'activité.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-category" class="form-label fw-semibold">
+                Catégorie
+              </label>
+              <select
+                class="form-select form-select-lg"
+                id="activity-category"
+                name="categories"
+              >
+                <option value="">Choisir une catégorie</option>
+                <option value="Sport">Sport</option>
+                <option value="Art">Art</option>
+                <option value="Voyage">Voyage</option>
+                <option value="Science">Science</option>
+                <option value="Musique">Musique</option>
+                <option value="Lecture">Lecture</option>
+              </select>
+              <div class="form-text">
+                Tu peux choisir jusqu'à 3 catégories. Elles seront utiles pour
+                filtrer ton activité dans la recherche.
+              </div>
+              <div id="activity-category-chip" class="pt-3"></div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">
+                Adresse de l'activité
+              </label>
+              <div class="row g-3">
+                <div class="col-12 col-md-3">
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="activity-street-number"
+                    name="numeroRue"
+                    placeholder="N°"
+                    autocomplete="address-line1"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-9">
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="activity-street-name"
+                    name="nomRue"
+                    placeholder="Nom de la rue"
+                    autocomplete="address-line1"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-7">
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="activity-city"
+                    name="ville"
+                    placeholder="Ville"
+                    autocomplete="address-level2"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-5">
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="activity-zip-code"
+                    name="codePostal"
+                    placeholder="Code postal"
+                    autocomplete="postal-code"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-text">
+                Cette adresse servira à localiser l'activité pour les participants.
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="activity-group-size" class="form-label fw-semibold">
+                Taille du groupe
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="activity-group-size"
+                name="tailleGroupe"
+                min="1"
+                step="1"
+                placeholder="Ex. 10"
+                required
+              />
+              <div class="form-text">
+                Indique le nombre maximum de participants par événement.
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="activity-price" class="form-label fw-semibold">
+                Prix par personne
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="activity-price"
+                name="prix"
+                min="0"
+                step="0.01"
+                placeholder="Ex. 30"
+                required
+              />
+              <div class="form-text">
+                Indique le tarif payé par chaque participant.
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">
+                Dates des événements
+              </label>
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <input
+                    type="date"
+                    class="form-control form-control-lg"
+                    id="activity-event-date"
+                    name="dateEvenement"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <input
+                    type="time"
+                    class="form-control form-control-lg"
+                    id="activity-event-time"
+                    name="heureEvenement"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <button
+                    type="button"
+                    id="add-event-slot-button"
+                    class="btn btn-outline-primary btn-lg"
+                  >
+                    Ajouter ce créneau
+                  </button>
+                </div>
+              </div>
+              <div class="form-text">
+                Ajoute toutes les dates et heures auxquelles cette activité sera proposée.
+              </div>
+              <div id="activity-event-date-chip" class="pt-3"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
     <!-- <footer id="footer-container" class="footer-container"></footer> -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
