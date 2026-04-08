@@ -1,0 +1,160 @@
+.backgroundImage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("../Assets/img/fondRando.jfif") center/cover;
+    opacity: 0.35;
+    z-index: -1;
+}
+
+.containerLogin {
+    background-color: white;
+    border: black solid 0.5px;
+    border-radius: 7px;
+    padding: 15px;
+    margin: 50px auto;
+    width: 20%;
+}
+
+.textbox {
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: #F9F4F4;
+    padding: 5px;
+    width: 95% ;
+}
+
+#noAccount, #signup {
+    display: inline-block;
+    margin-right: 4px;
+    text-decoration: none;
+}
+
+#containerPassword {
+    position: relative; 
+    display: inline-block;
+    width: 100%;
+
+}
+
+.togglePassword {
+    position: absolute;
+    right: 10px;
+    top: 50%; 
+    transform: translateY(-50%);
+    width: 20px; 
+    cursor: pointer;
+}
+
+#boutonContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 100%;   
+    max-width: 400px; 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.modal-content .textbox {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 1.25rem;
+        border-radius: 8px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .modal-content .textbox {
+        font-size: 1rem;
+    }
+
+    #sendResetLink {
+        width: 100%;
+        padding: 0.75rem;
+    }
+}
+
+@media screen and (max-width: 1100px) {
+    .popup-content {
+        width: 35%;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .containerLogin {
+        width: 25%;
+    }
+}
+
+@media screen and (max-width: 880px) {
+    .popup-content {
+        width: 45%;
+    }
+}
+
+@media screen and (max-width: 830px) {
+    .containerLogin {
+        width: 45%;
+    }
+}
+
+@media screen and (max-width: 680px) {
+    .popup-content {
+        width: 65%;
+    }
+}
+
+@media screen and (max-width: 520px) {
+    .containerLogin {
+        width: 50%;
+    }
+    
+    #noAccount, #signup {
+        display: inline-block;
+        margin: 1px;
+        text-decoration: none;
+    }
+    #boutonContainer {
+        margin-top: 10px;
+    }
+}
+
+@media screen and (max-width: 470px) {
+    .popup-content {
+        width: 80%;
+    }
+}
+

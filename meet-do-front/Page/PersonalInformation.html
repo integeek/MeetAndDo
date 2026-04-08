@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your informations</title>
+    <link rel="stylesheet" href="../Style/PersonalInformation.css">
+    <script src="../Script/AddressSearch.js" defer></script>
+    <link rel="stylesheet" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css">
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Script/PersonalInformation.js" defer></script>
+</head>
+
+<body>
+    <div class="backgroundImage"></div>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>	
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar();
+        </script>
+    </header>
+    <main>
+        <div class="containerLogin">
+            <h1>Your informations</h1>
+            <form id="personalInformationForm">
+                <p>Lastname *</p>
+                <input class="textbox" type="text" name="lastname" required>
+                <p>Firstname *</p>
+                <input class="textbox" type="text" name="firstname" required>
+                <p>Address (optional)</p>
+                <div id="containerAddress">
+                    <input class="textbox" type="text" name="address" id="address" placeholder="Entrez une adresse...">
+                    <img id="iconAddress" src="../Assets/img/icon-pin.png" alt="Adresse">
+                    <ul id="suggestions"></ul>
+                </div>
+
+                <div class="erreur" style="color: red; margin-bottom: 1rem;">
+                </div>
+                <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
+                </div>
+                <div id="boutonContainer"></div>
+                <script>
+                    document.getElementById('boutonContainer').innerHTML = BoutonBleu("Confirm");
+                </script>
+            </form>
+        </div>
+    </main>
+    <footer id="footer-container" class="footer-container">
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
+</body>
+</html>
