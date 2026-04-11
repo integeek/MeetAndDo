@@ -1,0 +1,85 @@
+.search-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    padding: 10px 15px;
+    border-radius: 20px;
+    gap: 10px;
+    width: fit-content;
+    margin: 40px auto; /* Centre la barre */
+    border: 1px solid #ddd; /* Optionnel : ajoute une bordure légère */
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    padding: 8px;
+    font-size: 16px;
+    outline: none;
+    flex: 1;
+    min-width: 150px;
+}
+
+.search-bar button {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.separator {
+    width: 1px;
+    height: 24px;
+    background: #ccc;
+}
+
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid #ccc;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
+
+#containerAdresse {
+    position: relative; 
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#suggestions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    z-index: 1000;
+}
+
+#suggestions li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+#suggestions li:hover {
+    background-color: #eee;
+}

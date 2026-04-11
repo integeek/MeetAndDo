@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil</title>
+    <link rel="stylesheet" type="text/css" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" type="text/css" href="../Style/Home.css">
+    <link rel="stylesheet" href="../Component/SearchBar/SearchBar.css">
+    <!-- <link rel="stylesheet" href="../component/ActivityCard/ActivityCard.css"> -->
+    <!--<script src="activityCard.js" defer></script>-->
+    <link rel="stylesheet" type="text/css" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="../Style/Accueil.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/SearchBar/SearchBar.js"></script>
+    <script src="../Script/Home.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar("..");
+        </script>
+    </header>
+    <main>
+        <h1 class="message-bienvenue">Ravi de vous revoir sur Meet&Do <span style="color: #004AAD;"></span> !</h1>
+        <!-- <h1 class="message-bienvenue">Bienvenue sur Meet&Do !</h1> -->
+        <div id="search-bar"></div>
+        <script>
+            document.getElementById('search-bar').innerHTML = SearchBar("..")
+        </script>
+        <!-- <div id="activities-container"></div>
+            <div id="loader" style="text-align:center; margin: 20px; display: none;">
+                <img src="../../view/assets/img/loader.gif" alt="Chargement..." width="200" height="200">
+            </div>
+        <script src="../component/ActivityCard/ActivityCard.js"></script>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script> -->
+       
+    </main>
+    <footer id="footer-container" class="footer-container">
+        <script src="../Component/Footer/Footer.js"></script>
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
+</body>
+
+</html>
