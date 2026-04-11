@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../Style/MyAccount.css" />
+  <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+  <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+  <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+  <script src="../Component/Button/BlueButton.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
+  <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Script/MyAccount.js" defer></script>
+  <title>My account</title>
+</head>
+
+<body>
+  <header>
+    <div class="navbar-container" id="navbar-container"></div>
+    <script>
+      document.getElementById('navbar-container').innerHTML = Navbar("..");
+    </script>
+    <h1>My Account :</h1>
+  </header>
+  <main>
+    <div class="global-container">
+      <div class="infos-container">
+        <div class="profile-container">
+          <img src="../Assets/img/icon-profil.png" alt="profile-icon" id="profile-icon" />
+          <div id="boutonContainer"></div>
+          <script>
+            document.getElementById("boutonContainer").innerHTML = BoutonBleu(
+              "Modifier photo de profil"
+            );
+            // Affichage dynamique de la photo de profil
+            fetch('../../controller/Compte/PhotoController.php', { method: 'GET' })
+              .then(response => response.json())
+              .then(data => {
+                if (data.photo && data.photo !== "") {
+                  document.getElementById('profile-icon').src = data.photo;
+                }
+              });
+          </script>
+        </div>
+        <hr>
+        <form>
+          <div class="firstname-container">
+            <div class="input-firstname">
+              <label for="firstname">Firstname :</label>
+              <input type="text" id="firstname" readonly />
+            </div>
+            <img src="../Assets/img/icon-edit.svg" alt="edit-icon" class="edit-icon"
+              onclick="openPopUp('edit-firstname-popup')" />
+          </div>
+          <div class="lastname-container">
+            <div class="input-lastname">
+              <label for="lastname">Lastname :</label>
+              <input type="text" id="lastname" readonly />
+            </div>
+            <img src="../Assets/img/icon-edit.svg" alt="edit-icon" class="edit-icon"
+              onclick="openPopUp('edit-lastname-popup')" />
+          </div>
+          <div class="email-container">
+            <div class="input-email">
+              <label for="email">Email :</label>
+              <input type="email" id="email" readonly />
+            </div>
+          </div>
+          <div class="password-container">
+            <div class="input-password">
+              <label for="password">Password :</label>
+              <input type="password" id="password" value="Password" readonly />
+            </div>
+            <img src="../Assets/img/icon-edit.svg" alt="edit-icon" class="edit-icon" id="editIcon">
+          </div>
+        </form>
+      </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer id="footer-container" class="footer-container"></footer>
+  <script src="../component/Footer/Footer.js"></script>
+  <script>
+    document.getElementById('footer-container').innerHTML = Footer("..");
+  </script>
+
+  <div class="edit-container" id="edit-firstname-popup">
+    <div class="edit-content">
+      <div class="edit-header">
+        <h3>Update your firstname</h3>
+      </div>
+      <form id="edit-firstname-form">
+        <div class="edit-main">
+          <input type="text" name="edit-firstname" id="edited-firstname" />
+        </div>
+        <div class="edit-footer">
+          <button type="button" onclick="closePopUp('edit-firstname-popup')" class="buttonRo">Annuler</button>
+          <div onclick="updateFirstname()" id="bouton-bleue1"></div>
+          <script>
+            document.getElementById("bouton-bleue1").innerHTML =
+              BoutonBleu("Valider");
+          </script>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="edit-container" id="edit-lastname-popup">
+    <div class="edit-content">
+      <div class="edit-header">
+        <h3>Update your lastname</h3>
+      </div>
+      <form onsubmit="event.preventDefault(); updateLastname();" id="edit-lastname-form">
+        <div class="edit-main">
+          <input type="text" name="edit-lastname" id="edited-lastname" />
+        </div>
+        <div class="edit-footer">
+          <button type="button" onclick="closePopUp('edit-lastname-popup')" class="buttonRo">Annuler</button>
+          <div onclick="document.getElementById('edit-lastname-form').submit()" id="bouton-bleue2"></div>
+          <script>
+            document.getElementById("bouton-bleue2").innerHTML =
+              BoutonBleu("Valider");
+          </script>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="edit-container" id="edit-photo-popup" style="display:none;">
+    <div class="edit-content">
+      <div class="edit-header">
+        <h3>Changer la photo de profil</h3>
+      </div>
+      <form id="edit-photo-form" enctype="multipart/form-data">
+        <div class="edit-main">
+          <input type="file" name="photo" id="input-pdp" accept="image/*" required />
+        </div>
+        <div class="edit-footer">
+          <button type="button" onclick="closePopUp('edit-photo-popup')" class="buttonRo">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

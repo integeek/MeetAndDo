@@ -44,13 +44,13 @@ export class AuthenticationController {
     return response.sendStatus(200);
   }
 
-  @UseGuards(JwtAuthenticationGuard)
-  @Get()
-  authenticate(@Req() request: RequestWithUser) {
-    const user = request.user;
-    user.password = '';
-    return user;
-  }
+  // @UseGuards(JwtAuthenticationGuard)
+  // @Get()
+  // authenticate(@Req() request: RequestWithUser) {
+  //   const user = request.user;
+  //   user.password = '';
+  //   return user;
+  // }
 
   @HttpCode(200)
   @UseGuards(LocalAuthenticationGuard)
@@ -69,6 +69,12 @@ export class AuthenticationController {
     response.setHeader('Set-Cookie', cookie);
     user.password = '';
     return response.send(user);
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Get('me')
+  authenticate(@Req() request: RequestWithUser) {
+    return request.user;
   }
 
   @Post('complete-profile')

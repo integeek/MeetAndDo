@@ -75,48 +75,48 @@ export class UserService {
     return data;
   }
   async getByVerificationToken(token: string) {
-  const { data, error } = await this.supabaseService
-    .getAdminClient()
-    .from('users')
-    .select('*')
-    .eq('verification_token', token)
-    .maybeSingle();
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .select('*')
+      .eq('verification_token', token)
+      .maybeSingle();
 
-  if (error) {
-    this.logger.error(`getByVerificationToken erreur: ${error.message}`);
-    throw new HttpException(
-      'Something went wrong',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    if (error) {
+      this.logger.error(`getByVerificationToken erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    if (!data) {
+      throw new HttpException(
+        'Invalid or expired token',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return data;
   }
 
-  if (!data) {
-    throw new HttpException(
-      'Invalid or expired token',
-      HttpStatus.BAD_REQUEST,
-    );
+  async update(id: number, updateData: Partial<UpdateUserDto>) {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      this.logger.error(`update erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return data;
   }
-
-  return data;
-}
-
-async update(id: number, updateData: Partial<UpdateUserDto>) {
-  const { data, error } = await this.supabaseService
-    .getAdminClient()
-    .from('users')
-    .update(updateData)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) {
-    this.logger.error(`update erreur: ${error.message}`);
-    throw new HttpException(
-      'Something went wrong',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
-
-  return data;
-}
 }

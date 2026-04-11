@@ -244,9 +244,7 @@ export class AuthenticationService {
   public getCookieWithJwtToken(userId: number, role: string) {
     const payload: JwtPayload = { userId, role };
     const token = this.jwtService.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_EXPIRATION_TIME',
-    )}`;
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}; SameSite=Lax`;
   }
 
   public async requestResetPassword(data: RequestResetPasswordDto) {
