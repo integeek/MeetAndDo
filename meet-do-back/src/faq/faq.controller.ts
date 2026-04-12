@@ -10,7 +10,6 @@ export class FaqController {
   getAll(): Promise<Faq[]> {
     return this.faqService.getAll();
   }
-
   @Post()
   create(@Body() dto: CreateFaqDto): Promise<Faq> {
     return this.faqService.create(dto);

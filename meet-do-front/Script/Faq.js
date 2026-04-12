@@ -46,3 +46,38 @@ function renderFaq(items) {
   });
 }
 loadFaq();
+
+function openPopUp(id) {
+    document.getElementById(id).style.display = "block";
+}
+
+function closePopUp(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+async function createFaq() {
+  const question = document.getElementById('faq-question-input').value.trim();
+  const answer = document.getElementById('faq-answer-input').value.trim();
+
+  if (!question || !answer) {
+    alert('Please fill in both fields.');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:3000/faq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, answer }),
+    });
+
+    if (!res.ok) throw new Error('Network error');
+
+    document.getElementById('faq-question-input').value = '';
+    document.getElementById('faq-answer-input').value = '';
+    closePopUp('edit-email-popup');
+    loadFaq();
+  } catch (err) {
+    alert('Unable to add the question. Please try again.');
+  }
+}
