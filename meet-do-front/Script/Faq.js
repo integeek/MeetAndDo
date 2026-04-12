@@ -1,0 +1,48 @@
+async function loadFaq() {
+  try {
+    const res = await fetch('http://localhost:3000/faq');
+    if (!res.ok) {
+        throw new Error('Network error');
+    }
+    const items = await res.json();
+    renderFaq(items);
+  } catch (err) {
+    document.getElementById('faq-container').innerHTML =
+      '<p style="color:#888;font-size:14px;">Unable to load questions.</p>';
+  }
+}
+
+function renderFaq(items) {
+  const container = document.getElementById('faq-container');
+  container.innerHTML = '';
+
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.innerHTML = `
+      <button class="faq-btn" aria-expanded="false">
+        <span class="faq-question">${item.question}</span>
+        <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="faq-panel">
+        <div class="faq-answer">${item.answer}</div>
+      </div>
+    `;
+
+    div.querySelector('.faq-btn').addEventListener('click', () => {
+      const isOpen = div.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-btn').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        div.classList.add('open');
+        div.querySelector('.faq-btn').setAttribute('aria-expanded', 'true');
+      }
+    });
+    container.appendChild(div);
+  });
+}
+loadFaq();

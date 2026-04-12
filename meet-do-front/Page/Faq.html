@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ</title>
+  <link rel="stylesheet" type="text/css" href="../Style/Faq.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Footer/Footer.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Navbar/Navbar.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Button/BlueButton.css">
+  <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
+  <script src="../Component/Button/BlueButton.js"></script>
+  <script src="../Script/Faq.js" defer></script>
+</head>
+<body>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar();
+        </script>
+    </header>
+    <br>
+  <div class="faq-wrapper">
+    <h1>Frequently Asked Questions</h1>
+    <div id="boutonContainer" style="display: inline-block; margin-bottom: 1rem;"></div>
+    <script>
+        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Create a question");
+    </script>
+    <div id="faq-container"></div>
+  </div>
+    <footer>
+        <div id="footer-container" class="footer-container"></div>
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
+</body>
+</html>
