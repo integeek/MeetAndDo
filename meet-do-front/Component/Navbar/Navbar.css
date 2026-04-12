@@ -97,3 +97,41 @@ nav {
     color: #004AAD;
     border: 1px solid #004AAD;
 }
+
+.profil-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 180px;
+  z-index: 100;
+}
+
+.dropdown-menu.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu a {
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+  background: #004AAD;;
+}
+
+.dropdown-menu hr {
+  margin: 4px 0;
+  border: none;
+  border-top: 1px solid #e0e0e0;
+}

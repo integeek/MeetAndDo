@@ -32,7 +32,7 @@ export class AuthenticationController {
   }
 
   @UseGuards(JwtAuthenticationGuard)
-  @Post('log-out')
+  @Post('logout')
   async logOut(
     @Req() request: RequestWithUser,
     @Res() response: express.Response,
