@@ -1,0 +1,23 @@
+@import url("./ActivityBuilder.css");
+
+.existing-activity-image-wrap {
+  position: relative;
+}
+
+.existing-activity-image {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+}
+
+.existing-image-remove {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 1;
+}
