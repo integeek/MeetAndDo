@@ -4,6 +4,7 @@
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.17",
     "@nestjs/mapped-types": "^2.1.0",
+    "@supabase/supabase-js": "^2.103.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
