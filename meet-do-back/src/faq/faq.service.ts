@@ -47,4 +47,39 @@ export class FaqService {
     }
     return data;
   }
+
+  async update(id: number, updateData: Partial<UpdateFaqDto>) {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('faq')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+  
+    if (error) {
+      this.logger.error(`update erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return data;
+  }
+
+  async delete(id: number) {
+    const { error } = await this.supabaseService
+      .getAdminClient()
+      .from('faq')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      this.logger.error(`delete erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
