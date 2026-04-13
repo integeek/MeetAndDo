@@ -34,7 +34,7 @@ import { ActivityModule } from './activity/activity.module';
       },
       defaults: {
         from: '"MeetAndDo" <meetdosav@gmail.com>',
-      }, 
+      },
     }),
     MessagingModule,
     ActivityModule,
