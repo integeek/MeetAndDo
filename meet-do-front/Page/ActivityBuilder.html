@@ -71,6 +71,7 @@
             <div class="col-12">
               <label for="activity-description" class="form-label fw-semibold">
                 Description de l'activité
+                <span class="text-danger">*</span>
               </label>
               <textarea
                 class="form-control"
@@ -78,6 +79,8 @@
                 name="description"
                 rows="6"
                 placeholder="Décris l'activité, son déroulé, ce qui est inclus, et ce que les participants vont vivre."
+                minlength="10"
+                required
               ></textarea>
               <div class="form-text">
                 Cette description sera affichée sur la page de l'activité.
@@ -121,6 +124,7 @@
                 name="address"
                 placeholder="Ex. 10 rue de Vanves, 92130 Issy-les-Moulineaux"
                 autocomplete="street-address"
+                minlength="5"
                 required
               />
               <div class="form-text">
@@ -181,7 +185,6 @@
                     class="form-control form-control-lg"
                     id="activity-event-date"
                     name="dateEvenement"
-                    required
                   />
                 </div>
                 <div class="col-12 col-md-6">
@@ -190,7 +193,6 @@
                     class="form-control form-control-lg"
                     id="activity-event-time"
                     name="heureEvenement"
-                    required
                   />
                 </div>
                 <div class="col-12">
@@ -238,8 +240,17 @@
     <script src="../Component/Button/BlueButton.js"></script>
     <script src="../Component/Button/RedButton.js"></script>
     <script>
-      document.getElementById("navbar-container").innerHTML = Navbar();
-      document.getElementById("footer-container").innerHTML = Footer("..");
+      const navbarContainer = document.getElementById("navbar-container");
+      const footerContainer = document.getElementById("footer-container");
+
+      if (navbarContainer) {
+        navbarContainer.innerHTML = Navbar();
+      }
+
+      if (footerContainer) {
+        footerContainer.innerHTML = Footer("..");
+      }
+
       if (window.initializeNavbar) {
         window.initializeNavbar();
       }

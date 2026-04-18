@@ -8,6 +8,7 @@ export class ActivityService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async create(createActivityDto: CreateActivityDto) {
+    const adminClient = this.supabaseService.getAdminClient();
     const activityData = {
       title: createActivityDto.title,
       description: createActivityDto.description,
@@ -22,14 +23,34 @@ export class ActivityService {
       id_user: createActivityDto.id_user || null,
     };
 
-    const { data, error } = await this.supabaseService
-      .getAdminClient()
+    const { data, error } = await adminClient
       .from('activity')
       .insert([activityData])
       .select('id, title, description, address, group_size, price, id_user, theme, average_rating, images');
 
     if (error) throw new Error(error.message);
-    return data[0];
+
+    const createdActivity = data[0];
+    const eventSlots = createActivityDto.eventSlots || [];
+
+    if (eventSlots.length) {
+      const eventsData = eventSlots.map((eventSlot) => ({
+        date: `${eventSlot.date.split('T')[0]}T${eventSlot.heure}:00`,
+        id_activity: createdActivity.id,
+      }));
+
+      const { error: eventError } = await adminClient.from('event').insert(eventsData);
+
+      if (eventError) {
+        await adminClient.from('activity').delete().eq('id', createdActivity.id);
+        throw new Error(eventError.message);
+      }
+    }
+
+    return {
+      ...createdActivity,
+      eventSlots,
+    };
   }
 
   async findOne(id: number) {

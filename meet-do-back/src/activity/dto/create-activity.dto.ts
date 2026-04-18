@@ -6,7 +6,19 @@ import {
   Min,
   IsOptional,
   IsArray,
+  ValidateNested,
+  IsDateString,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateActivityEventDto {
+  @IsDateString()
+  date: string;
+
+  @IsString()
+  @IsNotEmpty()
+  heure: string;
+}
 
 export class CreateActivityDto {
   @IsString()
@@ -49,4 +61,10 @@ export class CreateActivityDto {
   @IsNumber()
   @IsOptional()
   id_user?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateActivityEventDto)
+  @IsOptional()
+  eventSlots?: CreateActivityEventDto[];
 }
