@@ -47,6 +47,13 @@ function setFieldError(fieldId, message) {
   return true;
 }
 
+function setEventSlotFeedback(message = "") {
+  const feedback = document.getElementById("activity-event-slot-feedback");
+  if (!feedback) return;
+
+  feedback.textContent = message;
+}
+
 function renderCategoryChip() {
   const chipContainer = document.getElementById("activity-category-chip");
   if (!chipContainer) return;
@@ -263,21 +270,18 @@ function addEventSlot() {
   const date = dateInput.value;
   const heure = timeInput.value;
   if (!date) {
-    dateInput.reportValidity();
+    setEventSlotFeedback("Choisis d'abord une date pour ce créneau.");
     return;
   }
 
   if (!heure) {
-    timeInput.reportValidity();
+    setEventSlotFeedback("Choisis d'abord une heure pour ce créneau.");
     return;
   }
 
   const slotDate = new Date(`${date}T${heure}`);
   if (Number.isNaN(slotDate.getTime()) || slotDate < new Date()) {
-    setFieldError(
-      "activity-event-date",
-      "Le créneau doit correspondre à une date future.",
-    );
+    setEventSlotFeedback("Le créneau doit correspondre à une date future.");
     return;
   }
 
@@ -286,7 +290,7 @@ function addEventSlot() {
   );
 
   if (alreadyExists) {
-    setFieldError("activity-event-date", "Ce créneau a déjà été ajouté.");
+    setEventSlotFeedback("Ce créneau a déjà été ajouté.");
     return;
   }
 
@@ -297,6 +301,7 @@ function addEventSlot() {
 
   dateInput.value = "";
   timeInput.value = "";
+  setEventSlotFeedback("");
   resetCustomValidity("activity-event-date");
   renderEventDateChip();
 }
@@ -462,6 +467,7 @@ function updateDraftField(event) {
   }
 
   if (name === "dateEvenement" || name === "heureEvenement") {
+    setEventSlotFeedback("");
     resetCustomValidity("activity-event-date");
     return;
   }
