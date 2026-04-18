@@ -30,6 +30,7 @@ const MOCK_MY_ACTIVITIES = [
 
 let activityActionsModal = null;
 let selectedActivity = null;
+let myActivities = [];
 
 async function getMyActivities() {
   try {
@@ -132,7 +133,9 @@ function renderActivityActionModalButtons() {
 
 function openActivityActionsModal(activityId) {
   selectedActivity =
-    MOCK_MY_ACTIVITIES.find((activity) => activity.id === activityId) || null;
+    myActivities.find((activity) => activity.id === activityId) ||
+    MOCK_MY_ACTIVITIES.find((activity) => activity.id === activityId) ||
+    null;
 
   const modalText = document.getElementById("activity-actions-modal-text");
   if (modalText) {
@@ -146,6 +149,7 @@ function openActivityActionsModal(activityId) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const activities = await getMyActivities();
+  myActivities = activities;
   renderMyActivities(activities);
 
   const createButton = document.getElementById("create-activity-button");
@@ -158,5 +162,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalElement = document.getElementById("activityActionsModal");
   if (modalElement) {
     activityActionsModal = new bootstrap.Modal(modalElement);
+  }
+
+  const editButton = document.querySelector(
+    "#modal-edit-activity-button .buttonCo",
+  );
+  if (editButton) {
+    editButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (!selectedActivity?.id) return;
+
+      window.location.href = `EditActivity.html?id=${selectedActivity.id}`;
+    });
   }
 });

@@ -7,6 +7,19 @@ import { SupabaseService } from '../supabase/supabase.service';
 export class ActivityService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
+  private formatEventDate(date: string, heure: string) {
+    return `${date.split('T')[0]}T${heure}:00`;
+  }
+
+  private normalizeEventSlot(event: { date: string }) {
+    const eventDate = new Date(event.date);
+
+    return {
+      date: eventDate.toISOString().split('T')[0],
+      heure: eventDate.toISOString().slice(11, 16),
+    };
+  }
+
   async create(createActivityDto: CreateActivityDto) {
     const adminClient = this.supabaseService.getAdminClient();
     const activityData = {
@@ -35,7 +48,7 @@ export class ActivityService {
 
     if (eventSlots.length) {
       const eventsData = eventSlots.map((eventSlot) => ({
-        date: `${eventSlot.date.split('T')[0]}T${eventSlot.heure}:00`,
+        date: this.formatEventDate(eventSlot.date, eventSlot.heure),
         id_activity: createdActivity.id,
       }));
 
@@ -54,23 +67,85 @@ export class ActivityService {
   }
 
   async findOne(id: number) {
-    const { data, error } = await this.supabaseService
-      .getClient()
+    const client = this.supabaseService.getClient();
+    const { data, error } = await client
       .from('activity')
       .select('id, title, description, address, group_size, price, id_user, theme, average_rating, images')
       .eq('id', id)
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+
+    const { data: eventData, error: eventError } = await client
+      .from('event')
+      .select('date')
+      .eq('id_activity', id)
+      .order('date', { ascending: true });
+
+    if (eventError) throw new Error(eventError.message);
+
+    return {
+      ...data,
+      eventSlots: (eventData || []).map((event) => this.normalizeEventSlot(event)),
+    };
   }
 
   findAll() {
     return `This action returns all activity`;
   }
 
-  update(id: number, updateActivityDto: UpdateActivityDto) {
-    return `This action updates a #${id} activity`;
+  async update(id: number, updateActivityDto: UpdateActivityDto) {
+    const adminClient = this.supabaseService.getAdminClient();
+    const activityData = {
+      ...(updateActivityDto.title !== undefined && { title: updateActivityDto.title }),
+      ...(updateActivityDto.description !== undefined && {
+        description: updateActivityDto.description,
+      }),
+      ...(updateActivityDto.images !== undefined && { images: updateActivityDto.images }),
+      ...(updateActivityDto.address !== undefined && { address: updateActivityDto.address }),
+      ...(updateActivityDto.theme !== undefined && { theme: updateActivityDto.theme }),
+      ...(updateActivityDto.group_size !== undefined && {
+        group_size: updateActivityDto.group_size,
+      }),
+      ...(updateActivityDto.price !== undefined && { price: updateActivityDto.price }),
+      ...(updateActivityDto.is_visible !== undefined && {
+        is_visible: updateActivityDto.is_visible,
+      }),
+      ...(updateActivityDto.is_disabled !== undefined && {
+        is_disabled: updateActivityDto.is_disabled,
+      }),
+      ...(updateActivityDto.id_user !== undefined && { id_user: updateActivityDto.id_user }),
+    };
+
+    const { data: updatedActivity, error } = await adminClient
+      .from('activity')
+      .update(activityData)
+      .eq('id', id)
+      .select(
+        'id, title, description, address, group_size, price, id_user, theme, average_rating, images',
+      )
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    if (updateActivityDto.eventSlots !== undefined) {
+      const { error: deleteError } = await adminClient.from('event').delete().eq('id_activity', id);
+
+      if (deleteError) throw new Error(deleteError.message);
+
+      if (updateActivityDto.eventSlots.length) {
+        const eventsData = updateActivityDto.eventSlots.map((eventSlot) => ({
+          date: this.formatEventDate(eventSlot.date, eventSlot.heure),
+          id_activity: id,
+        }));
+
+        const { error: insertError } = await adminClient.from('event').insert(eventsData);
+
+        if (insertError) throw new Error(insertError.message);
+      }
+    }
+
+    return this.findOne(updatedActivity.id);
   }
 
   remove(id: number) {

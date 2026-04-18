@@ -1,25 +1,24 @@
-const MOCK_ACTIVITY_TO_EDIT = {
-  id: 42,
-  title: "Atelier Macaron",
+const EMPTY_ACTIVITY_DRAFT = {
+  id: null,
+  title: "",
   images: [],
-  existingImages: [
-    "https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1514517220017-8ce97a34a7b6?auto=format&fit=crop&w=1200&q=80",
-  ],
-  description:
-    "Rejoignez-nous pour un atelier gourmand et créatif où vous apprendrez à réaliser de délicieux macarons maison.",
-  theme: ["Art", "Gastronomie"],
-  eventSlots: [
-    { date: "2026-04-18", heure: "14:00" },
-    { date: "2026-04-25", heure: "10:30" },
-  ],
-  address: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
-  group_size: "10",
-  price: "30",
+  existingImages: [],
+  description: "",
+  theme: [],
+  eventSlots: [],
+  address: "",
+  group_size: "",
+  price: "",
 };
 
 const ACTIVITY_API_URL = "http://localhost:3000/activity";
-const activityDraft = structuredClone(MOCK_ACTIVITY_TO_EDIT);
+const activityDraft = structuredClone(EMPTY_ACTIVITY_DRAFT);
+
+function getActivityIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const activityId = Number(params.get("id"));
+  return Number.isFinite(activityId) && activityId > 0 ? activityId : null;
+}
 
 function formatEventDate(dateString) {
   const date = new Date(`${dateString}T00:00:00`);
@@ -34,6 +33,50 @@ function formatEventDate(dateString) {
 
 function formatEventSlot(eventSlot) {
   return `${formatEventDate(eventSlot.date)} à ${eventSlot.heure}`;
+}
+
+function normalizeTheme(theme) {
+  if (Array.isArray(theme)) return theme;
+  if (typeof theme !== "string") return [];
+
+  return theme
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function normalizeEventSlots(eventSlots) {
+  if (!Array.isArray(eventSlots)) return [];
+
+  return eventSlots
+    .map((eventSlot) => {
+      const rawDate = typeof eventSlot?.date === "string" ? eventSlot.date : "";
+      const datePart = rawDate.includes("T") ? rawDate.split("T")[0] : rawDate;
+      const heure =
+        typeof eventSlot?.heure === "string" && eventSlot.heure
+          ? eventSlot.heure.slice(0, 5)
+          : rawDate.includes("T")
+            ? rawDate.slice(11, 16)
+            : "";
+
+      if (!datePart || !heure) return null;
+      return { date: datePart, heure };
+    })
+    .filter(Boolean)
+    .sort((a, b) => `${a.date}T${a.heure}`.localeCompare(`${b.date}T${b.heure}`));
+}
+
+function hydrateActivityDraft(activity) {
+  activityDraft.id = activity.id ?? null;
+  activityDraft.title = activity.title ?? "";
+  activityDraft.images = [];
+  activityDraft.existingImages = Array.isArray(activity.images) ? [...activity.images] : [];
+  activityDraft.description = activity.description ?? "";
+  activityDraft.theme = normalizeTheme(activity.theme);
+  activityDraft.eventSlots = normalizeEventSlots(activity.eventSlots);
+  activityDraft.address = activity.address ?? "";
+  activityDraft.group_size = activity.group_size ?? "";
+  activityDraft.price = activity.price ?? "";
 }
 
 function renderCategoryChip() {
@@ -170,15 +213,17 @@ function addEventSlot() {
 
 function buildActivityPayload() {
   return {
-    id: activityDraft.id,
     title: activityDraft.title,
     description: activityDraft.description,
-    images: activityDraft.images,
+    images: [...activityDraft.existingImages, ...activityDraft.images.map((file) => file.name)],
     address: activityDraft.address,
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
     price: Number(activityDraft.price),
-    existingImages: activityDraft.existingImages,
+    eventSlots: activityDraft.eventSlots.map((eventSlot) => ({
+      date: `${eventSlot.date}T00:00:00.000Z`,
+      heure: eventSlot.heure,
+    })),
   };
 }
 
@@ -189,6 +234,15 @@ function setSubmitFeedback(message, isError = false) {
   feedback.textContent = message;
   feedback.classList.toggle("text-danger", isError);
   feedback.classList.toggle("text-success", !isError && Boolean(message));
+}
+
+function setFormDisabledState(isDisabled) {
+  const form = document.getElementById("edit-activity-form");
+  if (!form) return;
+
+  form.querySelectorAll("input, textarea, select, button").forEach((element) => {
+    element.disabled = isDisabled;
+  });
 }
 
 function populateForm() {
@@ -203,6 +257,24 @@ function populateForm() {
   renderCategoryChip();
   renderEventDateChip();
   renderExistingImages();
+}
+
+async function loadActivity() {
+  const activityId = getActivityIdFromUrl();
+
+  if (!activityId) {
+    throw new Error("Aucun identifiant d'activité n'a été trouvé dans l'URL.");
+  }
+
+  const response = await fetch(`${ACTIVITY_API_URL}/${activityId}`);
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  const activity = await response.json();
+  hydrateActivityDraft(activity);
+  populateForm();
 }
 
 async function submitEditActivityForm(event) {
@@ -234,7 +306,14 @@ async function submitEditActivityForm(event) {
     return;
   }
 
+  if (!activityDraft.id) {
+    event.preventDefault();
+    setSubmitFeedback("Impossible de retrouver l'activité à modifier.", true);
+    return;
+  }
+
   event.preventDefault();
+  setFormDisabledState(true);
   setSubmitFeedback("Mise à jour de l'activité en cours...");
 
   try {
@@ -247,16 +326,36 @@ async function submitEditActivityForm(event) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      let errorMessage = `HTTP ${response.status}`;
+
+      try {
+        const errorBody = await response.json();
+        if (Array.isArray(errorBody.message)) {
+          errorMessage = errorBody.message.join(" ");
+        } else if (errorBody.message) {
+          errorMessage = errorBody.message;
+        }
+      } catch (_error) {
+        // Rien à faire si la réponse n'est pas du JSON.
+      }
+
+      throw new Error(errorMessage);
     }
 
+    const updatedActivity = await response.json();
+    hydrateActivityDraft(updatedActivity);
+    populateForm();
     setSubmitFeedback("Activité mise à jour avec succès.");
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'activité :", error);
     setSubmitFeedback(
-      "Impossible d'enregistrer les modifications pour l'instant. Vérifie que le backend est disponible.",
+      error instanceof Error
+        ? error.message
+        : "Impossible d'enregistrer les modifications pour l'instant.",
       true,
     );
+  } finally {
+    setFormDisabledState(false);
   }
 }
 
@@ -310,8 +409,25 @@ function initEditActivityForm() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  populateForm();
+document.addEventListener("DOMContentLoaded", async () => {
   initEditActivityForm();
+  setFormDisabledState(true);
+  setSubmitFeedback("Chargement de l'activité...");
+
+  try {
+    await loadActivity();
+    setSubmitFeedback("");
+  } catch (error) {
+    console.error("Erreur lors du chargement de l'activité :", error);
+    setSubmitFeedback(
+      error instanceof Error
+        ? error.message
+        : "Impossible de charger l'activité à modifier.",
+      true,
+    );
+  } finally {
+    setFormDisabledState(false);
+  }
+
   window.activityDraft = activityDraft;
 });
