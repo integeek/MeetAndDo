@@ -10,7 +10,7 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="../Style/Activity1.css" />
+    <link rel="stylesheet" href="../Style/Activity.css" />
     <link rel="stylesheet" href="../Component/Footer/Footer.css" />
     <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
     <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
@@ -30,8 +30,13 @@
             <div class="col-12 mt-3">
               <div class="row justify-content-start">
                 <div class="col-auto">
-                  <div class="d-inline-flex align-items-center gap-2 flex-nowrap">
-                    <span class="activity-address-icon d-inline-flex flex-shrink-0" aria-hidden="true">
+                  <div
+                    class="d-inline-flex align-items-center gap-2 flex-nowrap"
+                  >
+                    <span
+                      class="activity-address-icon d-inline-flex flex-shrink-0"
+                      aria-hidden="true"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -82,11 +87,19 @@
                 <div class="col-12 activity-content">
                   <div class="row">
                     <div class="col-12">
-                      <p id="activity-price" class="mb-3 text-start fw-semibold"></p>
+                      <p
+                        id="activity-price"
+                        class="mb-3 text-start fw-semibold"
+                      ></p>
                     </div>
                   </div>
-                  <div class="row gx-5 gy-3 justify-content-center justify-content-lg-start">
-                    <div class="col-auto" id="activity-participate-button"></div>
+                  <div
+                    class="row gx-5 gy-3 justify-content-center justify-content-lg-start"
+                  >
+                    <div
+                      class="col-auto"
+                      id="activity-participate-button"
+                    ></div>
                     <div class="col-auto" id="activity-review-button"></div>
                   </div>
                 </div>
@@ -98,10 +111,15 @@
                 <div class="col-12 activity-content">
                   <div class="row gy-3">
                     <div class="col-12">
-                      <p id="activity-created-by" class="mb-0 text-start creator-meta"></p>
+                      <p
+                        id="activity-created-by"
+                        class="mb-0 text-start creator-meta"
+                      ></p>
                     </div>
                     <div class="col-12">
-                      <div class="row align-items-center justify-content-between gy-3">
+                      <div
+                        class="row align-items-center justify-content-between gy-3"
+                      >
                         <div class="col">
                           <div class="row align-items-center gx-3 gy-2">
                             <div class="col-auto">
@@ -112,8 +130,14 @@
                               />
                             </div>
                             <div class="col">
-                              <p id="creator-name" class="mb-1 fw-semibold text-start"></p>
-                              <p id="creator-rating" class="mb-0 text-start"></p>
+                              <p
+                                id="creator-name"
+                                class="mb-1 fw-semibold text-start"
+                              ></p>
+                              <p
+                                id="creator-rating"
+                                class="mb-0 text-start"
+                              ></p>
                             </div>
                           </div>
                         </div>
@@ -128,7 +152,9 @@
 
               <div class="row">
                 <div class="col-12 activity-content">
-                  <div class="row align-items-center justify-content-between gy-2 mb-3">
+                  <div
+                    class="row align-items-center justify-content-between gy-2 mb-3"
+                  >
                     <div class="col-auto">
                       <h2 class="fw-bold mb-0">Avis de l'activité</h2>
                     </div>
@@ -147,11 +173,17 @@
                             />
                           </svg>
                         </span>
-                        <span id="activity-reviews-rating" class="fw-semibold"></span>
+                        <span
+                          id="activity-reviews-rating"
+                          class="fw-semibold"
+                        ></span>
                       </div>
                     </div>
                   </div>
-                  <div id="activity-reviews-list" class="reviews-scrollable"></div>
+                  <div
+                    id="activity-reviews-list"
+                    class="reviews-scrollable"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -159,12 +191,80 @@
         </div>
       </div>
     </main>
+
+    <!-- Modal Signaler -->
+    <div
+      class="modal fade"
+      id="reportActivityModal"
+      tabindex="-1"
+      aria-labelledby="reportModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportModalLabel">
+              Signaler cette activité
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="report-form">
+              <div class="mb-3">
+                <label for="report-reason" class="form-label"
+                  >Raison du signalement</label
+                >
+                <select class="form-select" id="report-reason" required>
+                  <option value="">-- Sélectionnez une raison --</option>
+                  <option value="contenu-inapproprie">
+                    Contenu inapproprié
+                  </option>
+                  <option value="arnaque">Arnaque/Fraude</option>
+                  <option value="harcellement">Harcèlement</option>
+                  <option value="prix-anormal">Prix anormal</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="report-description" class="form-label"
+                  >Description (optionnel)</label
+                >
+                <textarea
+                  class="form-control"
+                  id="report-description"
+                  rows="4"
+                  placeholder="Décris brièvement le problème..."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Fermer
+            </button>
+            <button type="button" class="btn btn-danger" id="report-submit-btn">
+              Signaler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       crossorigin="anonymous"
     ></script>
-    <script src="../Script/Activity1.js"></script>
+    <script src="../Script/Activity.js"></script>
     <script src="../Component/Footer/Footer.js"></script>
     <script src="../Component/Navbar/Navbar.js"></script>
     <script src="../Component/Navbar/NavAction.js"></script>
@@ -177,7 +277,10 @@
       if (document.getElementById("footer-container")) {
         document.getElementById("footer-container").innerHTML = Footer("..");
       }
-      if (window.initializeNavbar && document.getElementById("navbar-container")) {
+      if (
+        window.initializeNavbar &&
+        document.getElementById("navbar-container")
+      ) {
         window.initializeNavbar();
       }
     </script>

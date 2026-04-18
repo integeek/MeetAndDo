@@ -1,6 +1,6 @@
 const MOCK_ACTIVITY_TO_EDIT = {
   id: 42,
-  titre: "Atelier Macaron",
+  title: "Atelier Macaron",
   images: [],
   existingImages: [
     "https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=1200&q=80",
@@ -8,17 +8,14 @@ const MOCK_ACTIVITY_TO_EDIT = {
   ],
   description:
     "Rejoignez-nous pour un atelier gourmand et créatif où vous apprendrez à réaliser de délicieux macarons maison.",
-  categories: ["Art", "Gastronomie"],
-  evenements: [
+  theme: ["Art", "Gastronomie"],
+  eventSlots: [
     { date: "2026-04-18", heure: "14:00" },
     { date: "2026-04-25", heure: "10:30" },
   ],
-  numeroRue: "10",
-  nomRue: "rue de Vanves",
-  ville: "Issy-les-Moulineaux",
-  codePostal: "92130",
-  tailleGroupe: "10",
-  prix: "30",
+  address: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
+  group_size: "10",
+  price: "30",
 };
 
 const ACTIVITY_API_URL = "http://localhost:3000/activity";
@@ -43,16 +40,16 @@ function renderCategoryChip() {
   const chipContainer = document.getElementById("activity-category-chip");
   if (!chipContainer) return;
 
-  chipContainer.innerHTML = activityDraft.categories
+  chipContainer.innerHTML = activityDraft.theme
     .map(
-      (categorie, index) => `
+      (theme, index) => `
         <span class="badge text-bg-primary category-chip">
-          <span>${categorie}</span>
+          <span>${theme}</span>
           <button
             type="button"
             class="category-chip-remove"
             data-category-index="${index}"
-            aria-label="Désélectionner la catégorie ${categorie}"
+            aria-label="Désélectionner la catégorie ${theme}"
           >
             ×
           </button>
@@ -64,7 +61,7 @@ function renderCategoryChip() {
   chipContainer.querySelectorAll(".category-chip-remove").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.categoryIndex);
-      activityDraft.categories.splice(index, 1);
+      activityDraft.theme.splice(index, 1);
       renderCategoryChip();
     });
   });
@@ -74,7 +71,7 @@ function renderEventDateChip() {
   const chipContainer = document.getElementById("activity-event-date-chip");
   if (!chipContainer) return;
 
-  chipContainer.innerHTML = activityDraft.evenements
+  chipContainer.innerHTML = activityDraft.eventSlots
     .map(
       (eventSlot, index) => `
         <span class="badge text-bg-secondary category-chip">
@@ -95,7 +92,7 @@ function renderEventDateChip() {
   chipContainer.querySelectorAll(".category-chip-remove").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.dateIndex);
-      activityDraft.evenements.splice(index, 1);
+      activityDraft.eventSlots.splice(index, 1);
       renderEventDateChip();
     });
   });
@@ -155,13 +152,13 @@ function addEventSlot() {
     return;
   }
 
-  const alreadyExists = activityDraft.evenements.some(
+  const alreadyExists = activityDraft.eventSlots.some(
     (eventSlot) => eventSlot.date === date && eventSlot.heure === heure,
   );
 
   if (!alreadyExists) {
-    activityDraft.evenements.push({ date, heure });
-    activityDraft.evenements.sort((a, b) =>
+    activityDraft.eventSlots.push({ date, heure });
+    activityDraft.eventSlots.sort((a, b) =>
       `${a.date}T${a.heure}`.localeCompare(`${b.date}T${b.heure}`),
     );
   }
@@ -174,18 +171,13 @@ function addEventSlot() {
 function buildActivityPayload() {
   return {
     id: activityDraft.id,
-    titre: activityDraft.titre,
+    title: activityDraft.title,
     description: activityDraft.description,
-    categories: activityDraft.categories,
-    adresse: {
-      numeroRue: activityDraft.numeroRue,
-      nomRue: activityDraft.nomRue,
-      ville: activityDraft.ville,
-      codePostal: activityDraft.codePostal,
-    },
-    tailleGroupe: Number(activityDraft.tailleGroupe),
-    prix: Number(activityDraft.prix),
-    evenements: activityDraft.evenements,
+    images: activityDraft.images,
+    address: activityDraft.address,
+    theme: activityDraft.theme.join(", "),
+    group_size: Number(activityDraft.group_size),
+    price: Number(activityDraft.price),
     existingImages: activityDraft.existingImages,
   };
 }
@@ -200,17 +192,13 @@ function setSubmitFeedback(message, isError = false) {
 }
 
 function populateForm() {
-  document.getElementById("activity-title").value = activityDraft.titre;
+  document.getElementById("activity-title").value = activityDraft.title;
   document.getElementById("activity-description").value =
     activityDraft.description;
-  document.getElementById("activity-street-number").value =
-    activityDraft.numeroRue;
-  document.getElementById("activity-street-name").value = activityDraft.nomRue;
-  document.getElementById("activity-city").value = activityDraft.ville;
-  document.getElementById("activity-zip-code").value = activityDraft.codePostal;
+  document.getElementById("activity-address").value = activityDraft.address;
   document.getElementById("activity-group-size").value =
-    activityDraft.tailleGroupe;
-  document.getElementById("activity-price").value = activityDraft.prix;
+    activityDraft.group_size;
+  document.getElementById("activity-price").value = activityDraft.price;
 
   renderCategoryChip();
   renderEventDateChip();
@@ -226,7 +214,7 @@ async function submitEditActivityForm(event) {
     return;
   }
 
-  if (!activityDraft.categories.length) {
+  if (!activityDraft.theme.length) {
     event.preventDefault();
     const categoryField = document.getElementById("activity-category");
     categoryField?.setCustomValidity("Sélectionne au moins une catégorie.");
@@ -235,7 +223,7 @@ async function submitEditActivityForm(event) {
     return;
   }
 
-  if (!activityDraft.evenements.length) {
+  if (!activityDraft.eventSlots.length) {
     event.preventDefault();
     const eventDateField = document.getElementById("activity-event-date");
     eventDateField?.setCustomValidity(
@@ -249,17 +237,13 @@ async function submitEditActivityForm(event) {
   event.preventDefault();
   setSubmitFeedback("Mise à jour de l'activité en cours...");
 
-  const formData = new FormData();
-  formData.append("payload", JSON.stringify(buildActivityPayload()));
-
-  activityDraft.images.forEach((imageFile) => {
-    formData.append("images", imageFile);
-  });
-
   try {
     const response = await fetch(`${ACTIVITY_API_URL}/${activityDraft.id}`, {
       method: "PATCH",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(buildActivityPayload()),
     });
 
     if (!response.ok) {
@@ -285,13 +269,13 @@ function updateDraftField(event) {
     return;
   }
 
-  if (name === "categories") {
+  if (name === "theme") {
     if (
       value &&
-      !activityDraft.categories.includes(value) &&
-      activityDraft.categories.length < 3
+      !activityDraft.theme.includes(value) &&
+      activityDraft.theme.length < 3
     ) {
-      activityDraft.categories.push(value);
+      activityDraft.theme.push(value);
     }
 
     event.target.value = "";
@@ -316,9 +300,13 @@ function initEditActivityForm() {
     .getElementById("add-event-slot-button")
     ?.addEventListener("click", addEventSlot);
 
-  const submitButtonContainer = document.getElementById("activity-submit-button");
+  const submitButtonContainer = document.getElementById(
+    "activity-submit-button",
+  );
   if (submitButtonContainer) {
-    submitButtonContainer.innerHTML = BoutonBleu("Enregistrer les modifications");
+    submitButtonContainer.innerHTML = BoutonBleu(
+      "Enregistrer les modifications",
+    );
   }
 }
 

@@ -7,11 +7,11 @@ function LoadActivite(activite) {
         <div class="activite-container">
             <div class="titre-activite-container">
                 <div>
-                    <h1 class="titre-activite">${activite.titre}</h1>
+                    <h1 class="titre-activite">${activite.title}</h1>
                     <p class="date-activite">${activite.date}</p>
                 </div>
                 <div class="infos-activite">
-                    <p class="adresse-activite">📍 ${activite.adresse}</p>
+                    <p class="adresse-activite">📍 ${activite.address}</p>
                     <p class="groupe-activite">👥 Groupe de ${activite.nbParticipants}</p>
                 </div>
             </div>
@@ -28,7 +28,7 @@ function LoadActivite(activite) {
                 <div class="actions-container">
                     ${boutonParticiper}
                     ${boutonLaisserAvis}
-                    <p class="prix-activite">💶 Prix : ${activite.prix}€</p>
+                    <p class="prix-activite">💶 Prix : ${activite.price}€</p>
                     <div class="organisateur">
                         <p class="nom-organisateur">👤 ${activite.organisateur.nom}</p>
                         <p class="note-organisateur">⭐ ${activite.organisateur.note} / 5</p>

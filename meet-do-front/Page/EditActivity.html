@@ -39,7 +39,7 @@
                 type="text"
                 class="form-control form-control-lg"
                 id="activity-title"
-                name="titre"
+                name="title"
                 autocomplete="off"
                 required
               />
@@ -87,7 +87,7 @@
               <select
                 class="form-select form-select-lg"
                 id="activity-category"
-                name="categories"
+                name="theme"
               >
                 <option value="">Choisir une catégorie</option>
                 <option value="Sport">Sport</option>
@@ -108,56 +108,19 @@
             </div>
 
             <div class="col-12">
-              <label class="form-label fw-semibold">
+              <label for="activity-address" class="form-label fw-semibold">
                 Adresse de l'activité
                 <span class="text-danger">*</span>
               </label>
-              <div class="row g-3">
-                <div class="col-12 col-md-3">
-                  <input
-                    type="text"
-                    class="form-control form-control-lg"
-                    id="activity-street-number"
-                    name="numeroRue"
-                    placeholder="N°"
-                    autocomplete="address-line1"
-                    required
-                  />
-                </div>
-                <div class="col-12 col-md-9">
-                  <input
-                    type="text"
-                    class="form-control form-control-lg"
-                    id="activity-street-name"
-                    name="nomRue"
-                    placeholder="Nom de la rue"
-                    autocomplete="address-line1"
-                    required
-                  />
-                </div>
-                <div class="col-12 col-md-7">
-                  <input
-                    type="text"
-                    class="form-control form-control-lg"
-                    id="activity-city"
-                    name="ville"
-                    placeholder="Ville"
-                    autocomplete="address-level2"
-                    required
-                  />
-                </div>
-                <div class="col-12 col-md-5">
-                  <input
-                    type="text"
-                    class="form-control form-control-lg"
-                    id="activity-zip-code"
-                    name="codePostal"
-                    placeholder="Code postal"
-                    autocomplete="postal-code"
-                    required
-                  />
-                </div>
-              </div>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="activity-address"
+                name="address"
+                placeholder="Ex. 10 rue de Vanves, 92130 Issy-les-Moulineaux"
+                autocomplete="street-address"
+                required
+              />
             </div>
 
             <div class="col-12 col-md-6">
@@ -169,7 +132,7 @@
                 type="number"
                 class="form-control form-control-lg"
                 id="activity-group-size"
-                name="tailleGroupe"
+                name="group_size"
                 min="1"
                 step="1"
                 required
@@ -185,7 +148,7 @@
                 type="number"
                 class="form-control form-control-lg"
                 id="activity-price"
-                name="prix"
+                name="price"
                 min="0"
                 step="0.01"
                 required
@@ -230,7 +193,10 @@
             </div>
 
             <div class="col-12 pt-2 text-center">
-              <div id="activity-submit-button" class="d-inline-block submit-button-wrap"></div>
+              <div
+                id="activity-submit-button"
+                class="d-inline-block submit-button-wrap"
+              ></div>
               <p
                 id="activity-submit-feedback"
                 class="form-text mt-3 mb-0"
@@ -260,7 +226,10 @@
       if (document.getElementById("footer-container")) {
         document.getElementById("footer-container").innerHTML = Footer("..");
       }
-      if (window.initializeNavbar && document.getElementById("navbar-container")) {
+      if (
+        window.initializeNavbar &&
+        document.getElementById("navbar-container")
+      ) {
         window.initializeNavbar();
       }
     </script>

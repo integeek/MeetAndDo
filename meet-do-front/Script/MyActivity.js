@@ -1,31 +1,28 @@
 const MOCK_MY_ACTIVITIES = [
   {
     id: 1,
-    titre: "Atelier Macaron",
-    categories: ["Art", "Gastronomie"],
-    ville: "Issy-les-Moulineaux",
-    prix: 30,
-    nbEvenements: 3,
+    title: "Atelier Macaron",
+    theme: "Art, Gastronomie",
+    address: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
+    price: 30,
     image:
       "https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 2,
-    titre: "Sortie Running au Parc",
-    categories: ["Sport", "Bien-être"],
-    ville: "Paris",
-    prix: 12,
-    nbEvenements: 5,
+    title: "Sortie Running au Parc",
+    theme: "Sport, Bien-être",
+    address: "Parc Monceau, 75008 Paris",
+    price: 12,
     image:
       "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: 3,
-    titre: "Club Lecture du Jeudi",
-    categories: ["Lecture", "Culture"],
-    ville: "Boulogne-Billancourt",
-    prix: 8,
-    nbEvenements: 2,
+    title: "Club Lecture du Jeudi",
+    theme: "Lecture, Culture",
+    address: "Bibliothèque municipale, 92100 Boulogne-Billancourt",
+    price: 8,
     image:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
   },
@@ -35,10 +32,14 @@ let activityActionsModal = null;
 let selectedActivity = null;
 
 async function getMyActivities() {
-  return MOCK_MY_ACTIVITIES;
-  // Plus tard :
-  // const response = await fetch("http://localhost:3000/activity/me");
-  // return await response.json();
+  try {
+    const response = await fetch("http://localhost:3000/activity");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des activités :", error);
+    return MOCK_MY_ACTIVITIES; // Fallback sur le mock en cas d'erreur
+  }
 }
 
 function renderMyActivities(activities) {
@@ -57,28 +58,31 @@ function renderMyActivities(activities) {
   }
 
   container.innerHTML = activities
-    .map(
-      (activity) => `
+    .map((activity) => {
+      const categories = activity.theme ? activity.theme.split(", ") : [];
+      const city = activity.address ? activity.address.split(", ").pop() : "";
+
+      return `
         <div class="col-12 col-md-6">
           <article class="card h-100 border-0 shadow-sm activity-card">
             <img
               src="${activity.image}"
               class="card-img-top activity-card-image"
-              alt="${activity.titre}"
+              alt="${activity.title}"
             />
             <div class="card-body d-flex flex-column p-4">
               <div class="d-flex flex-wrap gap-2 mb-3">
-                ${(activity.categories || [])
+                ${categories
                   .map(
                     (category) =>
                       `<span class="badge activity-badge">${category}</span>`,
                   )
                   .join("")}
-                <span class="badge text-bg-light border">${activity.nbEvenements} événements</span>
+                <span class="badge text-bg-light border">${(activity.eventSlots || []).length} événements</span>
               </div>
-              <h2 class="h4 fw-bold mb-2">${activity.titre}</h2>
-              <p class="card-text text-secondary mb-1">${activity.ville}</p>
-              <p class="card-text fw-semibold mb-4">${activity.prix} EUR / personne</p>
+              <h2 class="h4 fw-bold mb-2">${activity.title}</h2>
+              <p class="card-text text-secondary mb-1">${city}</p>
+              <p class="card-text fw-semibold mb-4">${activity.price} EUR / personne</p>
               <div class="mt-auto d-flex flex-wrap justify-content-center gap-3">
                 <div class="activity-action-button">${BoutonBleu("Voir l'activité")}</div>
                 <div
@@ -91,17 +95,21 @@ function renderMyActivities(activities) {
             </div>
           </article>
         </div>
-      `,
-    )
+      `;
+    })
     .join("");
 
-  container.querySelectorAll(".activity-actions-trigger .buttonRo").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      const trigger = event.currentTarget.closest(".activity-actions-trigger");
-      const activityId = Number(trigger?.dataset.activityId);
-      openActivityActionsModal(activityId);
+  container
+    .querySelectorAll(".activity-actions-trigger .buttonRo")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        const trigger = event.currentTarget.closest(
+          ".activity-actions-trigger",
+        );
+        const activityId = Number(trigger?.dataset.activityId);
+        openActivityActionsModal(activityId);
+      });
     });
-  });
 }
 
 function renderActivityActionModalButtons() {
@@ -129,7 +137,7 @@ function openActivityActionsModal(activityId) {
   const modalText = document.getElementById("activity-actions-modal-text");
   if (modalText) {
     modalText.textContent = selectedActivity
-      ? `Choisis une action pour "${selectedActivity.titre}".`
+      ? `Choisis une action pour "${selectedActivity.title}."`
       : "";
   }
 

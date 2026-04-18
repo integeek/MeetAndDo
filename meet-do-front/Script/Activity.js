@@ -1,17 +1,17 @@
 const MOCK_ACTIVITY = {
   id: 42,
-  titre: "Atelier Macaron",
-  adresse: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
-  prix: 300,
-  dateCreation: "12 mars 2026",
-  tailleGroupe: 10,
-  noteMoyenne: 4.7,
+  title: "Atelier Macaron",
+  address: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
+  price: 300,
+  creationDate: "12 mars 2026",
+  groupSize: 10,
+  average_rating: 4.7,
   description:
     "Rejoignez-nous pour un atelier gourmand et creatif ou vous apprendrez a realiser de delicieux macarons maison. Encadre par un patissier experimente, vous decouvrirez les secrets d'une coque reussie et repartirez avec vos propres creations.",
-  createur: {
-    prenom: "Jean",
-    nom: "Dupont",
-    note: 4.8,
+  creator: {
+    first_name: "Jean",
+    last_name: "Dupont",
+    rating: 4.8,
     photo:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
   },
@@ -20,7 +20,7 @@ const MOCK_ACTIVITY = {
     "https://images.unsplash.com/photo-1514517220017-8ce97a34a7b6?auto=format&fit=crop&w=1200&q=80",
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
   ],
-  avis: [
+  reviews: [
     {
       auteur: "Alice",
       note: 5,
@@ -49,10 +49,14 @@ const MOCK_ACTIVITY = {
 };
 
 async function getActivity(id) {
-  return MOCK_ACTIVITY;
-  // Quand la table sera créée
-  // const response = await fetch(`http://localhost:3000/activity/${id}`);
-  // return await response.json();
+  try {
+    const response = await fetch(`http://localhost:3000/activity/${id}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'activité :", error);
+    return MOCK_ACTIVITY; // Fallback sur le mock en cas d'erreur
+  }
 }
 
 function renderContactButton() {
@@ -82,11 +86,11 @@ function renderReportButton() {
 }
 
 function renderActivity(activity) {
-  document.getElementById("activity-title").textContent = activity.titre;
+  document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-report-button").innerHTML =
     renderReportButton();
   document.getElementById("activity-address-text").textContent =
-    activity.adresse;
+    activity.address;
   document.getElementById("activity-description-text").textContent =
     activity.description;
   document.getElementById("activity-participate-button").innerHTML =
@@ -96,13 +100,13 @@ function renderActivity(activity) {
   document.getElementById("creator-contact-button").innerHTML =
     renderContactButton();
   document.getElementById("activity-group-size").textContent =
-    `Taille du groupe : ${activity.tailleGroupe} personnes`;
+    `Taille du groupe : ${activity.group_size} personnes`;
   document.getElementById("activity-price").textContent =
-    `Prix : ${activity.prix} EUR`;
+    `Prix : ${activity.price} EUR`;
   document.getElementById("activity-reviews-rating").textContent =
-    `${activity.noteMoyenne} / 5`;
+    `${activity.average_rating} / 5`;
   document.getElementById("activity-reviews-list").innerHTML = (
-    activity.avis || []
+    activity.reviews || []
   )
     .map(
       (avis) => `
@@ -135,11 +139,13 @@ function renderActivity(activity) {
     .join("");
   document.getElementById("activity-created-by").textContent =
     "Activité créée par";
-  document.getElementById("creator-avatar").src = activity.createur.photo;
-  document.getElementById("creator-name").textContent =
-    `${activity.createur.prenom} ${activity.createur.nom}`;
-  document.getElementById("creator-rating").textContent =
-    `Note : ${activity.createur.note} / 5`;
+  document.getElementById("creator-avatar").src = activity.creator?.photo || "";
+  document.getElementById("creator-name").textContent = activity.creator
+    ? `${activity.creator.first_name || ""} ${activity.creator.last_name || ""}`
+    : "";
+  document.getElementById("creator-rating").textContent = activity.creator
+    ? `Note : ${activity.creator.rating} / 5`
+    : "";
   document.getElementById("activity-images").innerHTML = `
     <div
       id="activityCarousel"
@@ -181,11 +187,74 @@ function renderActivity(activity) {
       </button>
     </div>
   `;
-  document.title = activity.titre;
+  document.title = activity.title;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const activityId = 42;
+  // Récupère l'ID depuis l'URL: ?id=1
+  const params = new URLSearchParams(window.location.search);
+  const activityId = params.get("id") || 1; // Par défaut 1 si pas d'ID
   const activity = await getActivity(activityId);
   renderActivity(activity);
+
+  // Initialiser le modal Signaler
+  initReportModal();
 });
+
+let reportModal = null;
+
+function initReportModal() {
+  // Récupérer le bouton Signaler et ajouter un event listener
+  const reportButton = document.querySelector(
+    "#activity-report-button .buttonRo",
+  );
+  const modalElement = document.getElementById("reportActivityModal");
+
+  if (modalElement) {
+    reportModal = new bootstrap.Modal(modalElement);
+  }
+
+  if (reportButton) {
+    reportButton.addEventListener("click", () => {
+      reportModal?.show();
+    });
+  }
+
+  // Gérer la soumission du formulaire
+  const submitBtn = document.getElementById("report-submit-btn");
+  const reportForm = document.getElementById("report-form");
+
+  if (submitBtn) {
+    submitBtn.addEventListener("click", async () => {
+      const reason = document.getElementById("report-reason").value;
+      const description = document.getElementById("report-description").value;
+
+      if (!reason) {
+        alert("Veuillez sélectionner une raison");
+        return;
+      }
+
+      // Afficher un message de confirmation
+      alert(
+        "Merci de votre signalement. Notre équipe examinera votre rapport.",
+      );
+
+      // Réinitialiser le formulaire
+      reportForm.reset();
+
+      // Fermer le modal
+      reportModal?.hide();
+
+      // TODO: Envoyer les données au backend
+      // await fetch('http://localhost:3000/reports', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     activityId,
+      //     reason,
+      //     description
+      //   })
+      // });
+    });
+  }
+}
