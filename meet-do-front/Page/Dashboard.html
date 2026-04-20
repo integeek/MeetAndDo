@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Meet & Do</title>
+  <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+  <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+  <link rel="stylesheet" href="../Style/Dashboard.css" />
+  <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
+  <script src="../Script/Dashboard.js" defer></script>
+</head>
+<body data-role="admin">
+  <div id="navbar-root" class="navbar-container"></div>
+
+  <button id="mobile-menu-btn" class="mobile-menu-btn" type="button" aria-label="Ouvrir le menu">
+    ☰
+  </button>
+
+  <div id="mobile-overlay" class="mobile-overlay" hidden></div>
+
+  <main class="dashboard-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <section id="dashboard-content" class="dashboard-content"></section>
+  </main>
+
+  <footer id="footer-root" class="footer-container"></footer>
+</body>
+</html>
