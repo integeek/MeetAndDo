@@ -112,3 +112,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Premier chargement (affiche tout si rien n'est filtré)
     loadActivities(true);
 });
+
+class ActivityCard {
+    constructor(containerId, data) {
+        this.container = document.getElementById(containerId);
+        this.data = data;
+        this.render();
+    }
+
+    render() {
+        const card = document.createElement("div");
+        card.classList.add("activity-card");
+        card.onclick = () => window.location.href = `../Page/Activity.html?id=${this.data.id}`;
+
+        card.innerHTML = `
+            <div class="card">
+                <img src="${this.data.image_url ?? '../Assets/img/placeholder.png'}" alt="Image of the activity" class="card-img">
+                <div class="card-content">
+                    <h2 class="card-title">${this.data.title}</h2>
+                    <p><strong>Place :</strong> ${this.data.address}</p>
+                    <p><strong>Price :</strong> ${this.data.price}€</p>
+                    <p><strong>Group of :</strong> ${this.data.group_size}</p>
+                </div>
+            </div>
+        `;
+
+        this.container.appendChild(card);
+    }
+}
+
+let loading = false;
+function loadActivities() {
+    loading = true;
+    document.getElementById("loader").style.display = "block";
+
+    fetch(`http://localhost:3000/activity`)
+        .then(response => response.json())
+        .then(activities => {
+            const list = Array.isArray(activities) ? activities : activities.data ?? [];
+            const container = document.getElementById("activities-container");
+            container.innerHTML = "";
+
+            if (list.length === 0) {
+                container.innerHTML = "<p>No activity.</p>";
+                return;
+            }
+
+            list.forEach(data => new ActivityCard("activities-container", data));
+        })
+        .catch(error => console.error("Error loading activities :", error))
+        .finally(() => {
+            loading = false;
+            document.getElementById("loader").style.display = "none";
+        });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadActivities();
+});

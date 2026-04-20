@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class ActivityService {
+  private readonly logger = new Logger(ActivityService.name);
   constructor(private readonly supabaseService: SupabaseService) {}
 
   private formatEventDate(date: string, heure: string) {
@@ -90,8 +91,23 @@ export class ActivityService {
     };
   }
 
-  findAll() {
-    return `This action returns all activity`;
+  async findAll() {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('activity')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .eq('is_disabled', false)
+   
+    if (error) {
+      this.logger.error(`findAll erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  
+    return data;
   }
 
   async update(id: number, updateActivityDto: UpdateActivityDto) {
