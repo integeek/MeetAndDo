@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { SupabaseService } from '../supabase/supabase.service';
 
+const ACTIVITY_STORAGE_BUCKET = 'activity-images';
+
 @Injectable()
 export class ActivityService {
+  private readonly logger = new Logger(ActivityService.name);
+
   constructor(private readonly supabaseService: SupabaseService) {}
 
   private formatEventDate(date: string, heure: string) {
@@ -18,6 +22,48 @@ export class ActivityService {
       date: eventDate.toISOString().split('T')[0],
       heure: eventDate.toISOString().slice(11, 16),
     };
+  }
+
+  private buildStoragePath(originalname: string) {
+    const sanitizedName = originalname.replace(/[^a-zA-Z0-9._-]/g, '-');
+    return `activities/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}-${sanitizedName}`;
+  }
+
+  async uploadImages(
+    files: Array<{
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    }>,
+  ) {
+    const adminClient = this.supabaseService.getAdminClient();
+
+    const uploadResults = await Promise.all(
+      files.map(async (file) => {
+        const path = this.buildStoragePath(file.originalname);
+        const { error } = await adminClient.storage
+          .from(ACTIVITY_STORAGE_BUCKET)
+          .upload(path, file.buffer, {
+            contentType: file.mimetype,
+            upsert: false,
+          });
+
+        if (error) {
+          this.logger.error(`Erreur upload image activité: ${error.message}`);
+          throw new Error(error.message);
+        }
+
+        const { data } = adminClient.storage
+          .from(ACTIVITY_STORAGE_BUCKET)
+          .getPublicUrl(path);
+
+        return data.publicUrl;
+      }),
+    );
+
+    return uploadResults;
   }
 
   async create(createActivityDto: CreateActivityDto) {

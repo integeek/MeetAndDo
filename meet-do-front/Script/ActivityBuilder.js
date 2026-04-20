@@ -327,7 +327,7 @@ function buildActivityPayload(currentUser) {
   return {
     title: activityDraft.title,
     description: activityDraft.description,
-    images: activityDraft.images.map((file) => file.name),
+    images: [],
     address: activityDraft.address,
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
@@ -338,6 +338,46 @@ function buildActivityPayload(currentUser) {
       heure: eventSlot.heure,
     })),
   };
+}
+
+async function uploadActivityImages() {
+  if (!activityDraft.images.length) {
+    return [];
+  }
+
+  const formData = new FormData();
+  activityDraft.images.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  const response = await fetch(`${ACTIVITY_API_URL}/upload-images`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}`;
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody.message) {
+        errorMessage = Array.isArray(errorBody.message)
+          ? errorBody.message.join(" ")
+          : errorBody.message;
+      }
+    } catch (_error) {
+      // Rien à faire si la réponse n'est pas du JSON.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const body = await response.json();
+  if (!Array.isArray(body.urls)) {
+    throw new Error("Le serveur n'a pas retourné les URLs des images.");
+  }
+
+  return body.urls;
 }
 
 function setSubmitFeedback(message, isError = false) {
@@ -389,13 +429,20 @@ async function submitActivityForm(event) {
 
   try {
     const currentUser = await getCurrentUser();
+    setSubmitFeedback("Upload des images en cours...");
+    const uploadedImageUrls = await uploadActivityImages();
+
+    setSubmitFeedback("Création de l'activité en cours...");
     const response = await fetch(ACTIVITY_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(buildActivityPayload(currentUser)),
+      body: JSON.stringify({
+        ...buildActivityPayload(currentUser),
+        images: uploadedImageUrls,
+      }),
     });
 
     if (!response.ok) {
