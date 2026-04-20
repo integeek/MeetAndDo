@@ -98,6 +98,7 @@ export class ActivityService {
       .select('*')
       .order('created_at', { ascending: false })
       .eq('is_disabled', false)
+      .eq('is_visible', true)
    
     if (error) {
       this.logger.error(`findAll erreur: ${error.message}`);
@@ -109,6 +110,23 @@ export class ActivityService {
   
     return data;
   }
+
+  async findAllTheme() {
+    const { data, error } = await this.supabaseService
+        .getAdminClient()
+        .from('activity')
+        .select('theme');
+
+    if (error) {
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const themes = [...new Set(
+       data
+      .flatMap(d => d.theme?.split(',').map(t => t.trim()) ?? [])
+      .filter(Boolean)
+    )];
+    return themes;
+}
 
   async update(id: number, updateActivityDto: UpdateActivityDto) {
     const adminClient = this.supabaseService.getAdminClient();

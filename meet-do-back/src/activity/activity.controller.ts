@@ -17,6 +17,11 @@ export class ActivityController {
     return this.activityService.findAll();
   }
 
+  @Get('themes')
+  findAllThemes() {
+    return this.activityService.findAllTheme();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.activityService.findOne(+id);

@@ -16,11 +16,8 @@ return `
             <h3>Filtres</h3>
             <button id="close-filters" style="font-size:1.5rem;background:none;border:none;cursor:pointer;">✖</button>
         </div>
-        <div style="margin:15px 0;">
-            <label>Date : <input type="date" id="date"/></label>
-        </div>
-        <div id="categories-filter" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
-        <button id="apply-filters" style="margin-top:20px;">Appliquer</button>
+        <div id="themes-filter" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+        <button id="apply-filters" class="blueButton">Apply</button>
     </div>
     <!-- Modal Map -->
     <div id="map-modal" class="popup hidden" style="width:80vw;max-width:700px;height:70vh;">
