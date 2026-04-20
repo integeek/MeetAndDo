@@ -28,28 +28,28 @@ function setSearch(v) { state.search = v; rafraichirTableau(); }
 // ---- Menus par rôle ----
 const MENUS = {
   admin: [
-    { id: 'overview',   icone: 'bi-grid-fill',          label: 'Vue d\'ensemble' },
-    { id: 'users',      icone: 'bi-people-fill',         label: 'Gestion Utilisateurs' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie Support' },
-    { id: 'reports',    icone: 'bi-flag-fill',           label: 'Signalements' },
-    { id: 'validation', icone: 'bi-patch-check-fill',    label: 'Validation Meeters' },
-    { id: 'settings',   icone: 'bi-gear-fill',           label: 'Paramètres' },
+    { id: 'overview',   icone: 'bi-grid-fill',          label: 'Overview' },
+    { id: 'users',      icone: 'bi-people-fill',         label: 'User Management' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Support Messaging' },
+    { id: 'reports',    icone: 'bi-flag-fill',           label: 'Reports' },
+    { id: 'validation', icone: 'bi-patch-check-fill',    label: 'Meeter Validation' },
+    { id: 'settings',   icone: 'bi-gear-fill',           label: 'Settings' },
   ],
   user: [
-    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Mon Dashboard' },
-    { id: 'explore',    icone: 'bi-search',              label: 'Explorer' },
-    { id: 'activities', icone: 'bi-calendar3',           label: 'Mes Activités' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
-    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favoris' },
-    { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
+    { id: 'overview',   icone: 'bi-grid-fill',           label: 'My Dashboard' },
+    { id: 'explore',    icone: 'bi-search',              label: 'Explore' },
+    { id: 'activities', icone: 'bi-calendar3',           label: 'My Activities' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
+    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favorites' },
+    { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
   ],
   publisher: [
-    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Vue d\'ensemble' },
-    { id: 'listings',   icone: 'bi-megaphone-fill',      label: 'Mes Annonces' },
-    { id: 'bookings',   icone: 'bi-calendar-check-fill', label: 'Réservations' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
-    { id: 'stats',      icone: 'bi-bar-chart-fill',      label: 'Statistiques' },
-    { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
+    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Overview' },
+    { id: 'listings',   icone: 'bi-megaphone-fill',      label: 'My Listings' },
+    { id: 'bookings',   icone: 'bi-calendar-check-fill', label: 'Bookings' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
+    { id: 'stats',      icone: 'bi-bar-chart-fill',      label: 'Statistics' },
+    { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
   ],
 };
 
@@ -429,8 +429,11 @@ function renderUserView() {
   const sessions = data.prochainesSessions || [];
   const suggest  = data.activitesSuggérées || [];
 
-  if (onglet === 'account') return renderMonCompte();
-  if (onglet === 'messaging') { renderMessagingTab(); return null; }
+  if (onglet === 'account')    return renderMonCompte();
+  if (onglet === 'messaging')  { renderMessagingTab();   return null; }
+  if (onglet === 'explore')    { renderExplorerTab();    return null; }
+  if (onglet === 'activities') { renderActivitiesTab();  return null; }
+  if (onglet === 'favorites')  { renderFavoritesTab();   return null; }
 
   if (onglet !== 'overview') {
     const label = MENUS.user.find((m) => m.id === onglet)?.label || 'Section';
@@ -621,6 +624,494 @@ function renderPublisherView() {
           </table>
         </div>`,
     })}`;
+}
+
+// ============================================================
+//  ONGLET MES ACTIVITÉS — CALENDRIER
+// ============================================================
+
+let _calMois   = new Date().getMonth();
+let _calAnnee  = new Date().getFullYear();
+let _calJourSel = null;
+
+async function renderActivitiesTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div><h1 class="view-title">Mes Activités</h1><p class="view-subtitle">Chargement…</p></div>
+    </header>
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+
+  try {
+    const reservations = await appelApi('/dashboard/activites');
+    renderSidebar();
+    afficherCalendrier(reservations);
+  } catch (e) {
+    main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
+  }
+}
+
+function afficherCalendrier(reservations) {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  // Index des réservations par date YYYY-MM-DD
+  const parJour = {};
+  reservations.forEach((r) => {
+    const dateSource = r.event?.date || r.date;
+    if (!dateSource) return;
+    const cle = dateSource.slice(0, 10);
+    if (!parJour[cle]) parJour[cle] = [];
+    parJour[cle].push(r);
+  });
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Mes Activités</h1>
+        <p class="view-subtitle">${reservations.length} réservation(s) au total.</p>
+      </div>
+    </header>
+    <div class="cal-layout animate-in">
+      <div class="glass-card" style="flex:1;min-width:0">
+        <div id="cal-root"></div>
+      </div>
+      <div class="glass-card cal-detail-panel" id="cal-detail">
+        ${renduDetailVide()}
+      </div>
+    </div>`;
+
+  _calJourSel = null;
+  renduCalendrierMois(parJour);
+}
+
+function renduCalendrierMois(parJour) {
+  const root = document.getElementById('cal-root');
+  if (!root) return;
+
+  const JOURS  = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const MOIS   = ['Janvier','Février','Mars','Avril','Mai','Juin',
+                  'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  const premier = new Date(_calAnnee, _calMois, 1);
+  const dernier  = new Date(_calAnnee, _calMois + 1, 0);
+  // lundi=0 … dimanche=6
+  let debutCol = (premier.getDay() + 6) % 7;
+
+  const cellules = [];
+  for (let i = 0; i < debutCol; i++) cellules.push(null);
+  for (let j = 1; j <= dernier.getDate(); j++) cellules.push(j);
+  while (cellules.length % 7 !== 0) cellules.push(null);
+
+  const aujourdhui = new Date();
+  const ajdStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth()+1).padStart(2,'0')}-${String(aujourdhui.getDate()).padStart(2,'0')}`;
+
+  const cases = cellules.map((j) => {
+    if (!j) return `<div class="cal-cell cal-cell-vide"></div>`;
+    const cle = `${_calAnnee}-${String(_calMois+1).padStart(2,'0')}-${String(j).padStart(2,'0')}`;
+    const events = parJour[cle] || [];
+    const isAujd = cle === ajdStr;
+    const isSel  = cle === _calJourSel;
+    const nbEv   = events.length;
+    return `
+      <div class="cal-cell ${nbEv ? 'cal-has-event' : ''} ${isAujd ? 'cal-today' : ''} ${isSel ? 'cal-selected' : ''}"
+           data-date="${cle}" onclick="selJourCal('${cle}')">
+        <span class="cal-jour-num">${j}</span>
+        ${nbEv ? `<div class="cal-dots">${events.slice(0,3).map(() => '<span class="cal-dot"></span>').join('')}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="cal-header">
+      <button type="button" class="cal-nav-btn" onclick="changerMoisCal(-1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="cal-titre">${MOIS[_calMois]} ${_calAnnee}</span>
+      <button type="button" class="cal-nav-btn" onclick="changerMoisCal(1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+    <div class="cal-grid-header">
+      ${JOURS.map((j) => `<div class="cal-label-jour">${j}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${cases}</div>`;
+}
+
+function changerMoisCal(delta) {
+  _calMois += delta;
+  if (_calMois > 11) { _calMois = 0;  _calAnnee++; }
+  if (_calMois < 0)  { _calMois = 11; _calAnnee--; }
+  _calJourSel = null;
+  // reconstruire avec les mêmes données (re-fetch)
+  appelApi('/dashboard/activites').then((r) => {
+    const parJour = {};
+    r.forEach((res) => {
+      const d = (res.event?.date || res.date || '').slice(0,10);
+      if (d) { if (!parJour[d]) parJour[d] = []; parJour[d].push(res); }
+    });
+    renduCalendrierMois(parJour);
+    document.getElementById('cal-detail').innerHTML = renduDetailVide();
+  });
+}
+
+function selJourCal(cle) {
+  _calJourSel = cle;
+  const allCells = document.querySelectorAll('.cal-cell');
+  allCells.forEach((c) => c.classList.toggle('cal-selected', c.dataset.date === cle));
+
+  appelApi('/dashboard/activites').then((reservations) => {
+    const events = reservations.filter((r) => {
+      const d = (r.event?.date || r.date || '').slice(0,10);
+      return d === cle;
+    });
+    const panel = document.getElementById('cal-detail');
+    if (!panel) return;
+    if (!events.length) { panel.innerHTML = renduDetailVide(); return; }
+
+    const [annee, mois, jour] = cle.split('-');
+    const MOIS_COMPLET = ['Janvier','Février','Mars','Avril','Mai','Juin',
+                         'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    panel.innerHTML = `
+      <div class="cal-detail-titre">${parseInt(jour)} ${MOIS_COMPLET[parseInt(mois)-1]} ${annee}</div>
+      <div class="cal-detail-liste">
+        ${events.map((r) => {
+          const a = r.event?.activity || {};
+          const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
+          return `
+            <div class="cal-detail-item">
+              <div class="cal-detail-img">
+                ${img ? `<img src="${img}" alt="">` : `<span style="font-size:1.5rem">${emojiTheme(a.theme)}</span>`}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div class="cal-detail-name">${escapeHtml(a.title || 'Activité')}</div>
+                ${a.address ? `<div class="cal-detail-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
+                <div style="display:flex;gap:.5rem;margin-top:.35rem;flex-wrap:wrap">
+                  <span class="badge-status badge-actif"><i class="bi bi-check-circle-fill" style="font-size:.55rem"></i> Confirmé</span>
+                  <span style="font-size:.72rem;color:var(--text-muted)">${r.group_size ?? 1} pers.</span>
+                  ${a.price != null ? `<span style="font-size:.72rem;font-weight:700;color:var(--accent)">${formatPrix(a.price)}</span>` : ''}
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  });
+}
+
+function renduDetailVide() {
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.75rem;color:var(--text-muted);padding:2rem;text-align:center">
+      <i class="bi bi-calendar3" style="font-size:2.5rem;opacity:.35"></i>
+      <p style="font-size:.85rem">Sélectionne un jour<br>pour voir tes activités</p>
+    </div>`;
+}
+
+// ============================================================
+//  ONGLET FAVORIS
+// ============================================================
+
+async function renderFavoritesTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div><h1 class="view-title">Mes Favoris</h1><p class="view-subtitle">Chargement…</p></div>
+    </header>
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+
+  try {
+    const favoris = await appelApi('/dashboard/favoris');
+    renderSidebar();
+    afficherFavoris(favoris);
+  } catch (e) {
+    main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
+  }
+}
+
+function afficherFavoris(favoris) {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  const cartes = favoris.length
+    ? favoris.map((f, i) => {
+        const a = f.activity || {};
+        const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
+        const note = (a.average_rating || 0).toFixed(1);
+        const prix = a.price != null ? formatPrix(a.price) : 'Gratuit';
+        const emoji = emojiTheme(a.theme);
+        return `
+          <div class="explorer-card" style="animation:fadeUp .35s ${0.04*i}s ease both">
+            <div class="explorer-card-img">
+              ${img
+                ? `<img src="${img}" alt="${escapeHtml(a.title || '')}" loading="lazy">`
+                : `<div class="explorer-card-img-placeholder">${emoji}</div>`}
+              ${a.theme ? `<span class="explorer-card-theme">${emoji} ${a.theme}</span>` : ''}
+              <button type="button" class="fav-remove-btn" data-fav-id="${f.id_activity}" title="Retirer des favoris">
+                <i class="bi bi-heart-fill"></i>
+              </button>
+            </div>
+            <div class="explorer-card-body">
+              <div class="explorer-card-title">${escapeHtml(a.title || '—')}</div>
+              ${a.address ? `<div class="explorer-card-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
+              <div class="explorer-card-footer">
+                <span class="explorer-card-prix">${prix}</span>
+                <span class="explorer-card-note"><i class="bi bi-star-fill"></i> ${note}</span>
+              </div>
+              <button type="button" class="btn-primary" style="width:100%;margin-top:.75rem;font-size:.8rem">
+                <i class="bi bi-calendar-check"></i> Réserver
+              </button>
+            </div>
+          </div>`;
+      }).join('')
+    : `<div class="explorer-empty" style="grid-column:1/-1">
+        <span style="font-size:2.5rem">💔</span>
+        <p>Aucun favori pour le moment.</p>
+        <button type="button" class="btn-primary" onclick="setOnglet('explore')">
+          <i class="bi bi-search"></i> Explorer les activités
+        </button>
+      </div>`;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Mes Favoris</h1>
+        <p class="view-subtitle">${favoris.length} activité(s) sauvegardée(s).</p>
+      </div>
+    </header>
+    <div class="explorer-grid" id="favoris-grid">${cartes}</div>`;
+
+  main.querySelectorAll('.fav-remove-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.favId;
+      btn.disabled = true;
+      try {
+        await appelApi(`/dashboard/favoris/${id}`, 'DELETE');
+        btn.closest('.explorer-card').style.opacity = '0';
+        btn.closest('.explorer-card').style.transform = 'scale(.9)';
+        btn.closest('.explorer-card').style.transition = 'all .25s ease';
+        setTimeout(() => {
+          btn.closest('.explorer-card').remove();
+          const grid = document.getElementById('favoris-grid');
+          const count = main.querySelector('.view-subtitle');
+          if (count) count.textContent = `${grid?.children.length ?? 0} activité(s) sauvegardée(s).`;
+        }, 260);
+      } catch (err) {
+        btn.disabled = false;
+        alert('Erreur : ' + err.message);
+      }
+    });
+  });
+}
+
+// ============================================================
+//  ONGLET EXPLORER
+// ============================================================
+
+const EMOJIS_THEME = {
+  sport:     '🏃', nature: '🌿', culture: '🎭', gastronomie: '🍽️',
+  musique:   '🎵', art:    '🎨', bien_etre: '🧘', aventure: '🏕️',
+  enfants:   '👦', social: '🤝', technologie: '💻', autre: '✨',
+};
+
+function emojiTheme(theme) {
+  return EMOJIS_THEME[(theme || '').toLowerCase()] || '✨';
+}
+
+let _explorerCache = null;
+let _explorerFiltres = { search: '', theme: '', maxPrix: '', tri: 'note' };
+
+async function renderExplorerTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div><h1 class="view-title">Explorer</h1><p class="view-subtitle">Chargement des activités…</p></div>
+    </header>
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+
+  try {
+    if (!_explorerCache) {
+      _explorerCache = await appelApi('/dashboard/explorer');
+    }
+    renderSidebar();
+    _explorerFiltres = { search: '', theme: '', maxPrix: '', tri: 'note' };
+    afficherExplorer(_explorerCache);
+  } catch (e) {
+    main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
+  }
+}
+
+function afficherExplorer(activites) {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  const themes = [...new Set((activites || []).map((a) => a.theme).filter(Boolean))].sort();
+
+  const options = themes.map((t) => `<option value="${t}">${emojiTheme(t)} ${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('');
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Explorer</h1>
+        <p class="view-subtitle" id="explorer-count">${activites.length} activité(s) disponible(s).</p>
+      </div>
+    </header>
+
+    <div class="explorer-filters glass-card animate-in">
+      <div class="explorer-filter-row">
+        <div class="explorer-search-wrap">
+          <i class="bi bi-search" style="color:var(--text-muted)"></i>
+          <input type="text" id="exp-search" placeholder="Rechercher une activité…" autocomplete="off">
+        </div>
+        <select id="exp-theme" class="explorer-select">
+          <option value="">Tous les thèmes</option>
+          ${options}
+        </select>
+        <select id="exp-prix" class="explorer-select">
+          <option value="">Tous les prix</option>
+          <option value="25">Moins de 25 €</option>
+          <option value="50">Moins de 50 €</option>
+          <option value="100">Moins de 100 €</option>
+          <option value="200">Moins de 200 €</option>
+        </select>
+        <select id="exp-tri" class="explorer-select">
+          <option value="note">Mieux notés</option>
+          <option value="prix-asc">Prix croissant</option>
+          <option value="prix-desc">Prix décroissant</option>
+        </select>
+      </div>
+      <div id="exp-tags" class="explorer-tags"></div>
+    </div>
+
+    <div id="explorer-grid" class="explorer-grid"></div>`;
+
+  appliquerFiltresExplorer(activites);
+  attachFiltresExplorer(activites);
+}
+
+function appliquerFiltresExplorer(activites) {
+  const f = _explorerFiltres;
+  let liste = [...activites];
+
+  if (f.search) {
+    const q = f.search.toLowerCase();
+    liste = liste.filter((a) =>
+      (a.title || '').toLowerCase().includes(q) ||
+      (a.address || '').toLowerCase().includes(q) ||
+      (a.theme || '').toLowerCase().includes(q)
+    );
+  }
+  if (f.theme)   liste = liste.filter((a) => a.theme === f.theme);
+  if (f.maxPrix) liste = liste.filter((a) => (a.price || 0) <= Number(f.maxPrix));
+
+  if (f.tri === 'prix-asc')  liste.sort((a, b) => (a.price || 0) - (b.price || 0));
+  else if (f.tri === 'prix-desc') liste.sort((a, b) => (b.price || 0) - (a.price || 0));
+  else liste.sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0));
+
+  const grid = document.getElementById('explorer-grid');
+  const count = document.getElementById('explorer-count');
+  if (count) count.textContent = `${liste.length} activité(s) trouvée(s).`;
+
+  if (!grid) return;
+  if (!liste.length) {
+    grid.innerHTML = `
+      <div class="explorer-empty">
+        <span style="font-size:2.5rem">🔍</span>
+        <p>Aucune activité ne correspond à vos filtres.</p>
+        <button type="button" class="btn-outline" onclick="resetFiltresExplorer()">Réinitialiser les filtres</button>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = liste.map((a, i) => {
+    const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
+    const note = (a.average_rating || 0).toFixed(1);
+    const prix = a.price != null ? formatPrix(a.price) : 'Gratuit';
+    const emoji = emojiTheme(a.theme);
+    return `
+      <div class="explorer-card" style="animation:fadeUp .35s ${0.04 * i}s ease both">
+        <div class="explorer-card-img">
+          ${img
+            ? `<img src="${img}" alt="${escapeHtml(a.title)}" loading="lazy">`
+            : `<div class="explorer-card-img-placeholder">${emoji}</div>`}
+          ${a.theme ? `<span class="explorer-card-theme">${emoji} ${a.theme}</span>` : ''}
+        </div>
+        <div class="explorer-card-body">
+          <div class="explorer-card-title">${escapeHtml(a.title || '—')}</div>
+          ${a.address ? `<div class="explorer-card-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
+          <div class="explorer-card-footer">
+            <span class="explorer-card-prix">${prix}</span>
+            <span class="explorer-card-note"><i class="bi bi-star-fill"></i> ${note}</span>
+          </div>
+          <button type="button" class="btn-primary" style="width:100%;margin-top:.75rem;font-size:.8rem">
+            <i class="bi bi-calendar-check"></i> Réserver
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function attachFiltresExplorer(activites) {
+  const search = document.getElementById('exp-search');
+  const theme  = document.getElementById('exp-theme');
+  const prix   = document.getElementById('exp-prix');
+  const tri    = document.getElementById('exp-tri');
+
+  const update = () => {
+    _explorerFiltres.search  = search?.value.trim() || '';
+    _explorerFiltres.theme   = theme?.value || '';
+    _explorerFiltres.maxPrix = prix?.value || '';
+    _explorerFiltres.tri     = tri?.value || 'note';
+    appliquerFiltresExplorer(activites);
+    mettreAJourTags();
+  };
+
+  search?.addEventListener('input', update);
+  theme?.addEventListener('change', update);
+  prix?.addEventListener('change', update);
+  tri?.addEventListener('change', update);
+}
+
+function mettreAJourTags() {
+  const tags = document.getElementById('exp-tags');
+  if (!tags) return;
+  const f = _explorerFiltres;
+  const liste = [];
+  if (f.search)  liste.push({ label: `"${f.search}"`, key: 'search' });
+  if (f.theme)   liste.push({ label: `${emojiTheme(f.theme)} ${f.theme}`, key: 'theme' });
+  if (f.maxPrix) liste.push({ label: `Moins de ${f.maxPrix} €`, key: 'maxPrix' });
+
+  tags.innerHTML = liste.map((t) => `
+    <span class="explorer-tag">
+      ${escapeHtml(t.label)}
+      <button type="button" onclick="retirerFiltreExplorer('${t.key}')">
+        <i class="bi bi-x"></i>
+      </button>
+    </span>`).join('');
+}
+
+function retirerFiltreExplorer(key) {
+  _explorerFiltres[key] = '';
+  const el = document.getElementById(
+    key === 'search' ? 'exp-search' : key === 'theme' ? 'exp-theme' : 'exp-prix'
+  );
+  if (el) el.value = '';
+  appliquerFiltresExplorer(_explorerCache || []);
+  mettreAJourTags();
+}
+
+function resetFiltresExplorer() {
+  _explorerFiltres = { search: '', theme: '', maxPrix: '', tri: 'note' };
+  ['exp-search','exp-theme','exp-prix','exp-tri'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'exp-tri' ? 'note' : '';
+  });
+  appliquerFiltresExplorer(_explorerCache || []);
+  mettreAJourTags();
 }
 
 // ============================================================

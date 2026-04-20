@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, UseGuards, ForbiddenException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Param, UseGuards, ForbiddenException, Req } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import JwtAuthenticationGuard from '../authentication/guard/jwt-authentication.guard';
 import type RequestWithUser from '../authentication/requestWithUser.interface';
@@ -30,6 +30,38 @@ export class DashboardController {
       throw new ForbiddenException('Accès réservé aux éditeurs.');
     }
     return this.dashboardService.getPublisherStats(req.user.id);
+  }
+
+  @Get('activites')
+  getActivites(@Req() req: RequestWithUser) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.getActivitesUtilisateur(req.user.id);
+  }
+
+  @Get('favoris')
+  getFavoris(@Req() req: RequestWithUser) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.getFavoris(req.user.id);
+  }
+
+  @Post('favoris/:id')
+  ajouterFavori(@Req() req: RequestWithUser, @Param('id') id: string) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.ajouterFavori(req.user.id, Number(id));
+  }
+
+  @Delete('favoris/:id')
+  retirerFavori(@Req() req: RequestWithUser, @Param('id') id: string) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.retirerFavori(req.user.id, Number(id));
+  }
+
+  @Get('explorer')
+  getExplorer(@Req() req: RequestWithUser) {
+    if ((req.user.role || '').toLowerCase() === 'admin') {
+      throw new ForbiddenException('Non disponible pour les administrateurs.');
+    }
+    return this.dashboardService.getExplorer();
   }
 
   @Get('conversations')

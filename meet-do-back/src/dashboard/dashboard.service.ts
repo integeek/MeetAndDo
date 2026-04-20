@@ -185,6 +185,47 @@ export class DashboardService {
     return { prochainesSessions, activitesSuggérées };
   }
 
+  async getActivitesUtilisateur(userId: number) {
+    const { data, error } = await this.db
+      .from('reservation')
+      .select(`id, group_size, date,
+               event(id, date, id_activity,
+                 activity(id, title, address, price, images, average_rating, theme))`)
+      .eq('id_user', userId)
+      .order('date', { ascending: true });
+    if (error) { this.logger.error(`getActivitesUtilisateur: ${error.message}`); return []; }
+    return data ?? [];
+  }
+
+  async getFavoris(userId: number) {
+    const { data, error } = await this.db
+      .from('favorites')
+      .select(`id, id_activity, created_at,
+               activity(id, title, address, price, images, average_rating, theme)`)
+      .eq('id_user', userId)
+      .order('created_at', { ascending: false });
+    if (error) { this.logger.error(`getFavoris: ${error.message}`); return []; }
+    return data ?? [];
+  }
+
+  async ajouterFavori(userId: number, activityId: number) {
+    const { error } = await this.db
+      .from('favorites')
+      .insert({ id_user: userId, id_activity: activityId });
+    if (error) throw new Error(error.message);
+    return { message: 'Activité ajoutée aux favoris.' };
+  }
+
+  async retirerFavori(userId: number, activityId: number) {
+    const { error } = await this.db
+      .from('favorites')
+      .delete()
+      .eq('id_user', userId)
+      .eq('id_activity', activityId);
+    if (error) throw new Error(error.message);
+    return { message: 'Activité retirée des favoris.' };
+  }
+
   private async getProchainesSessions(userId: number) {
     const maintenant = new Date().toISOString();
     const { data, error } = await this.db
@@ -208,6 +249,18 @@ export class DashboardService {
       .order('average_rating', { ascending: false })
       .limit(6);
     if (error) { this.logger.error(`getActivitesSuggérées: ${error.message}`); return []; }
+    return data ?? [];
+  }
+
+  async getExplorer() {
+    const { data, error } = await this.db
+      .from('activity')
+      .select('id, title, address, price, images, average_rating, theme, description')
+      .eq('is_visible', true)
+      .eq('is_disabled', false)
+      .order('average_rating', { ascending: false })
+      .limit(100);
+    if (error) { this.logger.error(`getExplorer: ${error.message}`); return []; }
     return data ?? [];
   }
 
