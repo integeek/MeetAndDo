@@ -77,6 +77,54 @@
       </div>
     </div>
 
+    <div
+      class="modal fade"
+      id="activityDeleteConfirmModal"
+      tabindex="-1"
+      aria-labelledby="activityDeleteConfirmModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="activityDeleteConfirmModalLabel">
+              Supprimer l'activité
+            </h2>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p id="activity-delete-confirm-text" class="mb-3"></p>
+            <div id="activity-delete-upcoming-wrapper" class="mb-3 d-none">
+              <p class="fw-semibold mb-2">Créneaux / événements à venir</p>
+              <ul
+                id="activity-delete-upcoming-list"
+                class="activity-delete-upcoming-list mb-0"
+              ></ul>
+            </div>
+            <p
+              id="activity-delete-feedback"
+              class="small mb-0 activity-delete-feedback"
+            ></p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              Annuler
+            </button>
+            <div id="activity-confirm-delete-button"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- <footer id="footer-container" class="footer-container"></footer> -->
 
     <script
