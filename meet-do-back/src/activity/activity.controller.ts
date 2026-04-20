@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
@@ -62,8 +75,15 @@ export class ActivityController {
   }
 
   @Get()
-  findAll() {
-    return this.activityService.findAll();
+  findAll(@Query('userId') userId?: string) {
+    const hasUserId = userId !== undefined && userId !== '';
+    const parsedUserId = hasUserId ? Number(userId) : undefined;
+
+    if (hasUserId && (!Number.isInteger(parsedUserId) || (parsedUserId ?? 0) <= 0)) {
+      throw new BadRequestException("Le parametre userId doit etre un entier positif");
+    }
+
+    return this.activityService.findAll(parsedUserId);
   }
 
   @Get('themes')

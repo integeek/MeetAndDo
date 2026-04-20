@@ -40,6 +40,20 @@ h1 {
   margin: 0;
 }
 
+.activity-delete-upcoming-list {
+  padding-left: 1rem;
+  color: #495057;
+}
+
+.activity-delete-feedback {
+  min-height: 1.25rem;
+}
+
+.activity-delete-feedback.text-danger,
+.activity-delete-feedback.text-muted {
+  display: block;
+}
+
 @media (max-width: 767.98px) {
   .activity-action-button {
     min-width: 130px;
