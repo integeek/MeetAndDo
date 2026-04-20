@@ -32,6 +32,13 @@ export class DashboardController {
     return this.dashboardService.getPublisherStats(req.user.id);
   }
 
+  @Get('conversations')
+  getConversations(@Req() req: RequestWithUser) {
+    const role = (req.user.role || '').toLowerCase();
+    if (role === 'admin') throw new ForbiddenException('Non disponible pour les administrateurs.');
+    return this.dashboardService.getConversations(req.user.id);
+  }
+
   @Get('admin/publisher-requests')
   getPublisherRequests(@Req() req: RequestWithUser) {
     if ((req.user.role || '').toLowerCase() !== 'admin') {

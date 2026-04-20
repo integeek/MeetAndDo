@@ -126,22 +126,32 @@ function injectBurgerMenu() {
   });
 }
 
-// ---- Faux utilisateur courant (remplacer par auth réelle) ---- //
-function initUser() {
-  // sessionStorage = propre à chaque onglet → chaque onglet a son propre UUID
-  const stored = sessionStorage.getItem('meetando_user_id');
-  if (stored) {
-    state.currentUserId = stored;
-  } else {
-    state.currentUserId = crypto.randomUUID();
+// ---- Convertir un ID entier en UUID valide ---- //
+function intToUUID(id) {
+  return `00000000-0000-0000-0000-${id.toString().padStart(12, '0')}`;
+}
+
+// ---- Utilisateur courant (depuis l'API si connecté) ---- //
+async function initUser() {
+  try {
+    const res = await fetch('http://localhost:3000/user/me', { credentials: 'include' });
+    if (res.ok) {
+      const userData = await res.json();
+      state.currentUserId = intToUUID(userData.id);
+    } else {
+      const stored = sessionStorage.getItem('meetando_user_id');
+      state.currentUserId = stored || crypto.randomUUID();
+      sessionStorage.setItem('meetando_user_id', state.currentUserId);
+    }
+  } catch {
+    const stored = sessionStorage.getItem('meetando_user_id');
+    state.currentUserId = stored || crypto.randomUUID();
     sessionStorage.setItem('meetando_user_id', state.currentUserId);
   }
 
-  // Affiche l'UUID dans le bandeau
   const el = document.getElementById('my-id-value');
   if (el) el.textContent = state.currentUserId;
 
-  // Copier au clic
   const bar = document.getElementById('my-id-bar');
   if (bar) {
     bar.addEventListener('click', () => {
@@ -175,6 +185,14 @@ function initSocket() {
   state.socket.on('conversations_list', (data) => {
     state.conversations = data;
     renderConversationList(data);
+
+    // Ouvrir la conversation depuis l'URL (?conv=<id> depuis le dashboard)
+    const params = new URLSearchParams(window.location.search);
+    const convIdFromUrl = params.get('conv');
+    if (convIdFromUrl && !state.activeConversationId) {
+      const conv = data.find((c) => c.id === convIdFromUrl);
+      if (conv) { selectConversation(conv); return; }
+    }
 
     // Restaurer la conversation active après un refresh
     const savedId = localStorage.getItem('meetando_active_conv');
@@ -278,7 +296,7 @@ function selectConversation(conv) {
   showChatView();
   DOM.chatMessages.innerHTML = '';
 
-  state.socket.emit('join_conversation', { conversationId: conv.id });
+  state.socket.emit('join_conversation', { conversationId: conv.id, userId: state.currentUserId });
   renderConversationList(state.conversations);
 
   // Mobile (< 768px) : cacher la sidebar pour afficher uniquement le chat
@@ -584,6 +602,8 @@ function formatTime(iso) {
 
 function shortenId(id) {
   if (!id) return '?';
+  const match = id.match(/^00000000-0000-0000-0000-0*(\d+)$/);
+  if (match) return `Utilisateur #${parseInt(match[1], 10)}`;
   return id.length > 12 ? id.slice(0, 8) + '…' : id;
 }
 
@@ -648,9 +668,9 @@ function initEvents() {
 }
 
 // ---- Bootstrap ---- //
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initComponents();
-  initUser();
+  await initUser();
   initEvents();
   initSocket();
 });

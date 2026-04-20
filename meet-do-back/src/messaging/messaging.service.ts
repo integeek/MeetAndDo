@@ -83,6 +83,23 @@ export class MessagingService {
     return data ?? [];
   }
 
+  async markAsRead(conversationId: string, userId: string): Promise<void> {
+    const { data: conv } = await this.supabaseService
+      .getAdminClient()
+      .from('conversations')
+      .select('participant_1')
+      .eq('id', conversationId)
+      .single();
+
+    if (!conv) return;
+    const field = conv.participant_1 === userId ? 'is_read_by_p1' : 'is_read_by_p2';
+    await this.supabaseService
+      .getAdminClient()
+      .from('conversations')
+      .update({ [field]: true })
+      .eq('id', conversationId);
+  }
+
   async uploadFile(file: { buffer: Buffer; originalname: string; mimetype: string }): Promise<string | null> {
     const ext = file.originalname.split('.').pop();
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -128,11 +145,20 @@ export class MessagingService {
       return null;
     }
 
+    const { data: conv } = await client
+      .from('conversations')
+      .select('participant_1')
+      .eq('id', dto.conversationId)
+      .single();
+
+    const isP1 = conv?.participant_1 === dto.senderId;
     await client
       .from('conversations')
       .update({
         last_message: dto.content,
         last_message_at: data.created_at,
+        last_sender_id: dto.senderId,
+        ...(isP1 ? { is_read_by_p2: false } : { is_read_by_p1: false }),
       })
       .eq('id', dto.conversationId);
 

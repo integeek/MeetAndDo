@@ -1011,3 +1011,90 @@ body {
 .stagger-4 { animation-delay: 0.2s; }
 .stagger-5 { animation-delay: 0.25s; }
 .stagger-6 { animation-delay: 0.3s; }
+
+/* ---- Conversations Dashboard (onglet Messagerie) ---- */
+.conv-dash-list {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.conv-dash-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .875rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid transparent;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.conv-dash-item:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-mid);
+}
+
+.conv-dash-item.unread {
+  background: var(--accent-soft);
+  border-color: var(--accent-mid);
+}
+
+.conv-dash-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.conv-dash-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-dash-name {
+  font-size: .875rem;
+  font-weight: 600;
+  margin-bottom: .2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-dash-last {
+  font-size: .78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-dash-item.unread .conv-dash-last {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.conv-dash-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .3rem;
+  flex-shrink: 0;
+}
+
+.conv-dash-time {
+  font-size: .72rem;
+  color: var(--text-muted);
+}
+
+.conv-dash-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}

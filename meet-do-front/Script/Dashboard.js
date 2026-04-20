@@ -71,6 +71,28 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function truncate(str, max) {
+  return String(str).length > max ? String(str).slice(0, max) + '…' : str;
+}
+
+function formatDateConv(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
 function formatPrix(val) {
   if (val === undefined || val === null) return '—';
   return Number(val).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
@@ -408,6 +430,7 @@ function renderUserView() {
   const suggest  = data.activitesSuggérées || [];
 
   if (onglet === 'account') return renderMonCompte();
+  if (onglet === 'messaging') { renderMessagingTab(); return null; }
 
   if (onglet !== 'overview') {
     const label = MENUS.user.find((m) => m.id === onglet)?.label || 'Section';
@@ -515,6 +538,7 @@ function renderPublisherView() {
   const reservations = data.dernieresReservations || [];
 
   if (onglet === 'account') return renderMonCompte();
+  if (onglet === 'messaging') { renderMessagingTab(); return null; }
 
   if (onglet !== 'overview') {
     const label = MENUS.publisher.find((m) => m.id === onglet)?.label || 'Section';
@@ -597,6 +621,74 @@ function renderPublisherView() {
           </table>
         </div>`,
     })}`;
+}
+
+// ============================================================
+//  ONGLET MESSAGERIE (user + publisher)
+// ============================================================
+
+async function renderMessagingTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div><h1 class="view-title">Messagerie</h1><p class="view-subtitle">Chargement des conversations…</p></div>
+    </header>
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+
+  try {
+    const conversations = await appelApi('/dashboard/conversations');
+    renderSidebar();
+
+    const lignes = conversations.length
+      ? conversations.map((conv, i) => {
+          const isUnread = !conv.is_read;
+          const time = formatDateConv(conv.last_message_at);
+          const nomAutre = conv.other_user_id ? `Utilisateur #${conv.other_user_id}` : 'Inconnu';
+          return `
+            <div class="conv-dash-item ${isUnread ? 'unread' : ''}"
+                 data-conv-id="${conv.id}"
+                 style="animation:fadeUp .3s ${0.05 * i}s ease both;cursor:pointer">
+              <div class="conv-dash-avatar">
+                <i class="bi bi-person-fill" style="font-size:1.1rem;color:var(--accent)"></i>
+              </div>
+              <div class="conv-dash-body">
+                <div class="conv-dash-name">${escapeHtml(nomAutre)}</div>
+                <div class="conv-dash-last">
+                  ${conv.is_mine ? '<i class="bi bi-arrow-up-right" style="color:var(--accent);font-size:.7rem"></i> ' : ''}
+                  ${conv.last_message ? escapeHtml(truncate(conv.last_message, 45)) : '<em>Nouvelle conversation</em>'}
+                </div>
+              </div>
+              <div class="conv-dash-meta">
+                ${time ? `<span class="conv-dash-time">${time}</span>` : ''}
+                ${isUnread ? '<span class="conv-dash-badge"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Non lu</span>' : ''}
+              </div>
+            </div>`;
+        }).join('')
+      : '<p style="color:var(--text-muted);font-size:.85rem;padding:.75rem 0">Aucune conversation pour le moment.</p>';
+
+    main.innerHTML = `
+      <header class="view-header animate-in">
+        <div>
+          <h1 class="view-title">Messagerie</h1>
+          <p class="view-subtitle">${conversations.length} conversation(s) active(s).</p>
+        </div>
+        <a href="../Page/Messagerie.html" class="btn-primary">
+          <i class="bi bi-chat-dots-fill"></i> Ouvrir la messagerie
+        </a>
+      </header>
+      ${Card({ classes: 'animate-in', contenu: `<div class="conv-dash-list">${lignes}</div>` })}`;
+
+    main.querySelectorAll('.conv-dash-item[data-conv-id]').forEach((item) => {
+      item.addEventListener('click', () => {
+        window.location.href = `../Page/Messagerie.html?conv=${item.dataset.convId}`;
+      });
+    });
+
+  } catch (e) {
+    main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
+  }
 }
 
 // ============================================================
