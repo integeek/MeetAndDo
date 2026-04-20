@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+}
+
+.page-subtitle {
+  color: #6c757d;
+}
+
+.activity-card {
+  border-radius: 20px;
+}
+
+.activity-card-image {
+  height: 220px;
+  object-fit: cover;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.activity-badge {
+  background-color: #64a0fb;
+  color: #fff;
+}
+
+.activity-action-button {
+  min-width: 170px;
+}
+
+.modal-body .buttonCo,
+.modal-body .buttonRo {
+  margin: 0;
+}
+
+@media (max-width: 767.98px) {
+  .activity-action-button {
+    min-width: 130px;
+  }
+
+  .activity-action-button .buttonCo,
+  .activity-action-button .buttonRo {
+    font-size: 14px;
+    padding: 8px 12px;
+    margin: 0;
+  }
+
+  .activity-card .mt-auto {
+    flex-wrap: nowrap !important;
+  }
+}
