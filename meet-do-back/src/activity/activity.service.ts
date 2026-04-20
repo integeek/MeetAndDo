@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -22,6 +27,24 @@ export class ActivityService {
       date: eventDate.toISOString().split('T')[0],
       heure: eventDate.toISOString().slice(11, 16),
     };
+  }
+
+  private isFutureEvent(date: string) {
+    const eventDate = new Date(date);
+    return !Number.isNaN(eventDate.getTime()) && eventDate > new Date();
+  }
+
+  private async getEventSlotsByActivityId(id: number) {
+    const client = this.supabaseService.getClient();
+    const { data: eventData, error: eventError } = await client
+      .from('event')
+      .select('date')
+      .eq('id_activity', id)
+      .order('date', { ascending: true });
+
+    if (eventError) throw new Error(eventError.message);
+
+    return (eventData || []).map((event) => this.normalizeEventSlot(event));
   }
 
   private buildStoragePath(originalname: string) {
@@ -122,22 +145,36 @@ export class ActivityService {
 
     if (error) throw new Error(error.message);
 
-    const { data: eventData, error: eventError } = await client
-      .from('event')
-      .select('date')
-      .eq('id_activity', id)
-      .order('date', { ascending: true });
-
-    if (eventError) throw new Error(eventError.message);
-
     return {
       ...data,
-      eventSlots: (eventData || []).map((event) => this.normalizeEventSlot(event)),
+      eventSlots: await this.getEventSlotsByActivityId(id),
     };
   }
 
-  findAll() {
-    return `This action returns all activity`;
+  async findAll(userId?: number) {
+    const client = this.supabaseService.getClient();
+    let query = client
+      .from('activity')
+      .select('id, title, description, address, group_size, price, id_user, theme, average_rating, images')
+      .order('id', { ascending: false });
+
+    if (userId !== undefined) {
+      query = query.eq('id_user', userId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw new Error(error.message);
+
+    const activities = await Promise.all(
+      (data || []).map(async (activity) => ({
+        ...activity,
+        image: Array.isArray(activity.images) ? (activity.images[0] ?? null) : null,
+        eventSlots: await this.getEventSlotsByActivityId(activity.id),
+      })),
+    );
+
+    return activities;
   }
 
   async update(id: number, updateActivityDto: UpdateActivityDto) {
@@ -194,7 +231,42 @@ export class ActivityService {
     return this.findOne(updatedActivity.id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} activity`;
+  async remove(id: number) {
+    const adminClient = this.supabaseService.getAdminClient();
+    const eventSlots = await this.getEventSlotsByActivityId(id);
+    const upcomingSlots = eventSlots.filter((eventSlot) =>
+      this.isFutureEvent(`${eventSlot.date}T${eventSlot.heure}:00`),
+    );
+
+    if (upcomingSlots.length) {
+      throw new BadRequestException(
+        "Impossible de supprimer cette activite car des creneaux a venir existent.",
+      );
+    }
+
+    const { data: activity, error: findError } = await adminClient
+      .from('activity')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (findError) throw new Error(findError.message);
+    if (!activity) throw new NotFoundException('Activite introuvable');
+
+    const { error: deleteEventsError } = await adminClient
+      .from('event')
+      .delete()
+      .eq('id_activity', id);
+
+    if (deleteEventsError) throw new Error(deleteEventsError.message);
+
+    const { error: deleteActivityError } = await adminClient
+      .from('activity')
+      .delete()
+      .eq('id', id);
+
+    if (deleteActivityError) throw new Error(deleteActivityError.message);
+
+    return { success: true, id };
   }
 }
