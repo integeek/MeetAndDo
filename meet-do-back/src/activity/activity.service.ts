@@ -151,6 +151,24 @@ export class ActivityService {
     };
   }
 
+  async findAll() {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('activity')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .eq('is_disabled', false)
+      .eq('is_visible', true)
+   
+    if (error) {
+      this.logger.error(`findAll erreur: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  
+    return data;
   async findAll(userId?: number) {
     const client = this.supabaseService.getClient();
     let query = client
@@ -176,6 +194,23 @@ export class ActivityService {
 
     return activities;
   }
+
+  async findAllTheme() {
+    const { data, error } = await this.supabaseService
+        .getAdminClient()
+        .from('activity')
+        .select('theme');
+
+    if (error) {
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const themes = [...new Set(
+       data
+      .flatMap(d => d.theme?.split(',').map(t => t.trim()) ?? [])
+      .filter(Boolean)
+    )];
+    return themes;
+}
 
   async update(id: number, updateActivityDto: UpdateActivityDto) {
     const adminClient = this.supabaseService.getAdminClient();

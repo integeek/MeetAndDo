@@ -15,6 +15,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
@@ -83,6 +84,11 @@ export class ActivityController {
     }
 
     return this.activityService.findAll(parsedUserId);
+  }
+
+  @Get('themes')
+  findAllThemes() {
+    return this.activityService.findAllTheme();
   }
 
   @Get(':id')
