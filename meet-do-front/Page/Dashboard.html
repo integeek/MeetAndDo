@@ -3,28 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Meet & Do</title>
+  <title>Dashboard | Meet &amp; Do</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles projet -->
   <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
   <link rel="stylesheet" href="../Component/Footer/Footer.css" />
   <link rel="stylesheet" href="../Style/Dashboard.css" />
-  <script src="../Component/Navbar/Navbar.js"></script>
-  <script src="../Component/Footer/Footer.js"></script>
-  <script src="../Script/Dashboard.js" defer></script>
 </head>
-<body data-role="admin">
-  <div id="navbar-root" class="navbar-container"></div>
+<body>
 
-  <button id="mobile-menu-btn" class="mobile-menu-btn" type="button" aria-label="Ouvrir le menu">
-    ☰
+  <div class="navbar-container" id="navbar-root"></div>
+
+  <!-- Layout dashboard -->
+  <div class="dash-layout" id="dash-layout">
+
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="dash-sidebar"></aside>
+
+    <!-- Overlay mobile -->
+    <div class="dash-overlay" id="dash-overlay"></div>
+
+    <!-- Contenu principal -->
+    <main class="dash-main" id="dash-main">
+      <div class="dash-loader" id="dash-loader">
+        <div class="dash-spinner"></div>
+        <p>Chargement…</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Bouton burger mobile -->
+  <button type="button" class="dash-burger" id="dash-burger" aria-label="Ouvrir le menu">
+    <i class="bi bi-list"></i>
   </button>
 
-  <div id="mobile-overlay" class="mobile-overlay" hidden></div>
+  <div id="footer-container"></div>
 
-  <main class="dashboard-layout">
-    <aside id="sidebar" class="sidebar"></aside>
-    <section id="dashboard-content" class="dashboard-content"></section>
-  </main>
-
-  <footer id="footer-root" class="footer-container"></footer>
+  <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
+  <script src="../Script/Dashboard.js"></script>
 </body>
 </html>
