@@ -72,7 +72,7 @@
             <div class="col-12 col-lg-7 text-start">
               <div class="row">
                 <div class="col-12 activity-content">
-                  <h2 class="fw-bold mb-3">Description de l'activité</h2>
+                  <h2 class="fw-bold mb-3">Activity description</h2>
                   <p id="activity-description-text" class="mb-0"></p>
                 </div>
               </div>
@@ -126,7 +126,7 @@
                               <img
                                 id="creator-avatar"
                                 class="creator-avatar"
-                                alt="Photo du createur"
+                                alt="Creator photo"
                               />
                             </div>
                             <div class="col">
@@ -156,7 +156,7 @@
                     class="row align-items-center justify-content-between gy-2 mb-3"
                   >
                     <div class="col-auto">
-                      <h2 class="fw-bold mb-0">Avis de l'activité</h2>
+                      <h2 class="fw-bold mb-0">Activity reviews</h2>
                     </div>
                     <div class="col-auto">
                       <div class="d-flex align-items-center gap-2">
@@ -192,7 +192,7 @@
       </div>
     </main>
 
-    <!-- Modal Signaler -->
+    <!-- Report Modal -->
     <div
       class="modal fade"
       id="reportActivityModal"
@@ -204,7 +204,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="reportModalLabel">
-              Signaler cette activité
+              Report this activity
             </h5>
             <button
               type="button"
@@ -217,28 +217,28 @@
             <form id="report-form">
               <div class="mb-3">
                 <label for="report-reason" class="form-label"
-                  >Raison du signalement</label
+                  >Reason for report</label
                 >
                 <select class="form-select" id="report-reason" required>
-                  <option value="">-- Sélectionnez une raison --</option>
+                  <option value="">-- Select a reason --</option>
                   <option value="contenu-inapproprie">
-                    Contenu inapproprié
+                    Inappropriate content
                   </option>
-                  <option value="arnaque">Arnaque/Fraude</option>
-                  <option value="harcellement">Harcèlement</option>
-                  <option value="prix-anormal">Prix anormal</option>
-                  <option value="autre">Autre</option>
+                  <option value="arnaque">Scam/Fraud</option>
+                  <option value="harcellement">Harassment</option>
+                  <option value="prix-anormal">Abnormal price</option>
+                  <option value="autre">Other</option>
                 </select>
               </div>
               <div class="mb-3">
                 <label for="report-description" class="form-label"
-                  >Description (optionnel)</label
+                  >Description (optional)</label
                 >
                 <textarea
                   class="form-control"
                   id="report-description"
                   rows="4"
-                  placeholder="Décris brièvement le problème..."
+                  placeholder="Briefly describe the issue..."
                 ></textarea>
               </div>
             </form>
@@ -249,10 +249,10 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Fermer
+              Close
             </button>
             <button type="button" class="btn btn-danger" id="report-submit-btn">
-              Signaler
+              Report
             </button>
           </div>
         </div>
