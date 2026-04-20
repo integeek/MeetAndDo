@@ -2,7 +2,7 @@ function SearchBar(url) {
 return `
     <div></div>
     <div class="search-bar">
-        <input type="text" placeholder="Rechercher" id="search-input">
+        <input type="text" placeholder="Research" id="search-input">
         <button id="search-btn"><img src="../Assets/img/icon-search.svg" alt=""></button>
         <div class="separator"></div>
         <button id="settings-btn"><img src="../Assets/img/icon-settings.svg" alt=""></button>
@@ -10,10 +10,10 @@ return `
             <img src="../Assets/img/icon-position.svg" alt="">
         </button>
     </div>
-    <!-- Modal Filtres -->
+    <!-- Modal Filters -->
     <div id="filters-modal" class="popup hidden">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h3>Filtres</h3>
+            <h3>Filters</h3>
             <button id="close-filters" style="font-size:1.5rem;background:none;border:none;cursor:pointer;">✖</button>
         </div>
         <div id="themes-filter" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
@@ -25,8 +25,8 @@ return `
             <div>
                 <h3>Carte des activités</h3>
                 <div id="map-loading-indicator" style="display:flex;align-items:center;gap:8px;font-size:1rem;margin-top:2px;">
-                    <span>Chargement des lieux...</span>
-                    <img src="../Assets/img/loader.gif" alt="Chargement..." width="22" height="22">
+                    <span>Loading of places...</span>
+                    <img src="../Assets/img/loader.gif" alt="Loading..." width="22" height="22">
                 </div>
             </div>
             <button id="close-map" style="font-size:1.5rem;background:none;border:none;cursor:pointer;">✖</button>

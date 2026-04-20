@@ -73,7 +73,7 @@ async function loadThemes() {
     const themes = await res.json();
     const container = document.getElementById('themes-filter');
 
-    container.innerHTML = `<button class="theme-btn active" data-id="">Tous</button>`;
+    container.innerHTML = `<button class="theme-btn active" data-id="">All</button>`;
 
     themes.forEach(theme => {
         const btn = document.createElement('button');

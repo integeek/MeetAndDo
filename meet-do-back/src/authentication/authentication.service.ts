@@ -38,8 +38,75 @@ export class AuthenticationService {
       const createdUser = await this.userService.create(createUserDto);
       await this.mailerService.sendMail({
         to: createdUser.email,
-        subject: 'Confirmez votre inscription sur Meet&Do !',
-        text: `Bonjour, votre compte a bien été créé. Afin de le valider, merci de cliquer sur le lien suivant : http://127.0.0.1:5500/meet-do-front/Page/PersonalInformation.html?token=${verificationToken}`,
+        subject: 'Confirm your registration on Meet&Do !',
+        html: `
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, sans-serif;">
+
+            <div style="width:100%; background-color:#004AAD; padding:20px 0; text-align:center;">
+                <h1 style="color:white; margin:0; font-size:2rem; letter-spacing:1px;">Meet&Do</h1>
+            </div>
+
+            <div style="max-width:600px; margin:30px auto; background-color:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                <div style="padding:40px;">
+                    <h3 style="text-align:center; color:#004AAD; font-size:1.4rem; margin-bottom:30px;">
+                        Welcome to Meet&Do 🎉
+                    </h3>
+
+                    <p style="color:#333;">Hello,</p>
+                    <p style="color:#555; line-height:1.6;">
+                        Thank you for registering on <strong>Meet&Do</strong>. 
+                        We are delighted to welcome you !
+                    </p>
+                    <p style="color:#555; line-height:1.6;">
+                        To finalize your registration and activate your account, click on the button below.
+                    </p>
+
+                    <div style="text-align:center; margin:35px 0;">
+                        <a href="http://127.0.0.1:5500/meet-do-front/Page/PersonalInformation.html?token=${verificationToken}"
+                          style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
+                                  text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
+                            Activate my account →
+                        </a>
+                    </div>
+
+                    <p style="color:#999; font-size:0.85rem; text-align:center;">
+                        If you did not initiate this registration, simply ignore this message.
+                    </p>
+
+                    <div style="border-top:1px solid #e0e0e0; margin:30px 0;"></div>
+
+                    <p style="color:#555; text-align:center; font-size:0.9rem;">
+                        Our team remains at your disposal for any questions.<br>
+                        <strong>Phone :</strong> +33 6 07 46 76 89 &nbsp;|&nbsp; 
+                        <strong>Email :</strong> meetanddosav@gmail.com
+                    </p>
+                </div>
+
+                <div style="background-color:#f9f9f9; padding:20px; text-align:center; border-top:1px solid #e0e0e0;">
+                    <p style="color:#999; font-size:0.85rem; margin-bottom:15px;">Stay connected !</p>
+                    <div>
+                        <a href="https://www.facebook.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/960px-2023_Facebook_icon.svg.png" 
+                                alt="Facebook" style="width:30px; height:30px;">
+                        </a>
+                        <a href="https://www.instagram.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/960px-Instagram_icon.png" 
+                                alt="Instagram" style="width:30px; height:30px;">
+                        </a>
+                        <a href="https://www.linkedin.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/960px-LinkedIn_logo_initials.png" 
+                                alt="LinkedIn" style="width:30px; height:30px;">
+                        </a>
+                    </div>
+                    <p style="color:#ccc; font-size:0.75rem; margin-top:15px;">© 2026 Meet&Do.</p>
+                </div>
+            </div>
+
+        </body>
+        </html>
+        `,
       });
 
       createdUser.password = '';
@@ -73,8 +140,68 @@ export class AuthenticationService {
     });
     await this.mailerService.sendMail({
         to: user.email,
-        subject: 'Merci pour votre inscription sur Meet&Do !',
-        text: `Bonjour ${data.firstname}, votre inscription a bien été confirmée.`
+        subject: 'Thank you for registering on Meet&Do !',
+        html: `
+        <!DOCTYPE html>
+        <html>
+        <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, sans-serif;">
+
+            <div style="width:100%; background-color:#004AAD; padding:20px 0; text-align:center;">
+                <h1 style="color:white; margin:0; font-size:2rem; letter-spacing:1px;">Meet&Do</h1>
+            </div>
+
+            <div style="max-width:600px; margin:30px auto; background-color:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                <div style="padding:40px;">
+                    <h3 style="text-align:center; color:#004AAD; font-size:1.4rem; margin-bottom:30px;">
+                        Your account is activated ✅
+                    </h3>
+
+                    <p style="color:#333;">Hello ${data.firstname},</p>
+                    <p style="color:#555; line-height:1.6;">
+                        Your registration on <strong>Meet&Do</strong> has been successfully confirmed.
+                        You can now access your account and enjoy all our activities !
+                    </p>
+
+                    <div style="text-align:center; margin:35px 0;">
+                        <a href="http://127.0.0.1:5500/meet-do-front/Page/Home.html"
+                          style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
+                                  text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
+                            Discover the activities →
+                        </a>
+                    </div>
+
+                    <div style="border-top:1px solid #e0e0e0; margin:30px 0;"></div>
+
+                    <p style="color:#555; text-align:center; font-size:0.9rem;">
+                        Our team remains at your disposal for any questions.<br>
+                        <strong>Phone :</strong> +33 6 07 46 76 89 &nbsp;|&nbsp; 
+                        <strong>Email :</strong> meetanddosav@gmail.com
+                    </p>
+                </div>
+
+                <div style="background-color:#f9f9f9; padding:20px; text-align:center; border-top:1px solid #e0e0e0;">
+                    <p style="color:#999; font-size:0.85rem; margin-bottom:15px;">Restez connecté !</p>
+                    <div>
+                        <a href="https://www.facebook.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/960px-2023_Facebook_icon.svg.png" 
+                                alt="Facebook" style="width:30px; height:30px;">
+                        </a>
+                        <a href="https://www.instagram.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/960px-Instagram_icon.png" 
+                                alt="Instagram" style="width:30px; height:30px;">
+                        </a>
+                        <a href="https://www.linkedin.com" style="margin:0 10px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/960px-LinkedIn_logo_initials.png" 
+                                alt="LinkedIn" style="width:30px; height:30px;">
+                        </a>
+                    </div>
+                    <p style="color:#ccc; font-size:0.75rem; margin-top:15px;">© 2026 Meet&Do.</p>
+                </div>
+            </div>
+
+        </body>
+        </html>
+            `,
      });
     return { message: 'Registration successful' };
 
@@ -129,12 +256,78 @@ export class AuthenticationService {
       verification_token: resetToken,
     });
 
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Reset your Meet&Do password',
-      text: `Click here to reset your password:
-      http://127.0.0.1:5500/meet-do-front/Page/NewPassword.html?token=${resetToken}`,
-    });
+   await this.mailerService.sendMail({
+    to: user.email,
+    subject: 'Reset your Meet&Do password',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <body style="margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, sans-serif;">
+
+          <div style="width:100%; background-color:#004AAD; padding:20px 0; text-align:center;">
+              <h1 style="color:white; margin:0; font-size:2rem; letter-spacing:1px;">Meet&Do</h1>
+          </div>
+
+          <div style="max-width:600px; margin:30px auto; background-color:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+              <div style="padding:40px;">
+                  <h3 style="text-align:center; color:#004AAD; font-size:1.4rem; margin-bottom:30px;">
+                      Password reset 🔐
+                  </h3>
+
+                  <p style="color:#333;">Bonjour,</p>
+                  <p style="color:#555; line-height:1.6;">
+                      You have requested to reset your account password <strong>Meet&Do</strong>.
+                  </p>
+                  <p style="color:#555; line-height:1.6;">
+                      Click the button below to choose a new password. 
+                  </p>
+
+                  <div style="text-align:center; margin:35px 0;">
+                      <a href="http://127.0.0.1:5500/meet-do-front/Page/NewPassword.html?token=${resetToken}"
+                        style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
+                                text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
+                          Reset my password →
+                      </a>
+                  </div>
+
+                  <p style="color:#999; font-size:0.85rem; text-align:center;">
+                      If you did not initiate this request, simply ignore this message.
+                      Your password will not be changed.
+                  </p>
+
+                  <div style="border-top:1px solid #e0e0e0; margin:30px 0;"></div>
+
+                  <p style="color:#555; text-align:center; font-size:0.9rem;">
+                      Our team remains at your disposal for any questions.<br>
+                      <strong>Phone :</strong> +33 6 07 46 76 89 &nbsp;|&nbsp; 
+                      <strong>Email :</strong> meetanddo@gmail.com
+                  </p>
+              </div>
+
+              <div style="background-color:#f9f9f9; padding:20px; text-align:center; border-top:1px solid #e0e0e0;">
+                  <p style="color:#999; font-size:0.85rem; margin-bottom:15px;">Stay connected !</p>
+                  <div>
+                      <a href="https://www.facebook.com" style="margin:0 10px;">
+                          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/960px-2023_Facebook_icon.svg.png" 
+                              alt="Facebook" style="width:30px; height:30px;">
+                      </a>
+                      <a href="https://www.instagram.com" style="margin:0 10px;">
+                          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/960px-Instagram_icon.png" 
+                              alt="Instagram" style="width:30px; height:30px;">
+                      </a>
+                      <a href="https://www.linkedin.com" style="margin:0 10px;">
+                          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/960px-LinkedIn_logo_initials.png" 
+                              alt="LinkedIn" style="width:30px; height:30px;">
+                      </a>
+                  </div>
+                  <p style="color:#ccc; font-size:0.75rem; margin-top:15px;">© 2026 Meet&Do.</p>
+              </div>
+          </div>
+
+      </body>
+      </html>
+          `,
+      });
     return { message: 'Please check your email' };
   }
 
