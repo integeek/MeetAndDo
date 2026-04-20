@@ -1,0 +1,144 @@
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    color: #1a1a1a;
+    padding: 2rem 1rem;
+    justify-content: flex-start;
+}
+
+.faq-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+    flex-grow: 1;
+}
+
+h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    color: #1a1a1a;
+}
+
+.faq-item {
+    background: #e8e8e6;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid #d4d4d0;
+}
+
+.faq-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    gap: 12px;
+    text-align: left;
+}
+
+.faq-btn:hover {
+    background: #dededb;
+}
+
+.faq-question {
+    font-size: 15px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
+
+.faq-icon {
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+    color: #888;
+}
+
+.faq-item.open .faq-icon {
+    transform: rotate(180deg);
+}
+
+.faq-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.open .faq-panel {
+    max-height: 500px;
+}
+
+.faq-answer {
+    padding: 0 1.25rem 1.1rem;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.75;
+    border-top: 1px solid #d4d4d0;
+    padding-top: 0.9rem;
+}
+.edit-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.edit-content {
+  width: 480px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: black;
+}
+
+.edit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-main input {
+  width: 100%;
+  height: 38px;
+  font-size: 0.95rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 0 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.edit-main input:focus {
+  border-color: #4a90e2;
+  background: #fff;
+}
+
+.edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+}
