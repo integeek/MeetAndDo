@@ -17,7 +17,7 @@ function formatEventDate(dateString) {
   const date = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(date.getTime())) return dateString;
 
-  return new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -25,7 +25,7 @@ function formatEventDate(dateString) {
 }
 
 function formatEventSlot(eventSlot) {
-  return `${formatEventDate(eventSlot.date)} à ${eventSlot.heure}`;
+  return `${formatEventDate(eventSlot.date)} at ${eventSlot.heure}`;
 }
 
 function getTrimmedValue(value) {
@@ -72,7 +72,7 @@ function renderCategoryChip() {
             type="button"
             class="category-chip-remove"
             data-category-index="${index}"
-            aria-label="Désélectionner la catégorie ${theme}"
+            aria-label="Deselect category ${theme}"
           >
             ×
           </button>
@@ -109,7 +109,7 @@ function renderEventDateChip() {
             type="button"
             class="category-chip-remove"
             data-date-index="${index}"
-            aria-label="Supprimer le créneau ${formatEventSlot(eventSlot)}"
+            aria-label="Remove slot ${formatEventSlot(eventSlot)}"
           >
             ×
           </button>
@@ -137,7 +137,7 @@ function validateImages() {
   if (!files.length) {
     return setFieldError(
       "activity-images",
-      "Ajoute au moins une image pour l'activité.",
+      "Add at least one image for the activity.",
     );
   }
 
@@ -145,7 +145,7 @@ function validateImages() {
   if (invalidFile) {
     return setFieldError(
       "activity-images",
-      "Tous les fichiers doivent être des images.",
+      "All files must be images.",
     );
   }
 
@@ -153,7 +153,7 @@ function validateImages() {
   if (tooLargeFile) {
     return setFieldError(
       "activity-images",
-      "Chaque image doit faire moins de 5 Mo.",
+      "Each image must be smaller than 5 MB.",
     );
   }
 
@@ -169,7 +169,7 @@ function validateCategories() {
 
   return setFieldError(
     "activity-category",
-    "Sélectionne au moins une catégorie.",
+    "Select at least one category.",
   );
 }
 
@@ -177,7 +177,7 @@ function validateEventSlots() {
   if (!activityDraft.eventSlots.length) {
     return setFieldError(
       "activity-event-date",
-      "Ajoute au moins un événement avec une date et une heure.",
+      "Add at least one event with a date and time.",
     );
   }
 
@@ -190,7 +190,7 @@ function validateEventSlots() {
   if (invalidSlot) {
     return setFieldError(
       "activity-event-date",
-      "Tous les créneaux doivent être dans le futur.",
+      "All slots must be in the future.",
     );
   }
 
@@ -208,34 +208,34 @@ function validateDraft() {
   normalizeTextFields();
 
   if (!activityDraft.title) {
-    return setFieldError("activity-title", "Le nom de l'activité est obligatoire.");
+    return setFieldError("activity-title", "The activity name is required.");
   }
 
   if (activityDraft.title.length < 3) {
     return setFieldError(
       "activity-title",
-      "Le nom de l'activité doit contenir au moins 3 caractères.",
+      "The activity name must contain at least 3 characters.",
     );
   }
 
   if (!activityDraft.description) {
     return setFieldError(
       "activity-description",
-      "La description de l'activité est obligatoire.",
+      "The activity description is required.",
     );
   }
 
   if (activityDraft.description.length < 10) {
     return setFieldError(
       "activity-description",
-      "La description doit contenir au moins 10 caractères.",
+      "The description must contain at least 10 characters.",
     );
   }
 
   if (!activityDraft.address) {
     return setFieldError(
       "activity-address",
-      "L'adresse de l'activité est obligatoire.",
+      "The activity address is required.",
     );
   }
 
@@ -243,7 +243,7 @@ function validateDraft() {
   if (!Number.isInteger(groupSize) || groupSize < 1) {
     return setFieldError(
       "activity-group-size",
-      "La taille du groupe doit être un nombre entier supérieur ou égal à 1.",
+      "Group size must be an integer greater than or equal to 1.",
     );
   }
 
@@ -251,7 +251,7 @@ function validateDraft() {
   if (Number.isNaN(price) || price < 0) {
     return setFieldError(
       "activity-price",
-      "Le prix doit être un nombre supérieur ou égal à 0.",
+      "Price must be a number greater than or equal to 0.",
     );
   }
 
@@ -270,18 +270,18 @@ function addEventSlot() {
   const date = dateInput.value;
   const heure = timeInput.value;
   if (!date) {
-    setEventSlotFeedback("Choisis d'abord une date pour ce créneau.");
+    setEventSlotFeedback("Choose a date for this slot first.");
     return;
   }
 
   if (!heure) {
-    setEventSlotFeedback("Choisis d'abord une heure pour ce créneau.");
+    setEventSlotFeedback("Choose a time for this slot first.");
     return;
   }
 
   const slotDate = new Date(`${date}T${heure}`);
   if (Number.isNaN(slotDate.getTime()) || slotDate < new Date()) {
-    setEventSlotFeedback("Le créneau doit correspondre à une date future.");
+    setEventSlotFeedback("The slot must be scheduled in the future.");
     return;
   }
 
@@ -290,7 +290,7 @@ function addEventSlot() {
   );
 
   if (alreadyExists) {
-    setEventSlotFeedback("Ce créneau a déjà été ajouté.");
+    setEventSlotFeedback("This slot has already been added.");
     return;
   }
 
@@ -318,7 +318,7 @@ async function getCurrentUser() {
 
     return await response.json();
   } catch (error) {
-    console.warn("Utilisateur non récupéré pour la création d'activité :", error);
+    console.warn("Unable to fetch current user for activity creation:", error);
     return null;
   }
 }
@@ -327,7 +327,7 @@ function buildActivityPayload(currentUser) {
   return {
     title: activityDraft.title,
     description: activityDraft.description,
-    images: activityDraft.images.map((file) => file.name),
+    images: [],
     address: activityDraft.address,
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
@@ -338,6 +338,46 @@ function buildActivityPayload(currentUser) {
       heure: eventSlot.heure,
     })),
   };
+}
+
+async function uploadActivityImages() {
+  if (!activityDraft.images.length) {
+    return [];
+  }
+
+  const formData = new FormData();
+  activityDraft.images.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  const response = await fetch(`${ACTIVITY_API_URL}/upload-images`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}`;
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody.message) {
+        errorMessage = Array.isArray(errorBody.message)
+          ? errorBody.message.join(" ")
+          : errorBody.message;
+      }
+    } catch (_error) {
+      // Nothing to do if the response is not JSON.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const body = await response.json();
+  if (!Array.isArray(body.urls)) {
+    throw new Error("The server did not return image URLs.");
+  }
+
+  return body.urls;
 }
 
 function setSubmitFeedback(message, isError = false) {
@@ -385,17 +425,24 @@ async function submitActivityForm(event) {
   }
 
   setFormDisabledState(true);
-  setSubmitFeedback("Création de l'activité en cours...");
+  setSubmitFeedback("Creating activity...");
 
   try {
     const currentUser = await getCurrentUser();
+    setSubmitFeedback("Uploading images...");
+    const uploadedImageUrls = await uploadActivityImages();
+
+    setSubmitFeedback("Creating activity...");
     const response = await fetch(ACTIVITY_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(buildActivityPayload(currentUser)),
+      body: JSON.stringify({
+        ...buildActivityPayload(currentUser),
+        images: uploadedImageUrls,
+      }),
     });
 
     if (!response.ok) {
@@ -409,21 +456,21 @@ async function submitActivityForm(event) {
           errorMessage = errorBody.message;
         }
       } catch (_error) {
-        // Rien à faire si la réponse n'est pas du JSON.
+        // Nothing to do if the response is not JSON.
       }
 
       throw new Error(errorMessage);
     }
 
-    setSubmitFeedback("Activité créée avec succès.");
+    setSubmitFeedback("Activity created successfully.");
     form.reset();
     resetDraft();
   } catch (error) {
-    console.error("Erreur lors de la création de l'activité :", error);
+    console.error("Error while creating activity:", error);
     setSubmitFeedback(
       error instanceof Error
         ? error.message
-        : "Impossible d'envoyer le formulaire pour l'instant.",
+        : "Unable to submit the form right now.",
       true,
     );
   } finally {
@@ -453,7 +500,7 @@ function updateDraftField(event) {
     if (activityDraft.theme.length >= 3) {
       setFieldError(
         "activity-category",
-        "Tu peux sélectionner jusqu'à 3 catégories.",
+        "You can select up to 3 categories.",
       );
       event.target.value = "";
       return;
@@ -491,7 +538,7 @@ function initActivityBuilderForm() {
     "activity-submit-button",
   );
   if (submitButtonContainer) {
-    submitButtonContainer.innerHTML = BoutonBleu("Créer l'activité");
+    submitButtonContainer.innerHTML = BoutonBleu("Create activity");
   }
 }
 

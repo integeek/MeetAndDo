@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modifier l'activité</title>
+    <title>Edit activity</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -23,7 +23,7 @@
     <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
       <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-          <h1>Modifier l'activité</h1>
+          <h1>Edit activity</h1>
         </div>
       </div>
 
@@ -32,7 +32,7 @@
           <form id="edit-activity-form" class="row g-4" novalidate>
             <div class="col-12">
               <label for="activity-title" class="form-label fw-semibold">
-                Nom de l'activité
+                Activity name
                 <span class="text-danger">*</span>
               </label>
               <input
@@ -46,13 +46,13 @@
             </div>
 
             <div class="col-12">
-              <label class="form-label fw-semibold">Photos actuelles</label>
+              <label class="form-label fw-semibold">Current photos</label>
               <div id="existing-activity-images" class="row g-3"></div>
             </div>
 
             <div class="col-12">
               <label for="activity-images" class="form-label fw-semibold">
-                Ajouter de nouvelles photos
+                Add new photos
               </label>
               <input
                 type="file"
@@ -63,13 +63,13 @@
                 multiple
               />
               <div class="form-text">
-                Tu peux garder les photos existantes et en ajouter de nouvelles.
+                You can keep the existing photos and add new ones.
               </div>
             </div>
 
             <div class="col-12">
               <label for="activity-description" class="form-label fw-semibold">
-                Description de l'activité
+                Activity description
               </label>
               <textarea
                 class="form-control"
@@ -81,7 +81,7 @@
 
             <div class="col-12">
               <label for="activity-category" class="form-label fw-semibold">
-                Catégorie
+                Category
                 <span class="text-danger">*</span>
               </label>
               <select
@@ -89,27 +89,27 @@
                 id="activity-category"
                 name="theme"
               >
-                <option value="">Choisir une catégorie</option>
-                <option value="Sport">Sport</option>
+                <option value="">Choose a category</option>
+                <option value="Sport">Sports</option>
                 <option value="Art">Art</option>
-                <option value="Voyage">Voyage</option>
+                <option value="Voyage">Travel</option>
                 <option value="Science">Science</option>
-                <option value="Musique">Musique</option>
-                <option value="Lecture">Lecture</option>
-                <option value="Gastronomie">Gastronomie</option>
+                <option value="Musique">Music</option>
+                <option value="Lecture">Reading</option>
+                <option value="Gastronomie">Food</option>
                 <option value="Culture">Culture</option>
-                <option value="Bien-être">Bien-être</option>
+                <option value="Bien-être">Well-being</option>
               </select>
               <div class="form-text">
-                Tu peux choisir jusqu'à 3 catégories. Elles seront utiles pour
-                filtrer ton activité dans la recherche.
+                You can choose up to 3 categories. They will help users filter
+                your activity in search.
               </div>
               <div id="activity-category-chip" class="pt-3"></div>
             </div>
 
             <div class="col-12">
               <label for="activity-address" class="form-label fw-semibold">
-                Adresse de l'activité
+                Activity address
                 <span class="text-danger">*</span>
               </label>
               <input
@@ -117,7 +117,7 @@
                 class="form-control form-control-lg"
                 id="activity-address"
                 name="address"
-                placeholder="Ex. 10 rue de Vanves, 92130 Issy-les-Moulineaux"
+                placeholder="E.g. 10 rue de Vanves, 92130 Issy-les-Moulineaux"
                 autocomplete="street-address"
                 required
               />
@@ -125,7 +125,7 @@
 
             <div class="col-12 col-md-6">
               <label for="activity-group-size" class="form-label fw-semibold">
-                Taille du groupe
+                Group size
                 <span class="text-danger">*</span>
               </label>
               <input
@@ -141,7 +141,7 @@
 
             <div class="col-12 col-md-6">
               <label for="activity-price" class="form-label fw-semibold">
-                Prix par personne
+                Price per person
                 <span class="text-danger">*</span>
               </label>
               <input
@@ -157,7 +157,7 @@
 
             <div class="col-12 col-md-6">
               <label class="form-label fw-semibold">
-                Dates des événements
+                Event dates
                 <span class="text-danger">*</span>
               </label>
               <div class="row g-3">
@@ -183,7 +183,7 @@
                     id="add-event-slot-button"
                     class="btn btn-outline-primary btn-lg"
                   >
-                    Ajouter ce créneau
+                    Add this slot
                   </button>
                 </div>
               </div>

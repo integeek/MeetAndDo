@@ -24,7 +24,7 @@ function formatEventDate(dateString) {
   const date = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(date.getTime())) return dateString;
 
-  return new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -32,7 +32,7 @@ function formatEventDate(dateString) {
 }
 
 function formatEventSlot(eventSlot) {
-  return `${formatEventDate(eventSlot.date)} à ${eventSlot.heure}`;
+  return `${formatEventDate(eventSlot.date)} at ${eventSlot.heure}`;
 }
 
 function normalizeTheme(theme) {
@@ -92,7 +92,7 @@ function renderCategoryChip() {
             type="button"
             class="category-chip-remove"
             data-category-index="${index}"
-            aria-label="Désélectionner la catégorie ${theme}"
+            aria-label="Deselect category ${theme}"
           >
             ×
           </button>
@@ -123,7 +123,7 @@ function renderEventDateChip() {
             type="button"
             class="category-chip-remove"
             data-date-index="${index}"
-            aria-label="Supprimer le créneau ${formatEventSlot(eventSlot)}"
+            aria-label="Remove slot ${formatEventSlot(eventSlot)}"
           >
             ×
           </button>
@@ -154,13 +154,13 @@ function renderExistingImages() {
               type="button"
               class="btn btn-danger btn-sm existing-image-remove"
               data-image-index="${index}"
-              aria-label="Supprimer cette photo"
+              aria-label="Remove this photo"
             >
               ×
             </button>
             <img
               src="${image}"
-              alt="Photo de l'activité"
+              alt="Activity photo"
               class="img-fluid rounded existing-activity-image"
             />
           </div>
@@ -263,7 +263,7 @@ async function loadActivity() {
   const activityId = getActivityIdFromUrl();
 
   if (!activityId) {
-    throw new Error("Aucun identifiant d'activité n'a été trouvé dans l'URL.");
+    throw new Error("No activity ID was found in the URL.");
   }
 
   const response = await fetch(`${ACTIVITY_API_URL}/${activityId}`);
@@ -289,7 +289,7 @@ async function submitEditActivityForm(event) {
   if (!activityDraft.theme.length) {
     event.preventDefault();
     const categoryField = document.getElementById("activity-category");
-    categoryField?.setCustomValidity("Sélectionne au moins une catégorie.");
+    categoryField?.setCustomValidity("Select at least one category.");
     categoryField?.reportValidity();
     categoryField?.setCustomValidity("");
     return;
@@ -299,7 +299,7 @@ async function submitEditActivityForm(event) {
     event.preventDefault();
     const eventDateField = document.getElementById("activity-event-date");
     eventDateField?.setCustomValidity(
-      "Ajoute au moins un événement avec une date et une heure.",
+      "Add at least one event with a date and time.",
     );
     eventDateField?.reportValidity();
     eventDateField?.setCustomValidity("");
@@ -308,13 +308,13 @@ async function submitEditActivityForm(event) {
 
   if (!activityDraft.id) {
     event.preventDefault();
-    setSubmitFeedback("Impossible de retrouver l'activité à modifier.", true);
+    setSubmitFeedback("Unable to find the activity to edit.", true);
     return;
   }
 
   event.preventDefault();
   setFormDisabledState(true);
-  setSubmitFeedback("Mise à jour de l'activité en cours...");
+  setSubmitFeedback("Updating activity...");
 
   try {
     const response = await fetch(`${ACTIVITY_API_URL}/${activityDraft.id}`, {
@@ -336,7 +336,7 @@ async function submitEditActivityForm(event) {
           errorMessage = errorBody.message;
         }
       } catch (_error) {
-        // Rien à faire si la réponse n'est pas du JSON.
+        // Nothing to do if the response is not JSON.
       }
 
       throw new Error(errorMessage);
@@ -345,13 +345,13 @@ async function submitEditActivityForm(event) {
     const updatedActivity = await response.json();
     hydrateActivityDraft(updatedActivity);
     populateForm();
-    setSubmitFeedback("Activité mise à jour avec succès.");
+    setSubmitFeedback("Activity updated successfully.");
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de l'activité :", error);
+    console.error("Error while updating activity:", error);
     setSubmitFeedback(
       error instanceof Error
         ? error.message
-        : "Impossible d'enregistrer les modifications pour l'instant.",
+        : "Unable to save changes right now.",
       true,
     );
   } finally {
@@ -404,7 +404,7 @@ function initEditActivityForm() {
   );
   if (submitButtonContainer) {
     submitButtonContainer.innerHTML = BoutonBleu(
-      "Enregistrer les modifications",
+      "Save changes",
     );
   }
 }
@@ -412,17 +412,17 @@ function initEditActivityForm() {
 document.addEventListener("DOMContentLoaded", async () => {
   initEditActivityForm();
   setFormDisabledState(true);
-  setSubmitFeedback("Chargement de l'activité...");
+  setSubmitFeedback("Loading activity...");
 
   try {
     await loadActivity();
     setSubmitFeedback("");
   } catch (error) {
-    console.error("Erreur lors du chargement de l'activité :", error);
+    console.error("Error while loading activity:", error);
     setSubmitFeedback(
       error instanceof Error
         ? error.message
-        : "Impossible de charger l'activité à modifier.",
+        : "Unable to load the activity to edit.",
       true,
     );
   } finally {

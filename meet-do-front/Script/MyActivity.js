@@ -1,8 +1,8 @@
 const MOCK_MY_ACTIVITIES = [
   {
     id: 1,
-    title: "Atelier Macaron",
-    theme: "Art, Gastronomie",
+    title: "Macaron Workshop",
+    theme: "Art, Food",
     address: "10 rue de Vanves, 92130 Issy-les-Moulineaux",
     price: 30,
     image:
@@ -10,8 +10,8 @@ const MOCK_MY_ACTIVITIES = [
   },
   {
     id: 2,
-    title: "Sortie Running au Parc",
-    theme: "Sport, Bien-être",
+    title: "Park Running Session",
+    theme: "Sports, Well-being",
     address: "Parc Monceau, 75008 Paris",
     price: 12,
     image:
@@ -19,8 +19,8 @@ const MOCK_MY_ACTIVITIES = [
   },
   {
     id: 3,
-    title: "Club Lecture du Jeudi",
-    theme: "Lecture, Culture",
+    title: "Thursday Book Club",
+    theme: "Reading, Culture",
     address: "Bibliothèque municipale, 92100 Boulogne-Billancourt",
     price: 8,
     image:
@@ -38,7 +38,7 @@ async function getMyActivities() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des activités :", error);
+    console.error("Error while fetching activities:", error);
     return MOCK_MY_ACTIVITIES; // Fallback sur le mock en cas d'erreur
   }
 }
@@ -51,7 +51,7 @@ function renderMyActivities(activities) {
     container.innerHTML = `
       <div class="col-12">
         <div class="alert alert-light border mb-0" role="status">
-          Tu n'as encore créé aucune activité.
+          You haven't created any activities yet.
         </div>
       </div>
     `;
@@ -79,13 +79,13 @@ function renderMyActivities(activities) {
                       `<span class="badge activity-badge">${category}</span>`,
                   )
                   .join("")}
-                <span class="badge text-bg-light border">${(activity.eventSlots || []).length} événements</span>
+                <span class="badge text-bg-light border">${(activity.eventSlots || []).length} events</span>
               </div>
               <h2 class="h4 fw-bold mb-2">${activity.title}</h2>
               <p class="card-text text-secondary mb-1">${city}</p>
-              <p class="card-text fw-semibold mb-4">${activity.price} EUR / personne</p>
+              <p class="card-text fw-semibold mb-4">${activity.price} EUR / person</p>
               <div class="mt-auto d-flex flex-wrap justify-content-center gap-3">
-                <div class="activity-action-button">${BoutonBleu("Voir l'activité")}</div>
+                <div class="activity-action-button">${BoutonBleu("View activity")}</div>
                 <div
                   class="activity-action-button activity-actions-trigger"
                   data-activity-id="${activity.id}"
@@ -119,15 +119,15 @@ function renderActivityActionModalButtons() {
   const deleteButton = document.getElementById("modal-delete-activity-button");
 
   if (viewButton) {
-    viewButton.innerHTML = BoutonBleu("Voir la liste des participants");
+    viewButton.innerHTML = BoutonBleu("View participant list");
   }
 
   if (editButton) {
-    editButton.innerHTML = BoutonBleu("Modifier l'activité");
+    editButton.innerHTML = BoutonBleu("Edit activity");
   }
 
   if (deleteButton) {
-    deleteButton.innerHTML = BoutonRouge("Supprimer l'activité");
+    deleteButton.innerHTML = BoutonRouge("Delete activity");
   }
 }
 
@@ -140,7 +140,7 @@ function openActivityActionsModal(activityId) {
   const modalText = document.getElementById("activity-actions-modal-text");
   if (modalText) {
     modalText.textContent = selectedActivity
-      ? `Choisis une action pour "${selectedActivity.title}."`
+      ? `Choose an action for "${selectedActivity.title}".`
       : "";
   }
 
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const createButton = document.getElementById("create-activity-button");
   if (createButton) {
-    createButton.innerHTML = BoutonBleu("Créer une activité");
+    createButton.innerHTML = BoutonBleu("Create an activity");
   }
 
   renderActivityActionModalButtons();
