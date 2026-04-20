@@ -1,0 +1,58 @@
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  width: 300px;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.star-rating label svg {
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  transition: 0.3s all ease-in-out;
+}
+
+.star-rating label svg path {
+  stroke: #000;
+  fill: transparent;
+  transition: 0.3s all ease-in-out;
+}
+
+.star-rating label:hover svg path,
+.star-rating label:hover ~ label svg path {
+  stroke: gold;
+  fill: gold;
+}
+
+.star-rating input:checked ~ label svg path {
+  stroke: gold;
+  fill: gold;
+}
+.popup-comment {
+  margin-bottom: 10px;
+}
+
+.comment-box textarea {
+  width: 100%;
+  height: 120px;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+}
+.comment-box textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}

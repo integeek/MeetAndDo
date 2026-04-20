@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+body {
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: bold;
+}
+
+.activity-address-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.activity-images {
+  width: 100%;
+}
+
+.activity-images .carousel {
+  width: 100%;
+}
+
+.activity-image {
+  width: 100%;
+  height: clamp(280px, 45vw, 520px);
+  object-fit: cover;
+  border-radius: 18px;
+  display: block;
+}
+
+.carousel-inner {
+  border-radius: 18px;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 10%;
+}
+
+.activity-divider {
+  border-color: #d9d9d9;
+  opacity: 1;
+}
+
+.activity-content {
+  width: 100%;
+}
+
+#activity-description-text {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+#activity-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.review-star-icon {
+  color: #f4b400;
+}
+
+.reviews-scrollable {
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.creator-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.creator-meta {
+  color: #666;
+}
+
+#creator-rating {
+  color: #555;
+}
+
+.creator-contact-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.creator-contact-icon .buttonCo {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-report-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.activity-report-icon .buttonRo {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

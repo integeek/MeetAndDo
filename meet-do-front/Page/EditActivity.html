@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit activity</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../Style/EditActivity.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+    <link rel="stylesheet" href="../Component/Button/RedButton.css" />
+  </head>
+  <body>
+    <!-- <header>
+      <div id="navbar-container" class="navbar-container"></div>
+    </header> -->
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1>Edit activity</h1>
+        </div>
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <form id="edit-activity-form" class="row g-4" novalidate>
+            <div class="col-12">
+              <label for="activity-title" class="form-label fw-semibold">
+                Activity name
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="activity-title"
+                name="title"
+                autocomplete="off"
+                required
+              />
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Current photos</label>
+              <div id="existing-activity-images" class="row g-3"></div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-images" class="form-label fw-semibold">
+                Add new photos
+              </label>
+              <input
+                type="file"
+                class="form-control form-control-lg"
+                id="activity-images"
+                name="images"
+                accept="image/*"
+                multiple
+              />
+              <div class="form-text">
+                You can keep the existing photos and add new ones.
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-description" class="form-label fw-semibold">
+                Activity description
+              </label>
+              <textarea
+                class="form-control"
+                id="activity-description"
+                name="description"
+                rows="6"
+              ></textarea>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-category" class="form-label fw-semibold">
+                Category
+                <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select form-select-lg"
+                id="activity-category"
+                name="theme"
+              >
+                <option value="">Choose a category</option>
+                <option value="Sport">Sports</option>
+                <option value="Art">Art</option>
+                <option value="Voyage">Travel</option>
+                <option value="Science">Science</option>
+                <option value="Musique">Music</option>
+                <option value="Lecture">Reading</option>
+                <option value="Gastronomie">Food</option>
+                <option value="Culture">Culture</option>
+                <option value="Bien-être">Well-being</option>
+              </select>
+              <div class="form-text">
+                You can choose up to 3 categories. They will help users filter
+                your activity in search.
+              </div>
+              <div id="activity-category-chip" class="pt-3"></div>
+            </div>
+
+            <div class="col-12">
+              <label for="activity-address" class="form-label fw-semibold">
+                Activity address
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="activity-address"
+                name="address"
+                placeholder="E.g. 10 rue de Vanves, 92130 Issy-les-Moulineaux"
+                autocomplete="street-address"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="activity-group-size" class="form-label fw-semibold">
+                Group size
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="activity-group-size"
+                name="group_size"
+                min="1"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="activity-price" class="form-label fw-semibold">
+                Price per person
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="number"
+                class="form-control form-control-lg"
+                id="activity-price"
+                name="price"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-semibold">
+                Event dates
+                <span class="text-danger">*</span>
+              </label>
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <input
+                    type="date"
+                    class="form-control form-control-lg"
+                    id="activity-event-date"
+                    name="dateEvenement"
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <input
+                    type="time"
+                    class="form-control form-control-lg"
+                    id="activity-event-time"
+                    name="heureEvenement"
+                  />
+                </div>
+                <div class="col-12">
+                  <button
+                    type="button"
+                    id="add-event-slot-button"
+                    class="btn btn-outline-primary btn-lg"
+                  >
+                    Add this slot
+                  </button>
+                </div>
+              </div>
+              <div id="activity-event-date-chip" class="pt-3"></div>
+            </div>
+
+            <div class="col-12 pt-2 text-center">
+              <div
+                id="activity-submit-button"
+                class="d-inline-block submit-button-wrap"
+              ></div>
+              <p
+                id="activity-submit-feedback"
+                class="form-text mt-3 mb-0"
+                aria-live="polite"
+              ></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <!-- <footer id="footer-container" class="footer-container"></footer> -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../Script/EditActivity.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Button/RedButton.js"></script>
+    <script>
+      if (document.getElementById("navbar-container")) {
+        document.getElementById("navbar-container").innerHTML = Navbar();
+      }
+      if (document.getElementById("footer-container")) {
+        document.getElementById("footer-container").innerHTML = Footer("..");
+      }
+      if (
+        window.initializeNavbar &&
+        document.getElementById("navbar-container")
+      ) {
+        window.initializeNavbar();
+      }
+    </script>
+  </body>
+</html>

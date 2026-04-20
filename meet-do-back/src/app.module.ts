@@ -9,6 +9,7 @@ import * as Joi from 'joi';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MessagingModule } from './messaging/messaging.module';
 import { FaqModule } from './faq/faq.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -34,10 +35,11 @@ import { FaqModule } from './faq/faq.module';
       },
       defaults: {
         from: '"MeetAndDo" <meetdosav@gmail.com>',
-      }, 
+      },
     }),
     MessagingModule,
     FaqModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
