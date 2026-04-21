@@ -1,4 +1,27 @@
 const API_URL = 'http://localhost:3000';
+
+function getRedirectParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        authMessage: params.get('authMessage') || '',
+        redirect: params.get('redirect') || 'Home.html',
+    };
+}
+
+function displayAuthMessage() {
+    const { authMessage } = getRedirectParams();
+    if (!authMessage) {
+        return;
+    }
+
+    const erreurDiv = document.querySelector('.erreur');
+    if (erreurDiv) {
+        erreurDiv.textContent = authMessage;
+    }
+}
+
+displayAuthMessage();
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -6,6 +29,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const password = e.target.password.value;
     const erreurDiv = document.querySelector('.erreur');
     const successDiv = document.querySelector('.success');
+    const { redirect } = getRedirectParams();
 
     erreurDiv.textContent = '';
     successDiv.textContent = '';
@@ -30,7 +54,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         successDiv.textContent = `Welcome ${user.firstname} !`;
 
         setTimeout(() => {
-            window.location.href = 'Home.html';
+            window.location.href = redirect;
         }, 1000);
 
     } catch (error) {

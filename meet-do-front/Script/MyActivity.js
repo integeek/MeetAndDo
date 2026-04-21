@@ -38,6 +38,23 @@ let activityActionsModal = null;
 let activityDeleteConfirmModal = null;
 let selectedActivity = null;
 let myActivities = [];
+let currentUser = null;
+
+function redirectToActivityBuilder() {
+  if (!currentUser?.id) {
+    const params = new URLSearchParams({
+      authMessage: "Vous devez etre connecte pour creer une activite.",
+      redirect: "ActivityBuilder.html",
+    });
+    window.location.href = `Login.html?${params.toString()}`;
+    return;
+  }
+
+  const params = new URLSearchParams({
+    userId: String(currentUser.id),
+  });
+  window.location.href = `ActivityBuilder.html?${params.toString()}`;
+}
 
 async function getCurrentUser() {
   try {
@@ -352,7 +369,7 @@ async function deleteSelectedActivity() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const currentUser = await getCurrentUser();
+  currentUser = await getCurrentUser();
   const activities = await getMyActivities(currentUser?.id);
   myActivities = activities;
   renderMyActivities(activities);
@@ -360,6 +377,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const createButton = document.getElementById("create-activity-button");
   if (createButton) {
     createButton.innerHTML = BoutonBleu("Create an activity");
+    const createActivityButton = createButton.querySelector(".buttonCo");
+    createActivityButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      redirectToActivityBuilder();
+    });
   }
 
   renderActivityActionModalButtons();

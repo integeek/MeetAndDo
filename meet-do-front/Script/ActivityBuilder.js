@@ -13,6 +13,12 @@ const ACTIVITY_API_URL = "http://localhost:3000/activity";
 const AUTH_API_URL = "http://localhost:3000/authentication";
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
+function getUserIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = Number(params.get("userId"));
+  return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
 function formatEventDate(dateString) {
   const date = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(date.getTime())) return dateString;
@@ -324,6 +330,8 @@ async function getCurrentUser() {
 }
 
 function buildActivityPayload(currentUser) {
+  const userIdFromUrl = getUserIdFromUrl();
+
   return {
     title: activityDraft.title,
     description: activityDraft.description,
@@ -332,7 +340,7 @@ function buildActivityPayload(currentUser) {
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
     price: Number(activityDraft.price),
-    id_user: currentUser?.id,
+    id_user: currentUser?.id ?? userIdFromUrl,
     eventSlots: activityDraft.eventSlots.map((eventSlot) => ({
       date: `${eventSlot.date}T00:00:00.000Z`,
       heure: eventSlot.heure,
