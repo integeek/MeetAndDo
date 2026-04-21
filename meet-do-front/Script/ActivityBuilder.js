@@ -406,6 +406,17 @@ function setFormDisabledState(isDisabled) {
   });
 }
 
+function redirectToMyActivity(currentUser) {
+  const userId = currentUser?.id ?? getUserIdFromUrl();
+  const targetUrl = new URL("../Page/MyActivity.html", window.location.href);
+
+  if (userId) {
+    targetUrl.searchParams.set("userId", String(userId));
+  }
+
+  window.location.href = targetUrl.toString();
+}
+
 function resetDraft() {
   activityDraft.title = "";
   activityDraft.images = [];
@@ -471,8 +482,7 @@ async function submitActivityForm(event) {
     }
 
     setSubmitFeedback("Activity created successfully.");
-    form.reset();
-    resetDraft();
+    redirectToMyActivity(currentUser);
   } catch (error) {
     console.error("Error while creating activity:", error);
     setSubmitFeedback(
