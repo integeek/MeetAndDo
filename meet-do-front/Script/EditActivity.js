@@ -12,6 +12,7 @@ const EMPTY_ACTIVITY_DRAFT = {
 };
 
 const ACTIVITY_API_URL = "http://localhost:3000/activity";
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const activityDraft = structuredClone(EMPTY_ACTIVITY_DRAFT);
 
 function getActivityIdFromUrl() {
@@ -33,6 +34,25 @@ function formatEventDate(dateString) {
 
 function formatEventSlot(eventSlot) {
   return `${formatEventDate(eventSlot.date)} at ${eventSlot.heure}`;
+}
+
+function getTrimmedValue(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function resetCustomValidity(fieldId) {
+  const field = document.getElementById(fieldId);
+  field?.setCustomValidity("");
+}
+
+function setFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  if (!field) return false;
+
+  field.setCustomValidity(message);
+  field.reportValidity();
+  field.setCustomValidity("");
+  return true;
 }
 
 function normalizeTheme(theme) {
@@ -77,6 +97,116 @@ function hydrateActivityDraft(activity) {
   activityDraft.address = activity.address ?? "";
   activityDraft.group_size = activity.group_size ?? "";
   activityDraft.price = activity.price ?? "";
+}
+
+function validateImages() {
+  const imageInput = document.getElementById("activity-images");
+  const files = activityDraft.images;
+  const totalImages = activityDraft.existingImages.length + files.length;
+
+  if (!imageInput) return false;
+
+  if (!totalImages) {
+    return setFieldError(
+      "activity-images",
+      "Add at least one image for the activity.",
+    );
+  }
+
+  const invalidFile = files.find((file) => !file.type.startsWith("image/"));
+  if (invalidFile) {
+    return setFieldError(
+      "activity-images",
+      "All files must be images.",
+    );
+  }
+
+  const tooLargeFile = files.find((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+  if (tooLargeFile) {
+    return setFieldError(
+      "activity-images",
+      "Each image must be smaller than 5 MB.",
+    );
+  }
+
+  resetCustomValidity("activity-images");
+  return false;
+}
+
+function normalizeTextFields() {
+  activityDraft.title = getTrimmedValue(activityDraft.title);
+  activityDraft.description = getTrimmedValue(activityDraft.description);
+  activityDraft.address = getTrimmedValue(activityDraft.address);
+}
+
+function validateDraft() {
+  normalizeTextFields();
+
+  if (!activityDraft.title) {
+    return setFieldError("activity-title", "The activity name is required.");
+  }
+
+  if (activityDraft.title.length < 3) {
+    return setFieldError(
+      "activity-title",
+      "The activity name must contain at least 3 characters.",
+    );
+  }
+
+  if (!activityDraft.description) {
+    return setFieldError(
+      "activity-description",
+      "The activity description is required.",
+    );
+  }
+
+  if (activityDraft.description.length < 10) {
+    return setFieldError(
+      "activity-description",
+      "The description must contain at least 10 characters.",
+    );
+  }
+
+  if (!activityDraft.address) {
+    return setFieldError(
+      "activity-address",
+      "The activity address is required.",
+    );
+  }
+
+  const groupSize = Number(activityDraft.group_size);
+  if (!Number.isInteger(groupSize) || groupSize < 1) {
+    return setFieldError(
+      "activity-group-size",
+      "Group size must be an integer greater than or equal to 1.",
+    );
+  }
+
+  const price = Number(activityDraft.price);
+  if (Number.isNaN(price) || price < 0) {
+    return setFieldError(
+      "activity-price",
+      "Price must be a number greater than or equal to 0.",
+    );
+  }
+
+  if (validateImages()) return true;
+
+  if (!activityDraft.theme.length) {
+    return setFieldError(
+      "activity-category",
+      "Select at least one category.",
+    );
+  }
+
+  if (!activityDraft.eventSlots.length) {
+    return setFieldError(
+      "activity-event-date",
+      "Add at least one event with a date and time.",
+    );
+  }
+
+  return false;
 }
 
 function renderCategoryChip() {
@@ -215,7 +345,7 @@ function buildActivityPayload() {
   return {
     title: activityDraft.title,
     description: activityDraft.description,
-    images: [...activityDraft.existingImages, ...activityDraft.images.map((file) => file.name)],
+    images: [...activityDraft.existingImages],
     address: activityDraft.address,
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
@@ -236,6 +366,46 @@ function setSubmitFeedback(message, isError = false) {
   feedback.classList.toggle("text-success", !isError && Boolean(message));
 }
 
+async function uploadActivityImages() {
+  if (!activityDraft.images.length) {
+    return [];
+  }
+
+  const formData = new FormData();
+  activityDraft.images.forEach((file) => {
+    formData.append("images", file);
+  });
+
+  const response = await fetch(`${ACTIVITY_API_URL}/upload-images`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}`;
+
+    try {
+      const errorBody = await response.json();
+      if (errorBody.message) {
+        errorMessage = Array.isArray(errorBody.message)
+          ? errorBody.message.join(" ")
+          : errorBody.message;
+      }
+    } catch (_error) {
+      // Nothing to do if the response is not JSON.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const body = await response.json();
+  if (!Array.isArray(body.urls)) {
+    throw new Error("The server did not return image URLs.");
+  }
+
+  return body.urls;
+}
+
 function setFormDisabledState(isDisabled) {
   const form = document.getElementById("edit-activity-form");
   if (!form) return;
@@ -247,6 +417,7 @@ function setFormDisabledState(isDisabled) {
 
 function populateForm() {
   document.getElementById("activity-title").value = activityDraft.title;
+  document.getElementById("activity-images").value = "";
   document.getElementById("activity-description").value =
     activityDraft.description;
   document.getElementById("activity-address").value = activityDraft.address;
@@ -279,50 +450,39 @@ async function loadActivity() {
 
 async function submitEditActivityForm(event) {
   const form = event.currentTarget;
+  event.preventDefault();
 
   if (!form.checkValidity()) {
-    event.preventDefault();
     form.reportValidity();
     return;
   }
 
-  if (!activityDraft.theme.length) {
-    event.preventDefault();
-    const categoryField = document.getElementById("activity-category");
-    categoryField?.setCustomValidity("Select at least one category.");
-    categoryField?.reportValidity();
-    categoryField?.setCustomValidity("");
-    return;
-  }
-
-  if (!activityDraft.eventSlots.length) {
-    event.preventDefault();
-    const eventDateField = document.getElementById("activity-event-date");
-    eventDateField?.setCustomValidity(
-      "Add at least one event with a date and time.",
-    );
-    eventDateField?.reportValidity();
-    eventDateField?.setCustomValidity("");
+  if (validateDraft()) {
     return;
   }
 
   if (!activityDraft.id) {
-    event.preventDefault();
     setSubmitFeedback("Unable to find the activity to edit.", true);
     return;
   }
 
-  event.preventDefault();
   setFormDisabledState(true);
   setSubmitFeedback("Updating activity...");
 
   try {
+    setSubmitFeedback("Uploading images...");
+    const uploadedImageUrls = await uploadActivityImages();
+
+    setSubmitFeedback("Updating activity...");
     const response = await fetch(`${ACTIVITY_API_URL}/${activityDraft.id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(buildActivityPayload()),
+      body: JSON.stringify({
+        ...buildActivityPayload(),
+        images: [...activityDraft.existingImages, ...uploadedImageUrls],
+      }),
     });
 
     if (!response.ok) {
