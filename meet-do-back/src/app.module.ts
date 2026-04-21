@@ -10,6 +10,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { MessagingModule } from './messaging/messaging.module';
 import { FaqModule } from './faq/faq.module';
 import { ActivityModule } from './activity/activity.module';
+import { ReservationModule } from './reservation/reservation.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { ActivityModule } from './activity/activity.module';
     MessagingModule,
     FaqModule,
     ActivityModule,
+    ReservationModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
