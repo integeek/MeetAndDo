@@ -26,6 +26,7 @@ const DOM = {
     avatar: document.getElementById('chat-header-avatar'),
     status: document.getElementById('chat-header-status'),
   },
+<<<<<<< Updated upstream
   msgInput:          document.getElementById('msg-input'),
   btnSend:           document.getElementById('btn-send'),
   btnNewConv:        document.getElementById('btn-new-conv'),
@@ -41,6 +42,15 @@ const DOM = {
 // ---- État pièce jointe ---- //
 const attach = { file: null };
 
+=======
+  msgInput:   document.getElementById('msg-input'),
+  btnSend:    document.getElementById('btn-send'),
+  btnNewConv: document.getElementById('btn-new-conv'),
+  btnBack:    document.getElementById('btn-back'),
+  sidebar:    document.getElementById('conv-sidebar'),
+};
+
+>>>>>>> Stashed changes
 // ---- Init composants ---- //
 function initComponents() {
   if (typeof Navbar === 'function') {
@@ -126,32 +136,22 @@ function injectBurgerMenu() {
   });
 }
 
-// ---- Convertir un ID entier en UUID valide ---- //
-function intToUUID(id) {
-  return `00000000-0000-0000-0000-${id.toString().padStart(12, '0')}`;
-}
-
-// ---- Utilisateur courant (depuis l'API si connecté) ---- //
-async function initUser() {
-  try {
-    const res = await fetch('http://localhost:3000/user/me', { credentials: 'include' });
-    if (res.ok) {
-      const userData = await res.json();
-      state.currentUserId = intToUUID(userData.id);
-    } else {
-      const stored = sessionStorage.getItem('meetando_user_id');
-      state.currentUserId = stored || crypto.randomUUID();
-      sessionStorage.setItem('meetando_user_id', state.currentUserId);
-    }
-  } catch {
-    const stored = sessionStorage.getItem('meetando_user_id');
-    state.currentUserId = stored || crypto.randomUUID();
+// ---- Faux utilisateur courant (remplacer par auth réelle) ---- //
+function initUser() {
+  // sessionStorage = propre à chaque onglet → chaque onglet a son propre UUID
+  const stored = sessionStorage.getItem('meetando_user_id');
+  if (stored) {
+    state.currentUserId = stored;
+  } else {
+    state.currentUserId = crypto.randomUUID();
     sessionStorage.setItem('meetando_user_id', state.currentUserId);
   }
 
+  // Affiche l'UUID dans le bandeau
   const el = document.getElementById('my-id-value');
   if (el) el.textContent = state.currentUserId;
 
+  // Copier au clic
   const bar = document.getElementById('my-id-bar');
   if (bar) {
     bar.addEventListener('click', () => {
@@ -185,14 +185,6 @@ function initSocket() {
   state.socket.on('conversations_list', (data) => {
     state.conversations = data;
     renderConversationList(data);
-
-    // Ouvrir la conversation depuis l'URL (?conv=<id> depuis le dashboard)
-    const params = new URLSearchParams(window.location.search);
-    const convIdFromUrl = params.get('conv');
-    if (convIdFromUrl && !state.activeConversationId) {
-      const conv = data.find((c) => c.id === convIdFromUrl);
-      if (conv) { selectConversation(conv); return; }
-    }
 
     // Restaurer la conversation active après un refresh
     const savedId = localStorage.getItem('meetando_active_conv');
@@ -296,7 +288,7 @@ function selectConversation(conv) {
   showChatView();
   DOM.chatMessages.innerHTML = '';
 
-  state.socket.emit('join_conversation', { conversationId: conv.id, userId: state.currentUserId });
+  state.socket.emit('join_conversation', { conversationId: conv.id });
   renderConversationList(state.conversations);
 
   // Mobile (< 768px) : cacher la sidebar pour afficher uniquement le chat
@@ -337,11 +329,18 @@ function appendMessage(msg, doScroll = true) {
   const time = formatTime(msg.created_at);
   const initials = shortenId(msg.sender_id).slice(0, 2).toUpperCase();
 
+<<<<<<< Updated upstream
   const bubbleContent = renderBubbleContent(msg.content);
   row.innerHTML = `
     ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
     <div class="msg-bubble">
       ${bubbleContent}
+=======
+  row.innerHTML = `
+    ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
+    <div class="msg-bubble">
+      ${escapeHtml(msg.content)}
+>>>>>>> Stashed changes
       <span class="msg-time">${time}</span>
     </div>`;
 
@@ -360,6 +359,7 @@ function updateConvLastMsg(convId, content, timestamp) {
 }
 
 // ---- Envoyer un message ---- //
+<<<<<<< Updated upstream
 async function sendMessage() {
   const content = DOM.msgInput.value.trim();
   const hasFile = !!attach.file;
@@ -385,10 +385,26 @@ async function sendMessage() {
     DOM.msgInput.value = '';
   }
 
+=======
+function sendMessage() {
+  const content = DOM.msgInput.value.trim();
+  if (!content || !state.activeConversationId) return;
+
+  triggerSendRipple();
+
+  state.socket.emit('send_message', {
+    conversationId: state.activeConversationId,
+    senderId: state.currentUserId,
+    content,
+  });
+
+  DOM.msgInput.value = '';
+>>>>>>> Stashed changes
   DOM.msgInput.focus();
   updateSendButton();
 }
 
+<<<<<<< Updated upstream
 // ---- Upload pièce jointe ---- //
 async function uploadAttachment(file) {
   const formData = new FormData();
@@ -458,6 +474,8 @@ function clearAttachment() {
   updateSendButton();
 }
 
+=======
+>>>>>>> Stashed changes
 // ---- Ripple sur le bouton envoi ---- //
 function triggerSendRipple() {
   const ripple = document.createElement('span');
@@ -468,7 +486,11 @@ function triggerSendRipple() {
 
 // ---- Activer/désactiver le bouton selon le contenu ---- //
 function updateSendButton() {
+<<<<<<< Updated upstream
   DOM.btnSend.disabled = !DOM.msgInput.value.trim() && !attach.file;
+=======
+  DOM.btnSend.disabled = !DOM.msgInput.value.trim();
+>>>>>>> Stashed changes
 }
 
 // ---- Indicateur de frappe ---- //
@@ -550,6 +572,7 @@ function filterConversations(conversations, query) {
   });
 }
 
+<<<<<<< Updated upstream
 // ---- Rendu du contenu d'une bulle (texte, image, fichier) ---- //
 function renderBubbleContent(content) {
   const imageExts = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
@@ -583,6 +606,8 @@ function openLightbox(src) {
   document.body.appendChild(lb);
 }
 
+=======
+>>>>>>> Stashed changes
 // ---- Helpers ---- //
 function scrollToBottom() {
   requestAnimationFrame(() => {
@@ -602,8 +627,6 @@ function formatTime(iso) {
 
 function shortenId(id) {
   if (!id) return '?';
-  const match = id.match(/^00000000-0000-0000-0000-0*(\d+)$/);
-  if (match) return `Utilisateur #${parseInt(match[1], 10)}`;
   return id.length > 12 ? id.slice(0, 8) + '…' : id;
 }
 
@@ -633,6 +656,7 @@ function initEvents() {
     }
   });
 
+<<<<<<< Updated upstream
   // Pièce jointe
   DOM.btnAttach.addEventListener('click', () => DOM.fileInput.click());
   DOM.fileInput.addEventListener('change', () => {
@@ -648,6 +672,8 @@ function initEvents() {
     }
   });
 
+=======
+>>>>>>> Stashed changes
   DOM.btnNewConv.addEventListener('click', openNewConvModal);
 
   DOM.convSearch.addEventListener('input', () => {
@@ -668,9 +694,9 @@ function initEvents() {
 }
 
 // ---- Bootstrap ---- //
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   initComponents();
-  await initUser();
+  initUser();
   initEvents();
   initSocket();
 });

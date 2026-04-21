@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Patch, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Req, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import type { File as MulterFile } from 'multer';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import JwtAuthenticationGuard from '../authentication/guard/jwt-authentication.guard';
@@ -32,5 +35,24 @@ export class UserController {
   @UseGuards(JwtAuthenticationGuard)
   requestPublisher(@Req() req: RequestWithUser) {
     return this.userService.requestPublisher(req.user.id);
+  }
+
+  @Patch('me/password')
+  @UseGuards(JwtAuthenticationGuard)
+  changePassword(
+    @Req() req: RequestWithUser,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.userService.changePassword(req.user.id, body.currentPassword, body.newPassword);
+  }
+
+  @Post('me/avatar')
+  @UseGuards(JwtAuthenticationGuard)
+  @UseInterceptors(FileInterceptor('avatar', { storage: memoryStorage() }))
+  uploadAvatar(
+    @Req() req: RequestWithUser,
+    @UploadedFile() file: MulterFile,
+  ) {
+    return this.userService.uploadAvatar(req.user.id, file);
   }
 }

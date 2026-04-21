@@ -1518,3 +1518,47 @@ body {
   transform: scale(1.15);
   background: #fee2e2;
 }
+
+/* ---- Mon Compte — avatar ---- */
+.account-avatar-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 3px solid var(--accent-mid);
+  transition: border-color var(--transition);
+}
+.account-avatar-wrap:hover { border-color: var(--accent); }
+.account-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.account-avatar-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 2rem;
+  font-weight: 700;
+}
+.account-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.3rem;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.account-avatar-wrap:hover .account-avatar-overlay { opacity: 1; }

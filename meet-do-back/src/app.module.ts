@@ -12,17 +12,17 @@ import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    SupabaseModule,
-    AuthenticationModule,
-    UserModule,
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: './.env',
       validationSchema: Joi.object({
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
+    SupabaseModule,
+    AuthenticationModule,
+    UserModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -34,7 +34,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
       },
       defaults: {
         from: '"MeetAndDo" <meetdosav@gmail.com>',
-      }, 
+      },
     }),
     MessagingModule,
     DashboardModule,

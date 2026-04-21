@@ -28,28 +28,28 @@ function setSearch(v) { state.search = v; rafraichirTableau(); }
 // ---- Menus par rôle ----
 const MENUS = {
   admin: [
-    { id: 'overview',   icone: 'bi-grid-fill',          label: 'Overview' },
-    { id: 'users',      icone: 'bi-people-fill',         label: 'User Management' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Support Messaging' },
-    { id: 'reports',    icone: 'bi-flag-fill',           label: 'Reports' },
-    { id: 'validation', icone: 'bi-patch-check-fill',    label: 'Meeter Validation' },
-    { id: 'settings',   icone: 'bi-gear-fill',           label: 'Settings' },
+    { id: 'overview',   icone: 'bi-grid-fill',          label: 'Vue d\'ensemble' },
+    { id: 'users',      icone: 'bi-people-fill',         label: 'Gestion Utilisateurs' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie Support' },
+    { id: 'reports',    icone: 'bi-flag-fill',           label: 'Signalements' },
+    { id: 'validation', icone: 'bi-patch-check-fill',    label: 'Validation Meeters' },
+    { id: 'settings',   icone: 'bi-gear-fill',           label: 'Paramètres' },
   ],
   user: [
-    { id: 'overview',   icone: 'bi-grid-fill',           label: 'My Dashboard' },
-    { id: 'explore',    icone: 'bi-search',              label: 'Explore' },
-    { id: 'activities', icone: 'bi-calendar3',           label: 'My Activities' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
-    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favorites' },
-    { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
+    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Mon Dashboard' },
+    { id: 'explore',    icone: 'bi-search',              label: 'Explorer' },
+    { id: 'activities', icone: 'bi-calendar3',           label: 'Mes Activités' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
+    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favoris' },
+    { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
   ],
   publisher: [
-    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Overview' },
-    { id: 'listings',   icone: 'bi-megaphone-fill',      label: 'My Listings' },
-    { id: 'bookings',   icone: 'bi-calendar-check-fill', label: 'Bookings' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
-    { id: 'stats',      icone: 'bi-bar-chart-fill',      label: 'Statistics' },
-    { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
+    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Vue d\'ensemble' },
+    { id: 'listings',   icone: 'bi-megaphone-fill',      label: 'Mes Annonces' },
+    { id: 'bookings',   icone: 'bi-calendar-check-fill', label: 'Réservations' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
+    { id: 'stats',      icone: 'bi-bar-chart-fill',      label: 'Statistiques' },
+    { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
   ],
 };
 
@@ -296,7 +296,11 @@ function renderSidebar() {
     </ul>
 
     <div class="sidebar-user">
-      <div class="sidebar-user-avatar">${initiales(profil.firstname, profil.lastname)}</div>
+      <div class="sidebar-user-avatar" style="${profil.avatar_url ? 'padding:0;overflow:hidden' : ''}">
+        ${profil.avatar_url
+          ? `<img src="${profil.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;display:block">`
+          : initiales(profil.firstname, profil.lastname)}
+      </div>
       <div>
         <div class="sidebar-user-name">${profil.firstname || ''} ${profil.lastname || ''}</div>
         <div class="sidebar-user-role">${nomRole}</div>
@@ -486,7 +490,11 @@ function renderUserView() {
 
   return `
     <div class="profile-premium-card">
-      <div class="profile-avatar-lg">${initiales(profil.firstname, profil.lastname)}</div>
+      <div class="profile-avatar-lg" style="${profil.avatar_url ? 'padding:0;overflow:hidden' : ''}">
+        ${profil.avatar_url
+          ? `<img src="${profil.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit">`
+          : initiales(profil.firstname, profil.lastname)}
+      </div>
       <div>
         <div class="profile-premium-name">${profil.firstname || ''} ${profil.lastname || ''}</div>
         <div class="profile-premium-email">${profil.email || ''}</div>
@@ -1219,6 +1227,11 @@ function renderMonCompte() {
         </button>`}
     </div>` : '';
 
+  const avatarUrl = profil.avatar_url || '';
+  const avatarHtml = avatarUrl
+    ? `<img src="${avatarUrl}" alt="avatar" class="account-avatar-img">`
+    : `<span class="account-avatar-initials">${(profil.firstname || profil.email || '?')[0].toUpperCase()}</span>`;
+
   return `
     <header class="view-header animate-in">
       <div>
@@ -1228,6 +1241,21 @@ function renderMonCompte() {
     </header>
 
     <div style="max-width:640px">
+
+      <!-- Photo de profil -->
+      <div class="glass-card animate-in" style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.25rem">
+        <div class="account-avatar-wrap" id="avatar-wrap" title="Changer la photo">
+          ${avatarHtml}
+          <div class="account-avatar-overlay"><i class="bi bi-camera-fill"></i></div>
+          <input type="file" id="avatar-input" accept="image/*" style="display:none">
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:1rem">${profil.firstname || ''} ${profil.lastname || ''}</div>
+          <div style="font-size:.8rem;color:var(--text-muted)">${profil.email || ''}</div>
+          <div id="avatar-feedback" style="font-size:.78rem;margin-top:.3rem"></div>
+        </div>
+      </div>
+
       <form class="glass-card animate-in" id="form-profil">
         <div class="card-title">👤 Informations personnelles</div>
 
@@ -1268,6 +1296,36 @@ function renderMonCompte() {
 
         <button type="submit" class="btn-primary">
           <i class="bi bi-check-lg"></i> Enregistrer les modifications
+        </button>
+      </form>
+
+      <!-- Changer le mot de passe -->
+      <form class="glass-card animate-in" id="form-password" style="margin-top:1.25rem">
+        <div class="card-title">🔒 Changer le mot de passe</div>
+        <div id="form-password-feedback" style="margin-bottom:.75rem"></div>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Mot de passe actuel</label>
+          <input type="password" id="pwd-current" autocomplete="current-password"
+            style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
+                   font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
+        </div>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Nouveau mot de passe</label>
+          <input type="password" id="pwd-new" autocomplete="new-password"
+            style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
+                   font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Confirmer le nouveau mot de passe</label>
+          <input type="password" id="pwd-confirm" autocomplete="new-password"
+            style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
+                   font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="bi bi-shield-lock-fill"></i> Mettre à jour le mot de passe
         </button>
       </form>
 
@@ -1453,6 +1511,84 @@ function attachEventListeners() {
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-check-lg"></i> Enregistrer les modifications';
+      }
+    });
+  }
+
+  // Avatar upload
+  const avatarWrap = document.getElementById('avatar-wrap');
+  const avatarInput = document.getElementById('avatar-input');
+  if (avatarWrap && avatarInput) {
+    avatarWrap.addEventListener('click', () => avatarInput.click());
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files[0];
+      if (!file) return;
+      const feedback = document.getElementById('avatar-feedback');
+      feedback.innerHTML = '<span style="color:var(--text-muted)">Envoi en cours…</span>';
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        const res = await fetch('http://localhost:3000/user/me/avatar', {
+          method: 'POST', credentials: 'include', body: formData,
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erreur'); }
+        const result = await res.json();
+        state.profil = { ...state.profil, avatar_url: result.avatar_url };
+        feedback.innerHTML = '<span style="color:#059669;font-weight:600"><i class="bi bi-check-circle-fill"></i> Photo mise à jour !</span>';
+        const wrap = document.getElementById('avatar-wrap');
+        if (wrap) {
+          const img = wrap.querySelector('.account-avatar-img') || document.createElement('img');
+          img.src = result.avatar_url;
+          img.className = 'account-avatar-img';
+          const initials = wrap.querySelector('.account-avatar-initials');
+          if (initials) initials.replaceWith(img);
+        }
+      } catch (err) {
+        feedback.innerHTML = `<span style="color:#dc2626;font-weight:600"><i class="bi bi-exclamation-circle-fill"></i> ${err.message}</span>`;
+      }
+    });
+  }
+
+  // Mot de passe
+  const formPwd = document.getElementById('form-password');
+  if (formPwd) {
+    formPwd.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const feedback = document.getElementById('form-password-feedback');
+      const currentPassword = document.getElementById('pwd-current').value;
+      const newPassword     = document.getElementById('pwd-new').value;
+      const confirmPassword = document.getElementById('pwd-confirm').value;
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
+          <i class="bi bi-exclamation-circle-fill"></i> Veuillez remplir tous les champs.
+        </div>`; return;
+      }
+      if (newPassword !== confirmPassword) {
+        feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
+          <i class="bi bi-exclamation-circle-fill"></i> Les nouveaux mots de passe ne correspondent pas.
+        </div>`; return;
+      }
+      if (newPassword.length < 6) {
+        feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
+          <i class="bi bi-exclamation-circle-fill"></i> Le mot de passe doit contenir au moins 6 caractères.
+        </div>`; return;
+      }
+      const btn = formPwd.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Mise à jour…';
+      try {
+        await appelApi('/user/me/password', 'PATCH', { currentPassword, newPassword });
+        feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#d1fae5;color:#065f46;border-radius:.75rem;font-size:.83rem;font-weight:600">
+          <i class="bi bi-check-circle-fill"></i> Mot de passe modifié avec succès.
+        </div>`;
+        formPwd.reset();
+      } catch (err) {
+        feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
+          <i class="bi bi-exclamation-circle-fill"></i> ${err.message}
+        </div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-shield-lock-fill"></i> Mettre à jour le mot de passe';
       }
     });
   }
