@@ -33,12 +33,48 @@ const MOCK_MY_ACTIVITIES = [
 
 const ACTIVITY_API_URL = "http://localhost:3000/activity";
 const AUTH_API_URL = "http://localhost:3000/authentication";
+const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 
 let activityActionsModal = null;
 let activityDeleteConfirmModal = null;
 let selectedActivity = null;
 let myActivities = [];
 let currentUser = null;
+
+function getUserIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = Number(params.get("userId"));
+  return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
+function getStoredAuthenticatedUser() {
+  try {
+    const rawUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    if (!rawUser) return null;
+
+    const parsedUser = JSON.parse(rawUser);
+    return parsedUser && typeof parsedUser === "object" ? parsedUser : null;
+  } catch (error) {
+    console.warn("Unable to read stored authenticated user:", error);
+    return null;
+  }
+}
+
+function getAuthenticatedUserId(user) {
+  const currentUserId = Number(user?.id);
+  const storedUserId = Number(getStoredAuthenticatedUser()?.id);
+  const userIdFromUrl = getUserIdFromUrl();
+
+  if (Number.isInteger(currentUserId) && currentUserId > 0) {
+    return currentUserId;
+  }
+
+  if (Number.isInteger(storedUserId) && storedUserId > 0) {
+    return storedUserId;
+  }
+
+  return userIdFromUrl;
+}
 
 function redirectToActivityBuilder() {
   if (!currentUser?.id) {
@@ -370,7 +406,8 @@ async function deleteSelectedActivity() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   currentUser = await getCurrentUser();
-  const activities = await getMyActivities(currentUser?.id);
+  const authenticatedUserId = getAuthenticatedUserId(currentUser);
+  const activities = await getMyActivities(authenticatedUserId);
   myActivities = activities;
   renderMyActivities(activities);
 
