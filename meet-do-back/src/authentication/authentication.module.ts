@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SupabaseModule } from 'src/supabase/supabase.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [UserModule, SupabaseModule, PassportModule,
@@ -22,6 +23,6 @@ import { LocalStrategy } from './local.strategy';
     }),
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, LocalStrategy],
+  providers: [AuthenticationService, LocalStrategy, JwtStrategy],
 })
 export class AuthenticationModule {}
