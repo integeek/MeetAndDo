@@ -1,4 +1,5 @@
 const API_URL = 'http://localhost:3000';
+const AUTH_USER_STORAGE_KEY = 'meetando_current_user';
 
 function getRedirectParams() {
     const params = new URLSearchParams(window.location.search);
@@ -17,6 +18,18 @@ function displayAuthMessage() {
     const erreurDiv = document.querySelector('.erreur');
     if (erreurDiv) {
         erreurDiv.textContent = authMessage;
+    }
+}
+
+function persistAuthenticatedUser(user) {
+    if (!user || typeof user !== 'object') {
+        return;
+    }
+
+    try {
+        localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+    } catch (error) {
+        console.warn('Unable to persist authenticated user:', error);
     }
 }
 
@@ -51,6 +64,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         const user = await response.json();
+        persistAuthenticatedUser(user);
         successDiv.textContent = `Welcome ${user.firstname} !`;
 
         setTimeout(() => {
