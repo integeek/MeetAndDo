@@ -12,11 +12,41 @@ const activityDraft = {
 const ACTIVITY_API_URL = "http://localhost:3000/activity";
 const AUTH_API_URL = "http://localhost:3000/authentication";
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 
 function getUserIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const userId = Number(params.get("userId"));
   return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
+function getStoredAuthenticatedUser() {
+  try {
+    const rawUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    if (!rawUser) return null;
+
+    const parsedUser = JSON.parse(rawUser);
+    return parsedUser && typeof parsedUser === "object" ? parsedUser : null;
+  } catch (error) {
+    console.warn("Unable to read stored authenticated user:", error);
+    return null;
+  }
+}
+
+function getAuthenticatedUserId(currentUser) {
+  const storedUserId = Number(getStoredAuthenticatedUser()?.id);
+  const currentUserId = Number(currentUser?.id);
+  const userIdFromUrl = getUserIdFromUrl();
+
+  if (Number.isInteger(currentUserId) && currentUserId > 0) {
+    return currentUserId;
+  }
+
+  if (Number.isInteger(storedUserId) && storedUserId > 0) {
+    return storedUserId;
+  }
+
+  return userIdFromUrl;
 }
 
 function formatEventDate(dateString) {
@@ -330,7 +360,7 @@ async function getCurrentUser() {
 }
 
 function buildActivityPayload(currentUser) {
-  const userIdFromUrl = getUserIdFromUrl();
+  const authenticatedUserId = getAuthenticatedUserId(currentUser);
 
   return {
     title: activityDraft.title,
@@ -340,7 +370,7 @@ function buildActivityPayload(currentUser) {
     theme: activityDraft.theme.join(", "),
     group_size: Number(activityDraft.group_size),
     price: Number(activityDraft.price),
-    id_user: currentUser?.id ?? userIdFromUrl,
+    id_user: authenticatedUserId,
     eventSlots: activityDraft.eventSlots.map((eventSlot) => ({
       date: `${eventSlot.date}T00:00:00.000Z`,
       heure: eventSlot.heure,
@@ -407,7 +437,7 @@ function setFormDisabledState(isDisabled) {
 }
 
 function redirectToMyActivity(currentUser) {
-  const userId = currentUser?.id ?? getUserIdFromUrl();
+  const userId = getAuthenticatedUserId(currentUser);
   const targetUrl = new URL("../Page/MyActivity.html", window.location.href);
 
   if (userId) {
@@ -448,6 +478,12 @@ async function submitActivityForm(event) {
 
   try {
     const currentUser = await getCurrentUser();
+    const authenticatedUserId = getAuthenticatedUserId(currentUser);
+
+    if (!authenticatedUserId) {
+      throw new Error("Unable to find the connected user. Please log in again.");
+    }
+
     setSubmitFeedback("Uploading images...");
     const uploadedImageUrls = await uploadActivityImages();
 
