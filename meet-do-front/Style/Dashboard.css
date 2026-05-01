@@ -83,13 +83,16 @@ body {
   padding: 1.5rem 1rem 2rem;
   gap: 0.25rem;
   position: sticky;
-  top: 0;
-  height: calc(100vh - 6.3rem);
+  top: calc(8vh + 8px);
+  height: calc(100vh - 8vh - 8px);
   overflow-y: auto;
   scrollbar-width: none;
   transition: transform var(--transition);
-  z-index: 100;
+  z-index: 50;
 }
+
+/* Navbar toujours au-dessus de la sidebar */
+#navbar-root { position: relative; z-index: 200; }
 
 .dash-sidebar::-webkit-scrollbar { display: none; }
 
@@ -1562,3 +1565,267 @@ body {
   transition: opacity var(--transition);
 }
 .account-avatar-wrap:hover .account-avatar-overlay { opacity: 1; }
+
+/* ============================================================
+   ONGLET HISTORIQUE
+   ============================================================ */
+
+.hist-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+
+.hist-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  font-size: .83rem;
+  font-weight: 600;
+}
+
+.hist-stat-count { font-size: 1.1rem; font-weight: 800; }
+
+.hist-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+}
+
+.hist-filter-btn {
+  padding: .45rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent-mid);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: Inter, sans-serif;
+  font-size: .82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.hist-filter-btn.active,
+.hist-filter-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.hist-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.hist-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hist-card-img {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--accent-soft);
+}
+
+.hist-badge {
+  position: absolute;
+  top: .6rem;
+  left: .6rem;
+  padding: .3rem .75rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.hist-card-body { padding: 1rem; }
+
+.hist-card-title {
+  font-weight: 700;
+  font-size: .95rem;
+  margin-bottom: .5rem;
+}
+
+.hist-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: .85rem;
+}
+
+.hist-rating-btns {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.hist-rate-btn {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent-mid);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: Inter, sans-serif;
+  font-size: .75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.hist-rate-btn:hover { border-color: var(--accent); color: var(--accent); }
+.hist-rate-btn.active { font-weight: 700; }
+
+/* ============================================================
+   ONGLET PARRAINAGE
+   ============================================================ */
+
+.parr-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--accent-grad) !important;
+  color: #fff;
+}
+
+.parr-hero-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.parr-pts-val { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+.parr-pts-label { font-size: .85rem; opacity: .85; margin-top: .25rem; }
+
+.parr-link-row {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.parr-link-box {
+  flex: 1;
+  min-width: 0;
+  padding: .6rem 1rem;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent-mid);
+  border-radius: .75rem;
+  font-size: .78rem;
+  color: var(--accent);
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parr-copy-btn { white-space: nowrap; flex-shrink: 0; }
+
+.parr-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+.parr-share-btn {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem 1rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.parr-share-btn:hover { opacity: .85; transform: translateY(-1px); color: #fff; }
+
+.parr-paliers { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.parr-palier {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: .85rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent-mid);
+  transition: border-color var(--transition);
+}
+
+.parr-palier.atteint { border-color: transparent; background: var(--accent-soft); }
+
+.parr-palier-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.parr-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent-mid);
+  overflow: hidden;
+}
+
+.parr-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .6s ease;
+}
+
+.parr-steps { display: flex; flex-direction: column; gap: .85rem; }
+
+.parr-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: .87rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.parr-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}

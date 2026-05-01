@@ -252,6 +252,30 @@ export class DashboardService {
     return data ?? [];
   }
 
+  async getHistorique(userId: number) {
+    const now = new Date().toISOString();
+    const { data, error } = await this.db
+      .from('reservation')
+      .select(`id, group_size, date, user_rating,
+               event(id, date, id_activity,
+                 activity(id, title, address, price, images, average_rating, theme))`)
+      .eq('id_user', userId)
+      .lt('date', now)
+      .order('date', { ascending: false });
+    if (error) { this.logger.error(`getHistorique: ${error.message}`); return []; }
+    return data ?? [];
+  }
+
+  async raterActivite(userId: number, reservationId: number, rating: string | null) {
+    const { error } = await this.db
+      .from('reservation')
+      .update({ user_rating: rating })
+      .eq('id', reservationId)
+      .eq('id_user', userId);
+    if (error) throw new Error(error.message);
+    return { message: 'Avis enregistré.' };
+  }
+
   async getExplorer() {
     const { data, error } = await this.db
       .from('activity')

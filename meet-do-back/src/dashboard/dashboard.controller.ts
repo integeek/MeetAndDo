@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Patch, Param, UseGuards, ForbiddenException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Param, Body, UseGuards, ForbiddenException, Req } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import JwtAuthenticationGuard from '../authentication/guard/jwt-authentication.guard';
 import type RequestWithUser from '../authentication/requestWithUser.interface';
@@ -62,6 +62,22 @@ export class DashboardController {
       throw new ForbiddenException('Non disponible pour les administrateurs.');
     }
     return this.dashboardService.getExplorer();
+  }
+
+  @Get('historique')
+  getHistorique(@Req() req: RequestWithUser) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.getHistorique(req.user.id);
+  }
+
+  @Patch('historique/:id/rating')
+  raterActivite(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() body: { rating: string | null },
+  ) {
+    if ((req.user.role || '').toLowerCase() === 'admin') throw new ForbiddenException();
+    return this.dashboardService.raterActivite(req.user.id, Number(id), body.rating);
   }
 
   @Get('conversations')

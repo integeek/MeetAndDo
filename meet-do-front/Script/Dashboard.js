@@ -37,10 +37,11 @@ const MENUS = {
   ],
   user: [
     { id: 'overview',   icone: 'bi-grid-fill',           label: 'Mon Dashboard' },
-    { id: 'explore',    icone: 'bi-search',              label: 'Explorer' },
+    { id: 'historique', icone: 'bi-clock-history',       label: 'Historique' },
     { id: 'activities', icone: 'bi-calendar3',           label: 'Mes Activités' },
     { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
     { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favoris' },
+    { id: 'parrainage', icone: 'bi-people-fill',         label: 'Parrainage' },
     { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
   ],
   publisher: [
@@ -49,6 +50,11 @@ const MENUS = {
     { id: 'bookings',   icone: 'bi-calendar-check-fill', label: 'Réservations' },
     { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
     { id: 'stats',      icone: 'bi-bar-chart-fill',      label: 'Statistiques' },
+    { id: 'sep',        icone: '',                       label: '──────────' },
+    { id: 'historique', icone: 'bi-clock-history',       label: 'Historique' },
+    { id: 'activities', icone: 'bi-calendar3',           label: 'Mes Activités' },
+    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favoris' },
+    { id: 'parrainage', icone: 'bi-people-fill',         label: 'Parrainage' },
     { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
   ],
 };
@@ -284,7 +290,10 @@ function renderSidebar() {
 
     <p class="sidebar-nav-title">Navigation</p>
     <ul class="sidebar-nav">
-      ${items.map((item) => `
+      ${items.map((item) => item.id === 'sep' ? `
+        <li style="padding:.35rem .5rem;font-size:.7rem;color:var(--text-muted);letter-spacing:.05em;user-select:none">
+          ── En tant qu'utilisateur
+        </li>` : `
         <li class="sidebar-nav-item">
           <button type="button"
             class="sidebar-nav-btn ${onglet === item.id ? 'active' : ''}"
@@ -295,17 +304,7 @@ function renderSidebar() {
         </li>`).join('')}
     </ul>
 
-    <div class="sidebar-user">
-      <div class="sidebar-user-avatar" style="${profil.avatar_url ? 'padding:0;overflow:hidden' : ''}">
-        ${profil.avatar_url
-          ? `<img src="${profil.avatar_url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;display:block">`
-          : initiales(profil.firstname, profil.lastname)}
-      </div>
-      <div>
-        <div class="sidebar-user-name">${profil.firstname || ''} ${profil.lastname || ''}</div>
-        <div class="sidebar-user-role">${nomRole}</div>
-      </div>
-    </div>`;
+    `;
 
   sidebar.querySelectorAll('.sidebar-nav-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -435,9 +434,10 @@ function renderUserView() {
 
   if (onglet === 'account')    return renderMonCompte();
   if (onglet === 'messaging')  { renderMessagingTab();   return null; }
-  if (onglet === 'explore')    { renderExplorerTab();    return null; }
+  if (onglet === 'historique') { renderHistoriqueTab();  return null; }
   if (onglet === 'activities') { renderActivitiesTab();  return null; }
   if (onglet === 'favorites')  { renderFavoritesTab();   return null; }
+  if (onglet === 'parrainage') { renderParrainageTab();  return null; }
 
   if (onglet !== 'overview') {
     const label = MENUS.user.find((m) => m.id === onglet)?.label || 'Section';
@@ -548,8 +548,12 @@ function renderPublisherView() {
   const annonces     = data.annonces || [];
   const reservations = data.dernieresReservations || [];
 
-  if (onglet === 'account') return renderMonCompte();
-  if (onglet === 'messaging') { renderMessagingTab(); return null; }
+  if (onglet === 'account')    return renderMonCompte();
+  if (onglet === 'messaging')  { renderMessagingTab();  return null; }
+  if (onglet === 'historique') { renderHistoriqueTab(); return null; }
+  if (onglet === 'activities') { renderActivitiesTab(); return null; }
+  if (onglet === 'favorites')  { renderFavoritesTab();  return null; }
+  if (onglet === 'parrainage') { renderParrainageTab(); return null; }
 
   if (onglet !== 'overview') {
     const label = MENUS.publisher.find((m) => m.id === onglet)?.label || 'Section';
@@ -1188,6 +1192,311 @@ async function renderMessagingTab() {
   } catch (e) {
     main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
   }
+}
+
+// ============================================================
+//  ONGLET HISTORIQUE
+// ============================================================
+
+const RATING_CONFIG = {
+  like:      { label: 'J\'ai adoré',    icon: 'bi-hand-thumbs-up-fill',  color: '#059669', bg: '#d1fae5' },
+  dislike:   { label: 'Pas pour moi',   icon: 'bi-hand-thumbs-down-fill', color: '#dc2626', bg: '#fee2e2' },
+  recommend: { label: 'Je conseille',   icon: 'bi-star-fill',             color: '#d97706', bg: '#fef3c7' },
+};
+
+async function renderHistoriqueTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Historique</h1>
+        <p class="view-subtitle">Vos activités passées — classez-les et partagez vos avis.</p>
+      </div>
+    </header>
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+
+  try {
+    const historique = await appelApi('/dashboard/historique');
+    renderSidebar();
+    afficherHistorique(historique);
+  } catch (e) {
+    main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${e.message}</p></div>`;
+  }
+}
+
+function afficherHistorique(items) {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  const groups = { like: [], dislike: [], recommend: [], none: [] };
+  items.forEach(item => {
+    const r = item.user_rating || 'none';
+    (groups[r] || groups.none).push(item);
+  });
+
+  const activeFilter = { value: 'all' };
+
+  function carteHistorique(item) {
+    const act = item.event?.activity || {};
+    const date = item.date ? new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const img = (act.images && act.images[0]) ? act.images[0] : '';
+    const rating = item.user_rating;
+    const cfg = rating ? RATING_CONFIG[rating] : null;
+
+    return `
+      <div class="hist-card glass-card animate-in" data-id="${item.id}" data-rating="${rating || ''}">
+        <div class="hist-card-img" style="background:${img ? `url('${img}') center/cover` : 'var(--accent-soft)'}">
+          ${!img ? `<i class="bi bi-image" style="font-size:2rem;color:var(--accent-mid)"></i>` : ''}
+          ${cfg ? `<div class="hist-badge" style="background:${cfg.bg};color:${cfg.color}"><i class="bi ${cfg.icon}"></i> ${cfg.label}</div>` : ''}
+        </div>
+        <div class="hist-card-body">
+          <div class="hist-card-title">${escapeHtml(act.title || 'Activité')}</div>
+          <div class="hist-card-meta">
+            <span><i class="bi bi-calendar3"></i> ${date}</span>
+            ${act.address ? `<span><i class="bi bi-geo-alt"></i> ${escapeHtml(act.address)}</span>` : ''}
+          </div>
+          <div class="hist-rating-btns">
+            ${Object.entries(RATING_CONFIG).map(([key, c]) => `
+              <button class="hist-rate-btn ${rating === key ? 'active' : ''}" data-rate="${key}"
+                style="${rating === key ? `background:${c.bg};color:${c.color};border-color:${c.color}` : ''}"
+                title="${c.label}">
+                <i class="bi ${c.icon}"></i><span>${c.label}</span>
+              </button>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderFiltered(filter) {
+    const filtered = filter === 'all' ? items
+      : filter === 'none' ? items.filter(i => !i.user_rating)
+      : items.filter(i => i.user_rating === filter);
+
+    document.getElementById('hist-list').innerHTML = filtered.length
+      ? filtered.map(carteHistorique).join('')
+      : `<p style="color:var(--text-muted);text-align:center;padding:3rem 0;grid-column:1/-1">Aucune activité dans cette catégorie.</p>`;
+
+    attachRatingListeners();
+  }
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Historique</h1>
+        <p class="view-subtitle">Vos activités passées — classez-les et partagez vos avis.</p>
+      </div>
+    </header>
+
+    ${!items.length ? `
+      <div class="glass-card animate-in" style="text-align:center;padding:3rem">
+        <i class="bi bi-clock-history" style="font-size:3rem;color:var(--accent-mid);display:block;margin-bottom:1rem"></i>
+        <p style="color:var(--text-muted)">Vous n'avez encore participé à aucune activité.</p>
+      </div>` : `
+
+    <!-- Stats rapides -->
+    <div class="hist-stats animate-in">
+      ${Object.entries(RATING_CONFIG).map(([key, c]) => `
+        <div class="hist-stat-pill" style="background:${c.bg};color:${c.color}">
+          <i class="bi ${c.icon}"></i>
+          <span class="hist-stat-count">${groups[key].length}</span>
+          <span>${c.label}</span>
+        </div>`).join('')}
+      <div class="hist-stat-pill" style="background:var(--accent-soft);color:var(--accent)">
+        <i class="bi bi-clock-history"></i>
+        <span class="hist-stat-count">${groups.none.length}</span>
+        <span>Non classées</span>
+      </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="hist-filters animate-in">
+      ${[
+        { key: 'all', label: 'Toutes', icon: 'bi-grid' },
+        { key: 'like', label: 'Adorées', icon: 'bi-hand-thumbs-up-fill' },
+        { key: 'recommend', label: 'Conseillées', icon: 'bi-star-fill' },
+        { key: 'dislike', label: 'Pas pour moi', icon: 'bi-hand-thumbs-down-fill' },
+        { key: 'none', label: 'Non classées', icon: 'bi-question-circle' },
+      ].map(f => `
+        <button class="hist-filter-btn ${f.key === 'all' ? 'active' : ''}" data-filter="${f.key}">
+          <i class="bi ${f.icon}"></i> ${f.label}
+        </button>`).join('')}
+    </div>
+
+    <!-- Grille -->
+    <div class="hist-list" id="hist-list">
+      ${items.map(carteHistorique).join('')}
+    </div>`}`;
+
+  document.querySelectorAll('.hist-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.hist-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter.value = btn.dataset.filter;
+      renderFiltered(btn.dataset.filter);
+    });
+  });
+
+  attachRatingListeners();
+
+  function attachRatingListeners() {
+    document.querySelectorAll('.hist-rate-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const card = btn.closest('.hist-card');
+        const reservationId = card.dataset.id;
+        const newRating = btn.dataset.rate;
+        const currentRating = card.dataset.rating;
+        const finalRating = currentRating === newRating ? null : newRating;
+
+        try {
+          await appelApi(`/dashboard/historique/${reservationId}/rating`, 'PATCH', { rating: finalRating });
+          const entry = items.find(i => String(i.id) === reservationId);
+          if (entry) {
+            const old = entry.user_rating;
+            entry.user_rating = finalRating;
+            if (old) groups[old] = groups[old].filter(i => String(i.id) !== reservationId);
+            if (finalRating) (groups[finalRating] = groups[finalRating] || []).push(entry);
+            else groups.none.push(entry);
+          }
+          renderFiltered(activeFilter.value);
+        } catch (e) {
+          console.error('Erreur notation:', e.message);
+        }
+      });
+    });
+  }
+}
+
+// ============================================================
+//  ONGLET PARRAINAGE
+// ============================================================
+
+async function renderParrainageTab() {
+  const main = document.getElementById('dash-main');
+  if (!main) return;
+
+  const profil = state.profil || {};
+  const userId = profil.id;
+  const code = `MEET${userId}`;
+  const link = `${window.location.origin}/meet-do-front/Page/Signup.html?ref=${code}`;
+  const points = profil.referral_points || 0;
+
+  const paliers = [
+    { pts: 50,  label: '5% de réduction',     icon: 'bi-tag-fill',        color: '#059669' },
+    { pts: 100, label: '10% de réduction',    icon: 'bi-percent',          color: '#2563eb' },
+    { pts: 200, label: 'Activité offerte',    icon: 'bi-gift-fill',        color: '#7c3aed' },
+    { pts: 500, label: 'Statut VIP 1 mois',  icon: 'bi-star-fill',        color: '#d97706' },
+  ];
+
+  main.innerHTML = `
+    <header class="view-header animate-in">
+      <div>
+        <h1 class="view-title">Parrainage</h1>
+        <p class="view-subtitle">Invitez vos proches et gagnez des réductions.</p>
+      </div>
+    </header>
+
+    <div style="max-width:720px">
+
+      <!-- Points actuels -->
+      <div class="glass-card animate-in parr-hero">
+        <div class="parr-hero-icon"><i class="bi bi-people-fill"></i></div>
+        <div>
+          <div class="parr-pts-val">${points} pts</div>
+          <div class="parr-pts-label">Points de parrainage cumulés</div>
+        </div>
+      </div>
+
+      <!-- Lien de parrainage -->
+      <div class="glass-card animate-in" style="margin-top:1.25rem">
+        <div class="card-title">🔗 Votre lien de parrainage</div>
+        <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
+          Partagez ce lien. Pour chaque ami qui s'inscrit et fait sa première réservation,
+          vous gagnez <strong>10 points</strong>.
+        </p>
+        <div class="parr-link-row">
+          <div class="parr-link-box" id="parr-link-text">${link}</div>
+          <button class="btn-primary parr-copy-btn" id="parr-copy" title="Copier le lien">
+            <i class="bi bi-clipboard-fill"></i> Copier
+          </button>
+        </div>
+        <div id="parr-copy-feedback" style="font-size:.78rem;color:#059669;margin-top:.5rem;min-height:1rem"></div>
+
+        <!-- Partage réseaux sociaux -->
+        <div class="parr-share-row">
+          <a class="parr-share-btn" style="background:#1877f2"
+             href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}" target="_blank">
+            <i class="bi bi-facebook"></i> Facebook
+          </a>
+          <a class="parr-share-btn" style="background:#0a66c2"
+             href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}" target="_blank">
+            <i class="bi bi-linkedin"></i> LinkedIn
+          </a>
+          <a class="parr-share-btn" style="background:#25d366"
+             href="https://wa.me/?text=${encodeURIComponent('Rejoins Meet&Do avec mon lien : ' + link)}" target="_blank">
+            <i class="bi bi-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- Paliers de récompenses -->
+      <div class="glass-card animate-in" style="margin-top:1.25rem">
+        <div class="card-title">🎁 Récompenses disponibles</div>
+        <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1.25rem">
+          Accumulez des points pour débloquer des avantages exclusifs.
+        </p>
+        <div class="parr-paliers">
+          ${paliers.map(p => {
+            const atteint = points >= p.pts;
+            const pct = Math.min(100, Math.round((points / p.pts) * 100));
+            return `
+              <div class="parr-palier ${atteint ? 'atteint' : ''}">
+                <div class="parr-palier-icon" style="color:${p.color}">
+                  <i class="bi ${p.icon}"></i>
+                </div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+                    <div style="font-weight:600;font-size:.9rem">${p.label}</div>
+                    <div style="font-size:.78rem;color:var(--text-muted);font-weight:600">${p.pts} pts</div>
+                  </div>
+                  <div class="parr-progress-bar">
+                    <div class="parr-progress-fill" style="width:${pct}%;background:${p.color}"></div>
+                  </div>
+                  <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">
+                    ${atteint
+                      ? `<span style="color:${p.color};font-weight:600"><i class="bi bi-check-circle-fill"></i> Débloqué !</span>`
+                      : `${points}/${p.pts} pts — encore ${p.pts - points} pts`}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Comment ça marche -->
+      <div class="glass-card animate-in" style="margin-top:1.25rem">
+        <div class="card-title">❓ Comment ça marche ?</div>
+        <div class="parr-steps">
+          <div class="parr-step"><div class="parr-step-num">1</div><div>Copiez votre lien unique ci-dessus</div></div>
+          <div class="parr-step"><div class="parr-step-num">2</div><div>Partagez-le à vos amis par message, réseaux sociaux…</div></div>
+          <div class="parr-step"><div class="parr-step-num">3</div><div>Votre ami s'inscrit avec votre lien</div></div>
+          <div class="parr-step"><div class="parr-step-num">4</div><div>Il fait sa première réservation → vous gagnez <strong>10 pts</strong></div></div>
+          <div class="parr-step"><div class="parr-step-num">5</div><div>Utilisez vos points pour des réductions lors de votre prochaine réservation</div></div>
+        </div>
+      </div>
+
+    </div>`;
+
+  document.getElementById('parr-copy')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(link).then(() => {
+      const fb = document.getElementById('parr-copy-feedback');
+      if (fb) {
+        fb.innerHTML = '<i class="bi bi-check-circle-fill"></i> Lien copié dans le presse-papier !';
+        setTimeout(() => { if (fb) fb.innerHTML = ''; }, 3000);
+      }
+    });
+  });
 }
 
 // ============================================================
