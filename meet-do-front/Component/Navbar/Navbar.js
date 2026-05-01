@@ -31,7 +31,6 @@ function toggleDropdown(event) {
   document.getElementById('dropdown-menu').classList.toggle('open');
 }
 
-// Fermer si on clique ailleurs
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.profil-container')) {
     document.getElementById('dropdown-menu')?.classList.remove('open');
@@ -43,5 +42,5 @@ async function logout() {
     method: 'POST',
     credentials: 'include',
   });
-  window.location.href = '/login.html';
+  window.location.href = '../Page/Login.html';
 }

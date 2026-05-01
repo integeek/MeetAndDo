@@ -26,13 +26,9 @@ export class ReservationController {
     return this.reservationService.findByUserId(userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
-    return this.reservationService.update(+id, updateReservationDto);
-  }
-
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationService.remove(+id);
+  @UseGuards(JwtAuthenticationGuard)
+  cancelReservation(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.reservationService.cancelReservation(+id, req.user.id);
   }
 }

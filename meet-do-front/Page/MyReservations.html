@@ -25,7 +25,22 @@
         <h1>My reservations</h1>
     </header>
     <main>
-         <div class="reservation-list" id="reservation-list">
+        <div class="reservation-list" id="reservation-list">
+        </div>
+        <div class="popup-container" id="cancel-popup">
+            <div class="edit-content">
+                <div class="edit-header">
+                    <h3>Confirm the cancellation</h3>
+                </div>
+                <div class="edit-main">
+                    <p>Write <strong>CANCEL</strong> to confirm</p>
+                    <input type="text" id="cancel-input" placeholder="CANCEL" />
+                </div>
+                <div class="edit-footer">
+                    <button type="button" onclick="closePopUp('cancel-popup')" class="buttonRo">Close</button>
+                    <div id="bouton-confirmer"></div>
+                </div>
+            </div>
         </div>
     </main>
     <footer id="footer-container" class="footer-container">

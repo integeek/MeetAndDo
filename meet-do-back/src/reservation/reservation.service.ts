@@ -59,15 +59,30 @@ export class ReservationService {
     return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reservation`;
-  }
+  async cancelReservation(id: number, userId: number) {
+    const { data: reservation, error: findError } = await this.supabaseService
+      .getAdminClient()
+      .from('reservation')
+      .select('*')
+      .eq('id', id)
+      .eq('id_user', userId)
+      .single();
 
-  update(id: number, updateReservationDto: UpdateReservationDto) {
-    return `This action updates a #${id} reservation`;
-  }
+    if (findError || !reservation) {
+      throw new HttpException('Reservation not found', HttpStatus.NOT_FOUND);
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} reservation`;
+    const { error } = await this.supabaseService
+      .getAdminClient()
+      .from('reservation')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      this.logger.error(`cancelReservation error: ${error.message}`);
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return { message: 'Reservation successfully cancelled' };
   }
 }

@@ -1,3 +1,11 @@
+function openPopUp(id) {
+  document.getElementById(id).style.display = 'block';
+}
+
+function closePopUp(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
 function resaComponent(resa, index) {
   const activity = resa.event?.activity;
   const imageUrl = activity?.image || '../Assets/img/placeholder.png';
@@ -74,4 +82,36 @@ async function loadReservations() {
 }
 
 let currentIdResa = null;
-document.addEventListener('DOMContentLoaded', loadReservations);
+
+function openCancelPopUp(idResa) {
+  currentIdResa = idResa;
+  document.getElementById('cancel-input').value = '';
+  openPopUp('cancel-popup');
+}
+
+async function cancelReservation() {
+  const input = document.getElementById('cancel-input').value;
+
+  if (!input || input !== 'CANCEL') {
+    alert('Please type CANCEL exactly to confirm.');
+    return;
+  }
+
+  const response = await fetch(`http://localhost:3000/reservation/${currentIdResa}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (response.ok) {
+    alert('Reservation successfully cancelled.');
+    closePopUp('cancel-popup');
+    loadReservations();
+  } else {
+    alert('Error during cancellation.');
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('bouton-confirmer').innerHTML = BoutonBleu("Validate");
+  document.getElementById('bouton-confirmer').onclick = cancelReservation;
+  loadReservations();
+});
