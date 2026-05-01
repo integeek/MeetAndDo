@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
     <link rel="stylesheet" href="../Component/Footer/Footer.css" />
     <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
-    <link rel="stylesheet" href="../../view/Style/noReservations.css">
-    <link rel="stylesheet" type="text/css" href="../../view/component/BoutonRouge.css">
+    <link rel="stylesheet" href="../Component/Button/RedButton.css" />
     <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Button/RedButton.js"></script>
     <script src="../Component/Navbar/Navbar.js"></script>
     <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Script/MyReservation.js" defer></script>
 
-    <script src="../../view/component/BoutonRouge.js"></script>
-    <script src="../../view/Script/PopUp.js" defer></script>
     <title>My reservations</title>
 </head>
 <body>
@@ -34,49 +33,6 @@
             document.getElementById("footer-container").innerHTML = Footer("..");
         </script>
     </footer>
-
-    <div class="popup-container" id="edit-lastname-popup">
-      <div class="edit-content">
-        <div class="edit-header">
-          <h3>Modifiez votre Nom</h3>
-        </div>
-        <form action="../../controller/Compte/ModifierNom.php" method="POST" id="edit-lastname-form">
-          <div class="edit-main">
-            <input type="text" name="edit-lastname" id="edited-input" />
-            <input type="hidden" name="idClient" />
-          </div>
-          <div class="edit-footer">
-            <button type="button" onclick="closePopUp('edit-lastname-popup')" class="buttonRo">Annuler</button>
-              <div onclick="document.getElementById('edit-lastname-form').submit()" id="bouton-bleue2"></div>
-          <script>
-            document.getElementById("bouton-bleue2").innerHTML =
-              BoutonBleu("Valider");
-          </script>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="popup-container" id="cancel-popup">
-      <div class="edit-content">
-        <div class="edit-header">
-          <h3>Voulez-vous vraiment annuler ?</h3>
-        </div>
-        <form action="../../view/Page/mesReservations.php" method="POST" id="cancel-form">
-          <div class="edit-main">
-            <input type="text" name="cancel" id="cancel-input" placeholder="ANNULER" />
-            <input type="hidden" name="idResa" value="<?php echo $resa['idReservation'] ?>" />
-          </div>
-          <div class="edit-footer">
-            <button type="button" onclick="closePopUp('cancel-popup')" class="buttonRo">Annuler</button>
-              <div onclick="document.getElementById('cancel-form').submit()" id="bouton-bleue3"></div>
-          <script>
-            document.getElementById("bouton-bleue3").innerHTML =
-              BoutonBleu("Valider");
-          </script>
-        </div>
-      </form>
-    </div>
   </div>
 
 </body>

@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import JwtAuthenticationGuard from 'src/authentication/guard/jwt-authentication.guard';
+import type RequestWithUser from 'src/authentication/requestWithUser.interface';
 
 @Controller('reservation')
 export class ReservationController {
@@ -17,9 +19,11 @@ export class ReservationController {
     return this.reservationService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(+id);
+  @Get('user')
+  @UseGuards(JwtAuthenticationGuard)
+  findByCurrentUser(@Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.reservationService.findByUserId(userId);
   }
 
   @Patch(':id')

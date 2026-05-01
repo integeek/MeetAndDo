@@ -7,19 +7,19 @@ h1 {
   width: 90%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px 0;
 }
 
-#reservation-item-1,
-#reservation-item-2,
-#reservation-item-3 {
-  border: solid 1px black;
+.reservation-item {
+  border: solid 1px #e0e0e0;
   border-radius: 8px;
-  margin: 10px;
   padding: 10px;
-  gap: 20px;
   display: flex;
   justify-content: space-between;
+  align-items: stretch;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .item-header {
@@ -27,32 +27,49 @@ h1 {
   flex-direction: column-reverse;
   align-items: center;
   justify-content: space-around;
+  min-width: 120px;
 }
 
-.item-adresse {
-  display: flex;
-  gap: 10px;
-}
-
-.item-date {
-  display: flex;
-  gap: 10px;
-}
-
-.item-places {
-  display: flex;
-  gap: 10px;
-}
-
-.item-prix {
-  display: flex;
-  gap: 10px;
+.item-header h2 {
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 0;
 }
 
 .photo-reservation {
-  width: 250px;
-  height: 150px;
-  margin-left: 20px;
+  width: 120px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.item-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  padding: 0 12px;
+}
+
+.item-adresse,
+.item-date,
+.item-places,
+.item-prix {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.item-adresse img,
+.item-date img,
+.item-places img,
+.item-prix img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .item-footer {
@@ -60,6 +77,18 @@ h1 {
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+  gap: 8px;
+  min-width: 160px;
+}
+
+.item-footer > div {
+  width: 100%;
+}
+
+.item-footer > div button,
+.item-footer > div a {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .popup-container {
@@ -108,4 +137,10 @@ h1 {
   align-items: center;
   justify-content: space-around;
   margin-top: 50px;
+}
+
+@media (max-width: 786px) {
+  .reservation-list {
+    grid-template-columns: 1fr;
+  }
 }
