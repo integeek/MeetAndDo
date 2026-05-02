@@ -79,4 +79,16 @@ export class UserController {
   ) {
     return this.userService.uploadAvatar(req.user.id, file);
   }
+  @UseGuards(JwtAuthenticationGuard)
+  @Patch('password')
+  async updatePassword(
+    @Req() request: RequestWithUser,
+    @Body() body: { oldPassword: string; password: string },
+  ) {
+    return this.userService.updatePassword(
+      request.user.id,
+      body.oldPassword,
+      body.password,
+    );
+  }
 }

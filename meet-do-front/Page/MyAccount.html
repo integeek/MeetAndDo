@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
   <link rel="stylesheet" href="../Style/MyAccount.css" />
   <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
   <link rel="stylesheet" href="../Component/Footer/Footer.css" />
@@ -11,7 +12,9 @@
   <script src="../Component/Button/BlueButton.js"></script>
   <script src="../Component/Footer/Footer.js"></script>
   <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Script/TogglePassword.js" defer></script>
   <script src="../Script/MyAccount.js" defer></script>
+  <script src="../Script/ValidatorCriters.js" defer></script>
   <title>My account</title>
 </head>
 
@@ -30,16 +33,7 @@
           <img src="../Assets/img/icon-profil.png" alt="profile-icon" id="profile-icon" />
           <div id="boutonContainer"></div>
           <script>
-            document.getElementById("boutonContainer").innerHTML = BoutonBleu(
-              "Modifier photo de profil"
-            );
-            fetch('../../controller/Compte/PhotoController.php', { method: 'GET' })
-              .then(response => response.json())
-              .then(data => {
-                if (data.photo && data.photo !== "") {
-                  document.getElementById('profile-icon').src = data.photo;
-                }
-              });
+            document.getElementById("boutonContainer").innerHTML = BoutonBleu("Change profile picture");
           </script>
         </div>
         <hr>
@@ -66,9 +60,17 @@
               <input type="email" id="email" readonly />
             </div>
           </div>
+          <div id="editPassword"></div>
+          <script>
+            document.getElementById("editPassword").innerHTML = BoutonBleu("Edit my password");
+            document.querySelector("#editPassword .buttonCo").onclick = (event) => {
+              event.preventDefault();
+              openPopUp('edit-password-popup');
+            };
+          </script>
         </form>
       </div>
-        </div>
+      </div>
       </div>
     </div>
   </main>
@@ -88,11 +90,10 @@
           <input type="text" name="edit-firstname" id="edited-firstname" />
         </div>
         <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-firstname-popup')" class="buttonRo">Annuler</button>
+          <button type="button" onclick="closePopUp('edit-firstname-popup')" class="buttonRo">Cancel</button>
           <div onclick="updateFirstname()" id="bouton-bleue1"></div>
           <script>
-            document.getElementById("bouton-bleue1").innerHTML =
-              BoutonBleu("Valider");
+            document.getElementById("bouton-bleue1").innerHTML = BoutonBleu("Validate");
           </script>
         </div>
       </form>
@@ -109,11 +110,55 @@
           <input type="text" name="edit-lastname" id="edited-lastname" />
         </div>
         <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-lastname-popup')" class="buttonRo">Annuler</button>
+          <button type="button" onclick="closePopUp('edit-lastname-popup')" class="buttonRo">Cancel</button>
           <div onclick="document.getElementById('edit-lastname-form').submit()" id="bouton-bleue2"></div>
           <script>
-            document.getElementById("bouton-bleue2").innerHTML =
-              BoutonBleu("Valider");
+            document.getElementById("bouton-bleue2").innerHTML = BoutonBleu("Validate");
+          </script>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="edit-container" id="edit-password-popup">
+    <div class="edit-content">
+      <div class="edit-header">
+        <h3>Update your password</h3>
+      </div>
+      <form id="edit-password-form" class="groupForm">
+        <div class="edit-password">
+          <label for="old-password">Enter your old password</label>
+          <div class="containerPassword">
+            <input class="textbox" type="password" id="old-password" name="old-password" placeholder="********" required>
+            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
+          </div> 
+          <label for="old-password">Enter your new password</label>
+          <div class="containerPassword">
+            <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
+            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
+          </div> 
+          <div class="validatorCriters">
+            <span class="digit"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one number</span>
+            <span class="uppercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one uppercase letter</span>
+            <span class="lowercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one lowercase letter</span>
+            <span class="length"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least 8 characters</span>
+          </div>
+          <label for="old-password">Confirm your new password</label>
+          <div class="containerPassword">
+            <input class="textbox" type="password" id="new-password" name="new-password" placeholder="********" required>
+            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
+          </div> 
+        </div>
+        <div class="erreur" style="color: red; margin-bottom: 1rem;"></div>
+        <div class="edit-footer">
+          <button type="button" onclick="closePopUp('edit-password-popup')" class="buttonRo">Cancel</button>
+          <div id="bouton-bleue3"></div>
+          <script>
+            document.getElementById("bouton-bleue3").innerHTML = BoutonBleu("Validate");
+            document.querySelector("#bouton-bleue3 .buttonCo").onclick = (event) => {
+              event.preventDefault();
+              updatePassword();
+            };
           </script>
         </div>
       </form>

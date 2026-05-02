@@ -180,7 +180,7 @@ export class AuthenticationService {
                 </div>
 
                 <div style="background-color:#f9f9f9; padding:20px; text-align:center; border-top:1px solid #e0e0e0;">
-                    <p style="color:#999; font-size:0.85rem; margin-bottom:15px;">Restez connecté !</p>
+                    <p style="color:#999; font-size:0.85rem; margin-bottom:15px;">Stay connected !</p>
                     <div>
                         <a href="https://www.facebook.com" style="margin:0 10px;">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/2023_Facebook_icon.svg/960px-2023_Facebook_icon.svg.png" 
