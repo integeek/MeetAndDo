@@ -3,7 +3,7 @@ function Footer(url) {
         <div>
             <ul class="footerLinks">
                 <li><a href="./Faq">FAQ</a></li>
-                <li><a href="./Formulaire">Contact us</a></li>
+                <li><a href="./Contact.html">Contact us</a></li>
                 <li><a href="./MentionLegales">General terms of use</a></li>
                 <li><a href="./CGU">CGU</a></li>
             </ul>
