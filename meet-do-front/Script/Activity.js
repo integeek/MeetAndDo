@@ -115,6 +115,20 @@ async function getCurrentUser() {
   }
 }
 
+function getAuthenticatedUserId(user) {
+  const userId = Number(user?.id);
+  return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
+function redirectToLoginForReservation(activityId) {
+  const params = new URLSearchParams({
+    authMessage: "You must be logged in to reserve an event.",
+    redirect: `Activity.html?id=${activityId}`,
+  });
+
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
 async function getActivityEvents(activityId, activity) {
   const activityGroupSize = Number(
     activity?.group_size || activity?.groupSize || 0,
@@ -435,10 +449,17 @@ function initReservationModal(activityId, activity) {
   if (!joinButton || !modalElement) return;
 
   joinButton.addEventListener("click", async () => {
-    reservationEventsModal?.show();
+    const currentUser = await getCurrentUser();
+
+    if (!getAuthenticatedUserId(currentUser)) {
+      redirectToLoginForReservation(activityId);
+      return;
+    }
+
     currentReservationActivity = activity;
     selectedReservationQuantities = new Map();
     currentReservationEvents = [];
+    reservationEventsModal?.show();
     renderReservationEventsLoading();
 
     const events = await getActivityEvents(activityId, activity);
@@ -660,14 +681,10 @@ async function submitReservations() {
   if (!selectedItems.length) return;
 
   const currentUser = await getCurrentUser();
-  const userId = Number(currentUser?.id);
+  const userId = getAuthenticatedUserId(currentUser);
 
-  if (!Number.isInteger(userId) || userId <= 0) {
-    const params = new URLSearchParams({
-      authMessage: "You must be logged in to reserve an event.",
-      redirect: `Activity.html?id=${currentReservationActivity?.id || ""}`,
-    });
-    window.location.href = `Login.html?${params.toString()}`;
+  if (!userId) {
+    redirectToLoginForReservation(currentReservationActivity?.id || "");
     return;
   }
 
