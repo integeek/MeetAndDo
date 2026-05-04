@@ -122,7 +122,9 @@ async function getCurrentUser() {
 }
 
 function getAuthenticatedUserId(user) {
-  const userId = Number(user?.id);
+  const userId = Number(
+    user?.id ?? user?.id_user ?? user?.userId ?? user?.user_id,
+  );
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 

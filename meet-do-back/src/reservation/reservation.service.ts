@@ -56,12 +56,26 @@ export class ReservationService {
     };
   }
 
+  private async ensureUserExists(userId: number) {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data) throw new NotFoundException('User not found');
+  }
+
   async create(createReservationDto: CreateReservationDto) {
     if (createReservationDto.group_size <= 0) {
       throw new BadRequestException(
         'Reserved places must be greater than zero',
       );
     }
+
+    await this.ensureUserExists(createReservationDto.id_user);
 
     const { availablePlaces } = await this.getEventCapacity(
       createReservationDto.id_event,
