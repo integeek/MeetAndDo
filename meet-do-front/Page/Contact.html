@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us - MeetAndDo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="../Style/Contact.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Footer/Footer.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Navbar/Navbar.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Button/BlueButton.css">
+  <link rel="stylesheet" type="text/css" href="../Component/Button/RedButton.css">
+  <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
+  <script src="../Component/Button/BlueButton.js"></script>
+  <script src="../Component/Button/RedButton.js"></script>
+  <script src="../Script/Contact.js" defer></script>
+</head>
+<body>
+  <header>
+    <div id="navbar-container" class="navbar-container"></div>
+    <script>document.getElementById('navbar-container').innerHTML = Navbar();</script>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="contact-hero">
+      <div class="contact-hero-inner">
+        <div class="contact-hero-badge">Support</div>
+        <h1>Contact Us</h1>
+        <p>Our team is here to help. Fill in the form or check our FAQ.</p>
+        <div class="contact-hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value">&lt; 24h</span>
+            <span class="hero-stat-label">Response time</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">98%</span>
+            <span class="hero-stat-label">Satisfaction</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">Mon-Fri</span>
+            <span class="hero-stat-label">Availability</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="contact-wrapper">
+      <!-- Tabs -->
+      <div class="contact-tabs" role="tablist">
+        <button type="button" class="contact-tab active" onclick="switchTab('form')" id="tab-form" role="tab" aria-selected="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Send a message
+        </button>
+        <button type="button" class="contact-tab" onclick="switchTab('history')" id="tab-history" role="tab" aria-selected="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          My messages
+        </button>
+      </div>
+
+      <!-- Tab: Form -->
+      <div id="tab-content-form" class="tab-content tab-content--active">
+        <div class="contact-grid">
+
+          <!-- Contact info panel -->
+          <aside class="contact-info-panel">
+            <h2 class="panel-title">Get in touch</h2>
+
+            <div class="info-card">
+              <div class="info-card-icon email-icon">✉</div>
+              <div class="info-card-body">
+                <h3>Email</h3>
+                <p>meetdosav@gmail.com</p>
+                <button type="button" class="copy-btn" onclick="copierEmail()" id="copy-email-btn">Copy</button>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-card-icon clock-icon">⏱</div>
+              <div class="info-card-body">
+                <h3>Availability</h3>
+                <p>Monday – Friday<br>9:00 AM – 6:00 PM</p>
+                <span id="statut-ouvert" class="status-badge"></span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-card-icon faq-icon">?</div>
+              <div class="info-card-body">
+                <h3>Before you write</h3>
+                <p>Check our <a href="Faq.html">FAQ</a> — your answer might already be there.</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-card-icon shield-icon">🛡</div>
+              <div class="info-card-body">
+                <h3>Your data</h3>
+                <p>Your data is only used to respond to your request, in compliance with GDPR.</p>
+              </div>
+            </div>
+
+            <div class="draft-indicator hidden" id="draft-indicator">
+              <span class="draft-dot"></span>
+              Draft saved
+            </div>
+          </aside>
+
+          <!-- Main form -->
+          <div class="contact-form-area">
+
+            <!-- Success screen -->
+            <div id="contact-success" class="contact-success hidden">
+              <div class="success-animation">
+                <div class="success-circle">
+                  <svg class="success-check" viewBox="0 0 52 52">
+                    <circle class="success-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="success-checkmark" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                  </svg>
+                </div>
+              </div>
+              <h2>Message sent!</h2>
+              <p>We have received your message and will get back to you within 24 hours.</p>
+              <div class="success-ref" id="success-ref"></div>
+              <div class="success-actions">
+                <button type="button" class="btn-reset" onclick="resetContactForm()">Send another message</button>
+                <a href="Home.html" class="btn-home">Back to home</a>
+              </div>
+            </div>
+
+            <!-- Form -->
+            <form id="contact-form" onsubmit="envoyerMessage(event)" novalidate>
+              <div class="form-section">
+                <h2 class="form-section-title">Your information</h2>
+                <div class="form-row-2">
+                  <div class="form-field" id="field-nom">
+                    <label for="contact-nom">Full name <span class="req">*</span></label>
+                    <div class="input-wrapper">
+                      <input type="text" id="contact-nom" name="nom" placeholder="John Doe"
+                             autocomplete="name" maxlength="100"
+                             oninput="validerChamp('nom')" onblur="validerChamp('nom')" />
+                      <span class="input-icon valid-icon">✓</span>
+                      <span class="input-icon error-icon">✕</span>
+                    </div>
+                    <span class="field-error" id="error-nom"></span>
+                  </div>
+
+                  <div class="form-field" id="field-email">
+                    <label for="contact-email">Email <span class="req">*</span></label>
+                    <div class="input-wrapper">
+                      <input type="email" id="contact-email" name="email" placeholder="john@example.com"
+                             autocomplete="email" maxlength="255"
+                             oninput="validerChamp('email')" onblur="validerChamp('email')" />
+                      <span class="input-icon valid-icon">✓</span>
+                      <span class="input-icon error-icon">✕</span>
+                    </div>
+                    <span class="field-error" id="error-email"></span>
+                  </div>
+                </div>
+
+                <div class="form-field" id="field-telephone">
+                  <label for="contact-telephone">
+                    Phone
+                    <span class="optional-tag">optional</span>
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="tel" id="contact-telephone" name="telephone" placeholder="+1 555 000 0000"
+                           autocomplete="tel" maxlength="20"
+                           oninput="validerChamp('telephone')" onblur="validerChamp('telephone')" />
+                    <span class="input-icon valid-icon">✓</span>
+                    <span class="input-icon error-icon">✕</span>
+                  </div>
+                  <span class="field-error" id="error-telephone"></span>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <h2 class="form-section-title">Your request</h2>
+
+                <div class="form-row-2">
+                  <div class="form-field" id="field-categorie">
+                    <label for="contact-categorie">Category <span class="req">*</span></label>
+                    <div class="select-wrapper">
+                      <select id="contact-categorie" name="categorie" onchange="onCategorieChange()">
+                        <option value="">Choose a category</option>
+                        <option value="general">General question</option>
+                        <option value="compte">My account</option>
+                        <option value="reservation">Booking</option>
+                        <option value="activite">Activity / Publisher</option>
+                        <option value="paiement">Payment / Billing</option>
+                        <option value="technique">Technical issue</option>
+                        <option value="signalement">Report</option>
+                        <option value="autre">Other</option>
+                      </select>
+                      <span class="select-arrow">▾</span>
+                    </div>
+                    <span class="field-error" id="error-categorie"></span>
+                  </div>
+
+                  <div class="form-field" id="field-priorite">
+                    <label>Priority</label>
+                    <div class="priority-group">
+                      <label class="priority-option">
+                        <input type="radio" name="priorite" value="basse" />
+                        <span class="priority-label basse">Low</span>
+                      </label>
+                      <label class="priority-option">
+                        <input type="radio" name="priorite" value="normale" checked />
+                        <span class="priority-label normale">Normal</span>
+                      </label>
+                      <label class="priority-option">
+                        <input type="radio" name="priorite" value="haute" />
+                        <span class="priority-label haute">High</span>
+                      </label>
+                      <label class="priority-option">
+                        <input type="radio" name="priorite" value="urgente" />
+                        <span class="priority-label urgente">Urgent</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-field" id="field-sujet">
+                  <label for="contact-sujet">Subject <span class="req">*</span></label>
+                  <div class="input-wrapper">
+                    <input type="text" id="contact-sujet" name="sujet" placeholder="Briefly describe your request"
+                           maxlength="200"
+                           oninput="validerChamp('sujet'); rechercherFaq()" onblur="validerChamp('sujet')" />
+                    <span class="input-icon valid-icon">✓</span>
+                    <span class="input-icon error-icon">✕</span>
+                  </div>
+                  <div class="char-counter"><span id="counter-sujet">0</span>/200</div>
+                  <span class="field-error" id="error-sujet"></span>
+                  <div id="faq-suggestions" class="faq-suggestions hidden"></div>
+                </div>
+
+                <div class="form-field" id="field-message">
+                  <label for="contact-message">Message <span class="req">*</span></label>
+                  <textarea id="contact-message" name="message" rows="7"
+                            placeholder="Describe your request in detail..."
+                            maxlength="2000"
+                            oninput="validerChamp('message'); updateCharCounter()" onblur="validerChamp('message')"></textarea>
+                  <div class="char-counter"><span id="counter-message">0</span>/2000</div>
+                  <span class="field-error" id="error-message"></span>
+                </div>
+
+                <div id="categorie-helper" class="categorie-helper hidden"></div>
+              </div>
+
+              <div class="form-section form-section-last">
+                <div class="form-consent">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="contact-consent" onchange="validerChamp('consent')" />
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-text">
+                      I agree that my data will be used to process my request.
+                    </span>
+                  </label>
+                  <span class="field-error" id="error-consent"></span>
+                </div>
+
+                <div id="form-global-error" class="form-global-error hidden"></div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-save-draft" onclick="sauvegarderBrouillon()">
+                    Save draft
+                  </button>
+                  <button type="submit" class="btn-submit" id="btn-submit">
+                    <span class="btn-text">Send message</span>
+                    <span class="btn-loader hidden">
+                      <span class="spinner"></span> Sending...
+                    </span>
+                  </button>
+                </div>
+
+                <p class="form-note">
+                  Fields marked with <span class="req">*</span> are required.
+                  We never share your data.
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: History -->
+      <div id="tab-content-history" class="tab-content">
+
+        <!-- Message list -->
+        <div id="history-list-view">
+          <div class="history-header">
+            <div>
+              <h2>Your sent messages</h2>
+              <p>Click on a message to view the conversation.</p>
+            </div>
+            <button type="button" class="btn-clear-history" onclick="effacerHistorique()">Clear history</button>
+          </div>
+          <div id="history-container" class="history-container"></div>
+        </div>
+
+        <!-- Message detail view -->
+        <div id="history-detail-view" class="history-detail hidden">
+          <button type="button" class="btn-back" onclick="retourHistorique()">
+            ← Back to messages
+          </button>
+
+          <div class="thread-card">
+            <div class="thread-header">
+              <div class="thread-header-left">
+                <span class="thread-sujet" id="detail-sujet"></span>
+                <div class="thread-meta">
+                  <span class="history-badge history-badge-cat" id="detail-categorie"></span>
+                  <span class="history-badge" id="detail-priorite"></span>
+                  <span class="thread-date" id="detail-date"></span>
+                </div>
+              </div>
+              <div class="thread-status" id="detail-status"></div>
+            </div>
+
+            <div class="thread-messages" id="thread-messages"></div>
+
+            <div id="detail-reply-zone" class="detail-reply-zone hidden"></div>
+
+            <div class="thread-followup" id="thread-followup-form">
+              <div class="thread-followup-header">
+                <span>Send a follow-up message</span>
+                <button type="button" class="btn-refresh" id="btn-refresh" onclick="actualiserReponse()">
+                  ↻ Refresh
+                </button>
+              </div>
+              <textarea id="followup-message" rows="4" placeholder="Ask a follow-up question to the team..." maxlength="2000"></textarea>
+              <div class="thread-followup-actions">
+                <span class="char-counter"><span id="counter-followup">0</span>/2000</span>
+                <button type="button" class="btn-submit" onclick="envoyerSuivi()">
+                  <span class="btn-text">Send</span>
+                  <span class="btn-loader hidden"><span class="spinner"></span></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="contact-toast" class="contact-toast" role="alert" aria-live="polite">
+    <span id="contact-toast-msg"></span>
+    <button type="button" onclick="fermerToast()" class="toast-close" aria-label="Close">×</button>
+  </div>
+
+  <footer>
+    <div id="footer-container" class="footer-container"></div>
+    <script>document.getElementById('footer-container').innerHTML = Footer("..");</script>
+  </footer>
+</body>
+</html>

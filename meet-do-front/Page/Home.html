@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="../Component/Navbar/Navbar.css">
+    <link rel="stylesheet" type="text/css" href="../Style/Home.css">
+    <link rel="stylesheet" href="../Component/SearchBar/SearchBar.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" type="text/css" href="../Component/Footer/Footer.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/SearchBar/SearchBar.js"></script>
+    <script src="../Script/Home.js" defer></script>
+</head>
+
+<body>
+    <header>
+        <div id="navbar-container" class="navbar-container"></div>
+        <script>
+            document.getElementById('navbar-container').innerHTML = Navbar("..");
+        </script>
+    </header>
+    <main>
+        <h1 class="message-bienvenue">Great to see you again on Meet&Do <span style="color: #004AAD;"></span>!</h1>
+        <!-- <h1 class="message-bienvenue">Bienvenue sur Meet&Do !</h1> -->
+        <div id="search-bar"></div>
+        <script>
+            document.getElementById('search-bar').innerHTML = SearchBar("..")
+        </script>
+        <div id="activities-container"></div>
+        <div id="loader" style="text-align:center; margin: 20px; display: none;">
+            <img src="../../view/assets/img/loader.gif" alt="Loading..." width="200" height="200">
+        </div>
+       
+    </main>
+    <footer id="footer-container" class="footer-container">
+        <script src="../Component/Footer/Footer.js"></script>
+        <script>
+            document.getElementById('footer-container').innerHTML = Footer("..");
+        </script>
+    </footer>
+</body>
+
+</html>

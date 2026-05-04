@@ -29,7 +29,7 @@ document.getElementById('personalInformationForm').addEventListener('submit', as
         }
 
         const user = await response.json();
-        successDiv.textContent = `Welcome ${user.firstname} !`;
+        successDiv.textContent = `Welcome ${firstname} !`;
 
         setTimeout(() => {
             window.location.href = 'Home.html';
