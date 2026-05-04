@@ -68,7 +68,6 @@ const MOCK_ACTIVITY = {
 const EVENT_API_URL = "http://localhost:3000/event";
 const RESERVATION_API_URL = "http://localhost:3000/reservation";
 const AUTH_API_URL = "http://localhost:3000/authentication";
-const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 
 let currentReservationEvents = [];
 let selectedReservationQuantities = new Map();
@@ -85,19 +84,6 @@ async function getActivity(id) {
   }
 }
 
-function getStoredAuthenticatedUser() {
-  try {
-    const rawUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
-    if (!rawUser) return null;
-
-    const parsedUser = JSON.parse(rawUser);
-    return parsedUser && typeof parsedUser === "object" ? parsedUser : null;
-  } catch (error) {
-    console.warn("Unable to read stored authenticated user:", error);
-    return null;
-  }
-}
-
 async function getCurrentUser() {
   try {
     const response = await fetch(AUTH_API_URL, {
@@ -105,13 +91,13 @@ async function getCurrentUser() {
     });
 
     if (!response.ok) {
-      return getStoredAuthenticatedUser();
+      return null;
     }
 
     return await response.json();
   } catch (error) {
     console.warn("Unable to fetch current user for reservation:", error);
-    return getStoredAuthenticatedUser();
+    return null;
   }
 }
 
