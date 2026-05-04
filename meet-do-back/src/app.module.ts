@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import * as Joi from 'joi';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MessagingModule } from './messaging/messaging.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { FaqModule } from './faq/faq.module';
 import { ActivityModule } from './activity/activity.module';
 import { ReservationModule } from './reservation/reservation.module';
@@ -16,17 +17,17 @@ import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    SupabaseModule,
-    AuthenticationModule,
-    UserModule,
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: './.env',
       validationSchema: Joi.object({
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.string().required(),
       }),
     }),
+    SupabaseModule,
+    AuthenticationModule,
+    UserModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -41,11 +42,15 @@ import { ContactModule } from './contact/contact.module';
       },
     }),
     MessagingModule,
+<<<<<<< HEAD
+    DashboardModule,
+=======
     FaqModule,
     ActivityModule,
     ReservationModule,
     EventModule,
     ContactModule,
+>>>>>>> origin/main
   ],
   controllers: [AppController],
   providers: [AppService],

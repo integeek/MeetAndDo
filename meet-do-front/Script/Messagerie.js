@@ -26,6 +26,7 @@ const DOM = {
     avatar: document.getElementById('chat-header-avatar'),
     status: document.getElementById('chat-header-status'),
   },
+<<<<<<< Updated upstream
   msgInput:          document.getElementById('msg-input'),
   btnSend:           document.getElementById('btn-send'),
   btnNewConv:        document.getElementById('btn-new-conv'),
@@ -41,6 +42,15 @@ const DOM = {
 // ---- État pièce jointe ---- //
 const attach = { file: null };
 
+=======
+  msgInput:   document.getElementById('msg-input'),
+  btnSend:    document.getElementById('btn-send'),
+  btnNewConv: document.getElementById('btn-new-conv'),
+  btnBack:    document.getElementById('btn-back'),
+  sidebar:    document.getElementById('conv-sidebar'),
+};
+
+>>>>>>> Stashed changes
 // ---- Init composants ---- //
 function initComponents() {
   if (typeof Navbar === 'function') {
@@ -319,11 +329,18 @@ function appendMessage(msg, doScroll = true) {
   const time = formatTime(msg.created_at);
   const initials = shortenId(msg.sender_id).slice(0, 2).toUpperCase();
 
+<<<<<<< Updated upstream
   const bubbleContent = renderBubbleContent(msg.content);
   row.innerHTML = `
     ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
     <div class="msg-bubble">
       ${bubbleContent}
+=======
+  row.innerHTML = `
+    ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
+    <div class="msg-bubble">
+      ${escapeHtml(msg.content)}
+>>>>>>> Stashed changes
       <span class="msg-time">${time}</span>
     </div>`;
 
@@ -342,6 +359,7 @@ function updateConvLastMsg(convId, content, timestamp) {
 }
 
 // ---- Envoyer un message ---- //
+<<<<<<< Updated upstream
 async function sendMessage() {
   const content = DOM.msgInput.value.trim();
   const hasFile = !!attach.file;
@@ -367,10 +385,26 @@ async function sendMessage() {
     DOM.msgInput.value = '';
   }
 
+=======
+function sendMessage() {
+  const content = DOM.msgInput.value.trim();
+  if (!content || !state.activeConversationId) return;
+
+  triggerSendRipple();
+
+  state.socket.emit('send_message', {
+    conversationId: state.activeConversationId,
+    senderId: state.currentUserId,
+    content,
+  });
+
+  DOM.msgInput.value = '';
+>>>>>>> Stashed changes
   DOM.msgInput.focus();
   updateSendButton();
 }
 
+<<<<<<< Updated upstream
 // ---- Upload pièce jointe ---- //
 async function uploadAttachment(file) {
   const formData = new FormData();
@@ -440,6 +474,8 @@ function clearAttachment() {
   updateSendButton();
 }
 
+=======
+>>>>>>> Stashed changes
 // ---- Ripple sur le bouton envoi ---- //
 function triggerSendRipple() {
   const ripple = document.createElement('span');
@@ -450,7 +486,11 @@ function triggerSendRipple() {
 
 // ---- Activer/désactiver le bouton selon le contenu ---- //
 function updateSendButton() {
+<<<<<<< Updated upstream
   DOM.btnSend.disabled = !DOM.msgInput.value.trim() && !attach.file;
+=======
+  DOM.btnSend.disabled = !DOM.msgInput.value.trim();
+>>>>>>> Stashed changes
 }
 
 // ---- Indicateur de frappe ---- //
@@ -532,6 +572,7 @@ function filterConversations(conversations, query) {
   });
 }
 
+<<<<<<< Updated upstream
 // ---- Rendu du contenu d'une bulle (texte, image, fichier) ---- //
 function renderBubbleContent(content) {
   const imageExts = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
@@ -565,6 +606,8 @@ function openLightbox(src) {
   document.body.appendChild(lb);
 }
 
+=======
+>>>>>>> Stashed changes
 // ---- Helpers ---- //
 function scrollToBottom() {
   requestAnimationFrame(() => {
@@ -613,6 +656,7 @@ function initEvents() {
     }
   });
 
+<<<<<<< Updated upstream
   // Pièce jointe
   DOM.btnAttach.addEventListener('click', () => DOM.fileInput.click());
   DOM.fileInput.addEventListener('change', () => {
@@ -628,6 +672,8 @@ function initEvents() {
     }
   });
 
+=======
+>>>>>>> Stashed changes
   DOM.btnNewConv.addEventListener('click', openNewConvModal);
 
   DOM.convSearch.addEventListener('input', () => {
