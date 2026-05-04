@@ -117,3 +117,53 @@ h1 {
   align-items: center;
   justify-content: center;
 }
+
+.reservation-events-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reservation-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.reservation-event-title {
+  color: #667085;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.reservation-event-date {
+  color: #111827;
+  font-weight: 600;
+}
+
+.reservation-event-button {
+  min-width: 104px;
+}
+
+.reservation-empty-state {
+  padding: 1rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  color: #667085;
+}
+
+@media (max-width: 575.98px) {
+  .reservation-event-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reservation-event-button {
+    width: 100%;
+  }
+}
