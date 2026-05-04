@@ -146,8 +146,29 @@ h1 {
   font-weight: 600;
 }
 
-.reservation-event-button {
-  min-width: 104px;
+.reservation-event-availability {
+  color: #667085;
+  font-size: 0.9rem;
+}
+
+.reservation-quantity-control {
+  display: grid;
+  grid-template-columns: 40px 72px 40px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reservation-quantity-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.reservation-quantity-input {
+  height: 40px;
+  text-align: center;
 }
 
 .reservation-empty-state {
@@ -157,13 +178,43 @@ h1 {
   color: #667085;
 }
 
+.reservation-summary {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+.reservation-summary-title {
+  margin-bottom: 0.75rem;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.reservation-summary-list {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.reservation-summary-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #111827;
+}
+
 @media (max-width: 575.98px) {
   .reservation-event-row {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .reservation-event-button {
+  .reservation-quantity-control {
     width: 100%;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
   }
 }
