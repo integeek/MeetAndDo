@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact - MeetAndDo</title>
+  <title>Contact Us - MeetAndDo</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="../Style/Contact.css">
   <link rel="stylesheet" type="text/css" href="../Component/Footer/Footer.css">
@@ -27,12 +27,12 @@
     <section class="contact-hero">
       <div class="contact-hero-inner">
         <div class="contact-hero-badge">Support</div>
-        <h1>Contactez-nous</h1>
-        <p>Notre équipe est là pour vous aider. Remplissez le formulaire ou consultez notre FAQ.</p>
+        <h1>Contact Us</h1>
+        <p>Our team is here to help. Fill in the form or check our FAQ.</p>
         <div class="contact-hero-stats">
           <div class="hero-stat">
             <span class="hero-stat-value">&lt; 24h</span>
-            <span class="hero-stat-label">Temps de réponse</span>
+            <span class="hero-stat-label">Response time</span>
           </div>
           <div class="hero-stat-divider"></div>
           <div class="hero-stat">
@@ -41,8 +41,8 @@
           </div>
           <div class="hero-stat-divider"></div>
           <div class="hero-stat">
-            <span class="hero-stat-value">Lun-Ven</span>
-            <span class="hero-stat-label">Disponibilité</span>
+            <span class="hero-stat-value">Mon-Fri</span>
+            <span class="hero-stat-label">Availability</span>
           </div>
         </div>
       </div>
@@ -53,36 +53,36 @@
       <div class="contact-tabs" role="tablist">
         <button type="button" class="contact-tab active" onclick="switchTab('form')" id="tab-form" role="tab" aria-selected="true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Envoyer un message
+          Send a message
         </button>
         <button type="button" class="contact-tab" onclick="switchTab('history')" id="tab-history" role="tab" aria-selected="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Mes messages
+          My messages
         </button>
       </div>
 
-      <!-- Tab: Formulaire -->
+      <!-- Tab: Form -->
       <div id="tab-content-form" class="tab-content tab-content--active">
         <div class="contact-grid">
 
-          <!-- Infos de contact -->
+          <!-- Contact info panel -->
           <aside class="contact-info-panel">
-            <h2 class="panel-title">Nous joindre</h2>
+            <h2 class="panel-title">Get in touch</h2>
 
             <div class="info-card">
               <div class="info-card-icon email-icon">✉</div>
               <div class="info-card-body">
                 <h3>Email</h3>
                 <p>meetdosav@gmail.com</p>
-                <button type="button" class="copy-btn" onclick="copierEmail()" id="copy-email-btn">Copier</button>
+                <button type="button" class="copy-btn" onclick="copierEmail()" id="copy-email-btn">Copy</button>
               </div>
             </div>
 
             <div class="info-card">
               <div class="info-card-icon clock-icon">⏱</div>
               <div class="info-card-body">
-                <h3>Disponibilité</h3>
-                <p>Lundi – Vendredi<br>9h00 – 18h00</p>
+                <h3>Availability</h3>
+                <p>Monday – Friday<br>9:00 AM – 6:00 PM</p>
                 <span id="statut-ouvert" class="status-badge"></span>
               </div>
             </div>
@@ -90,29 +90,29 @@
             <div class="info-card">
               <div class="info-card-icon faq-icon">?</div>
               <div class="info-card-body">
-                <h3>Avant d'écrire</h3>
-                <p>Consultez notre <a href="Faq.html">FAQ</a> — la réponse est peut-être déjà là.</p>
+                <h3>Before you write</h3>
+                <p>Check our <a href="Faq.html">FAQ</a> — your answer might already be there.</p>
               </div>
             </div>
 
             <div class="info-card">
               <div class="info-card-icon shield-icon">🛡</div>
               <div class="info-card-body">
-                <h3>Données personnelles</h3>
-                <p>Vos données ne sont utilisées que pour vous répondre, conformément au RGPD.</p>
+                <h3>Your data</h3>
+                <p>Your data is only used to respond to your request, in compliance with GDPR.</p>
               </div>
             </div>
 
             <div class="draft-indicator hidden" id="draft-indicator">
               <span class="draft-dot"></span>
-              Brouillon sauvegardé
+              Draft saved
             </div>
           </aside>
 
-          <!-- Formulaire principal -->
+          <!-- Main form -->
           <div class="contact-form-area">
 
-            <!-- Succès -->
+            <!-- Success screen -->
             <div id="contact-success" class="contact-success hidden">
               <div class="success-animation">
                 <div class="success-circle">
@@ -122,24 +122,24 @@
                   </svg>
                 </div>
               </div>
-              <h2>Message envoyé !</h2>
-              <p>Nous avons bien reçu votre message et vous répondrons sous 24h.</p>
+              <h2>Message sent!</h2>
+              <p>We have received your message and will get back to you within 24 hours.</p>
               <div class="success-ref" id="success-ref"></div>
               <div class="success-actions">
-                <button type="button" class="btn-reset" onclick="resetContactForm()">Envoyer un autre message</button>
-                <a href="Home.html" class="btn-home">Retour à l'accueil</a>
+                <button type="button" class="btn-reset" onclick="resetContactForm()">Send another message</button>
+                <a href="Home.html" class="btn-home">Back to home</a>
               </div>
             </div>
 
-            <!-- Formulaire -->
+            <!-- Form -->
             <form id="contact-form" onsubmit="envoyerMessage(event)" novalidate>
               <div class="form-section">
-                <h2 class="form-section-title">Vos informations</h2>
+                <h2 class="form-section-title">Your information</h2>
                 <div class="form-row-2">
                   <div class="form-field" id="field-nom">
-                    <label for="contact-nom">Nom complet <span class="req">*</span></label>
+                    <label for="contact-nom">Full name <span class="req">*</span></label>
                     <div class="input-wrapper">
-                      <input type="text" id="contact-nom" name="nom" placeholder="Jean Dupont"
+                      <input type="text" id="contact-nom" name="nom" placeholder="John Doe"
                              autocomplete="name" maxlength="100"
                              oninput="validerChamp('nom')" onblur="validerChamp('nom')" />
                       <span class="input-icon valid-icon">✓</span>
@@ -151,7 +151,7 @@
                   <div class="form-field" id="field-email">
                     <label for="contact-email">Email <span class="req">*</span></label>
                     <div class="input-wrapper">
-                      <input type="email" id="contact-email" name="email" placeholder="jean@exemple.com"
+                      <input type="email" id="contact-email" name="email" placeholder="john@example.com"
                              autocomplete="email" maxlength="255"
                              oninput="validerChamp('email')" onblur="validerChamp('email')" />
                       <span class="input-icon valid-icon">✓</span>
@@ -163,11 +163,11 @@
 
                 <div class="form-field" id="field-telephone">
                   <label for="contact-telephone">
-                    Téléphone
-                    <span class="optional-tag">optionnel</span>
+                    Phone
+                    <span class="optional-tag">optional</span>
                   </label>
                   <div class="input-wrapper">
-                    <input type="tel" id="contact-telephone" name="telephone" placeholder="+33 6 00 00 00 00"
+                    <input type="tel" id="contact-telephone" name="telephone" placeholder="+1 555 000 0000"
                            autocomplete="tel" maxlength="20"
                            oninput="validerChamp('telephone')" onblur="validerChamp('telephone')" />
                     <span class="input-icon valid-icon">✓</span>
@@ -178,22 +178,22 @@
               </div>
 
               <div class="form-section">
-                <h2 class="form-section-title">Votre demande</h2>
+                <h2 class="form-section-title">Your request</h2>
 
                 <div class="form-row-2">
                   <div class="form-field" id="field-categorie">
-                    <label for="contact-categorie">Catégorie <span class="req">*</span></label>
+                    <label for="contact-categorie">Category <span class="req">*</span></label>
                     <div class="select-wrapper">
                       <select id="contact-categorie" name="categorie" onchange="onCategorieChange()">
-                        <option value="">Choisir une catégorie</option>
-                        <option value="general">Question générale</option>
-                        <option value="compte">Mon compte</option>
-                        <option value="reservation">Réservation</option>
-                        <option value="activite">Activité / Publisher</option>
-                        <option value="paiement">Paiement / Facturation</option>
-                        <option value="technique">Problème technique</option>
-                        <option value="signalement">Signalement</option>
-                        <option value="autre">Autre</option>
+                        <option value="">Choose a category</option>
+                        <option value="general">General question</option>
+                        <option value="compte">My account</option>
+                        <option value="reservation">Booking</option>
+                        <option value="activite">Activity / Publisher</option>
+                        <option value="paiement">Payment / Billing</option>
+                        <option value="technique">Technical issue</option>
+                        <option value="signalement">Report</option>
+                        <option value="autre">Other</option>
                       </select>
                       <span class="select-arrow">▾</span>
                     </div>
@@ -201,32 +201,32 @@
                   </div>
 
                   <div class="form-field" id="field-priorite">
-                    <label>Priorité</label>
+                    <label>Priority</label>
                     <div class="priority-group">
                       <label class="priority-option">
                         <input type="radio" name="priorite" value="basse" />
-                        <span class="priority-label basse">Basse</span>
+                        <span class="priority-label basse">Low</span>
                       </label>
                       <label class="priority-option">
                         <input type="radio" name="priorite" value="normale" checked />
-                        <span class="priority-label normale">Normale</span>
+                        <span class="priority-label normale">Normal</span>
                       </label>
                       <label class="priority-option">
                         <input type="radio" name="priorite" value="haute" />
-                        <span class="priority-label haute">Haute</span>
+                        <span class="priority-label haute">High</span>
                       </label>
                       <label class="priority-option">
                         <input type="radio" name="priorite" value="urgente" />
-                        <span class="priority-label urgente">Urgente</span>
+                        <span class="priority-label urgente">Urgent</span>
                       </label>
                     </div>
                   </div>
                 </div>
 
                 <div class="form-field" id="field-sujet">
-                  <label for="contact-sujet">Sujet <span class="req">*</span></label>
+                  <label for="contact-sujet">Subject <span class="req">*</span></label>
                   <div class="input-wrapper">
-                    <input type="text" id="contact-sujet" name="sujet" placeholder="Décrivez brièvement votre demande"
+                    <input type="text" id="contact-sujet" name="sujet" placeholder="Briefly describe your request"
                            maxlength="200"
                            oninput="validerChamp('sujet'); rechercherFaq()" onblur="validerChamp('sujet')" />
                     <span class="input-icon valid-icon">✓</span>
@@ -240,7 +240,7 @@
                 <div class="form-field" id="field-message">
                   <label for="contact-message">Message <span class="req">*</span></label>
                   <textarea id="contact-message" name="message" rows="7"
-                            placeholder="Décrivez votre demande en détail..."
+                            placeholder="Describe your request in detail..."
                             maxlength="2000"
                             oninput="validerChamp('message'); updateCharCounter()" onblur="validerChamp('message')"></textarea>
                   <div class="char-counter"><span id="counter-message">0</span>/2000</div>
@@ -256,7 +256,7 @@
                     <input type="checkbox" id="contact-consent" onchange="validerChamp('consent')" />
                     <span class="checkbox-custom"></span>
                     <span class="checkbox-text">
-                      J'accepte que mes données soient utilisées pour traiter ma demande.
+                      I agree that my data will be used to process my request.
                     </span>
                   </label>
                   <span class="field-error" id="error-consent"></span>
@@ -266,19 +266,19 @@
 
                 <div class="form-actions">
                   <button type="button" class="btn-save-draft" onclick="sauvegarderBrouillon()">
-                    Sauvegarder le brouillon
+                    Save draft
                   </button>
                   <button type="submit" class="btn-submit" id="btn-submit">
-                    <span class="btn-text">Envoyer le message</span>
+                    <span class="btn-text">Send message</span>
                     <span class="btn-loader hidden">
-                      <span class="spinner"></span> Envoi...
+                      <span class="spinner"></span> Sending...
                     </span>
                   </button>
                 </div>
 
                 <p class="form-note">
-                  Les champs marqués d'un <span class="req">*</span> sont obligatoires.
-                  Nous ne partageons jamais vos données.
+                  Fields marked with <span class="req">*</span> are required.
+                  We never share your data.
                 </p>
               </div>
             </form>
@@ -286,41 +286,28 @@
         </div>
       </div>
 
-      <!-- Tab: FAQ -->
-      <div id="tab-content-faq" class="tab-content">
-        <div class="faq-search-bar">
-          <input type="text" id="faq-search-input" placeholder="Rechercher dans la FAQ..."
-                 oninput="rechercherFaqTab()" />
-          <span class="faq-search-icon">🔍</span>
-        </div>
-        <div id="faq-tab-container" class="faq-tab-container">
-          <div class="faq-loader">Chargement de la FAQ...</div>
-        </div>
-      </div>
-
-      <!-- Tab: Historique -->
+      <!-- Tab: History -->
       <div id="tab-content-history" class="tab-content">
 
-        <!-- Liste des messages -->
+        <!-- Message list -->
         <div id="history-list-view">
           <div class="history-header">
             <div>
-              <h2>Vos messages envoyés</h2>
-              <p>Cliquez sur un message pour voir la conversation.</p>
+              <h2>Your sent messages</h2>
+              <p>Click on a message to view the conversation.</p>
             </div>
-            <button type="button" class="btn-clear-history" onclick="effacerHistorique()">Effacer l'historique</button>
+            <button type="button" class="btn-clear-history" onclick="effacerHistorique()">Clear history</button>
           </div>
           <div id="history-container" class="history-container"></div>
         </div>
 
-        <!-- Vue détail d'un message -->
+        <!-- Message detail view -->
         <div id="history-detail-view" class="history-detail hidden">
           <button type="button" class="btn-back" onclick="retourHistorique()">
-            ← Retour aux messages
+            ← Back to messages
           </button>
 
           <div class="thread-card">
-            <!-- En-tête du ticket -->
             <div class="thread-header">
               <div class="thread-header-left">
                 <span class="thread-sujet" id="detail-sujet"></span>
@@ -333,25 +320,22 @@
               <div class="thread-status" id="detail-status"></div>
             </div>
 
-            <!-- Messages de la conversation -->
             <div class="thread-messages" id="thread-messages"></div>
 
-            <!-- Zone de réponse admin (si répondue) -->
             <div id="detail-reply-zone" class="detail-reply-zone hidden"></div>
 
-            <!-- Formulaire de suivi -->
             <div class="thread-followup" id="thread-followup-form">
               <div class="thread-followup-header">
-                <span>Envoyer un message de suivi</span>
+                <span>Send a follow-up message</span>
                 <button type="button" class="btn-refresh" id="btn-refresh" onclick="actualiserReponse()">
-                  ↻ Actualiser
+                  ↻ Refresh
                 </button>
               </div>
-              <textarea id="followup-message" rows="4" placeholder="Posez une question complémentaire à l'équipe..." maxlength="2000"></textarea>
+              <textarea id="followup-message" rows="4" placeholder="Ask a follow-up question to the team..." maxlength="2000"></textarea>
               <div class="thread-followup-actions">
                 <span class="char-counter"><span id="counter-followup">0</span>/2000</span>
                 <button type="button" class="btn-submit" onclick="envoyerSuivi()">
-                  <span class="btn-text">Envoyer</span>
+                  <span class="btn-text">Send</span>
                   <span class="btn-loader hidden"><span class="spinner"></span></span>
                 </button>
               </div>
@@ -367,7 +351,7 @@
   <!-- Toast -->
   <div id="contact-toast" class="contact-toast" role="alert" aria-live="polite">
     <span id="contact-toast-msg"></span>
-    <button type="button" onclick="fermerToast()" class="toast-close" aria-label="Fermer">×</button>
+    <button type="button" onclick="fermerToast()" class="toast-close" aria-label="Close">×</button>
   </div>
 
   <footer>

@@ -77,7 +77,7 @@ function initialiserStatutBureau() {
   const estHoraires = tempsDecimal >= 9 && tempsDecimal < 18;
   const estOuvert = estSemaine && estHoraires;
 
-  el.textContent = estOuvert ? '● Ouvert maintenant' : '● Fermé actuellement';
+  el.textContent = estOuvert ? '● Open now' : '● Closed';
   el.classList.add(estOuvert ? 'ouvert' : 'ferme');
 }
 
@@ -116,9 +116,9 @@ const REGLES = {
     minLength: 2,
     maxLength: 100,
     messages: {
-      required: 'Le nom est obligatoire.',
-      minLength: 'Le nom doit contenir au moins 2 caractères.',
-      maxLength: 'Le nom ne peut pas dépasser 100 caractères.',
+      required: 'Full name is required.',
+      minLength: 'Name must be at least 2 characters.',
+      maxLength: 'Name cannot exceed 100 characters.',
     },
   },
   email: {
@@ -126,22 +126,22 @@ const REGLES = {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
     maxLength: 255,
     messages: {
-      required: "L'email est obligatoire.",
-      pattern: "L'adresse email n'est pas valide.",
-      maxLength: "L'email ne peut pas dépasser 255 caractères.",
+      required: 'Email is required.',
+      pattern: 'Please enter a valid email address.',
+      maxLength: 'Email cannot exceed 255 characters.',
     },
   },
   telephone: {
     required: false,
     pattern: /^[+\d\s\-().]{7,20}$/,
     messages: {
-      pattern: 'Le numéro de téléphone n\'est pas valide.',
+      pattern: 'Please enter a valid phone number.',
     },
   },
   categorie: {
     required: true,
     messages: {
-      required: 'Veuillez choisir une catégorie.',
+      required: 'Please choose a category.',
     },
   },
   sujet: {
@@ -149,9 +149,9 @@ const REGLES = {
     minLength: 5,
     maxLength: 200,
     messages: {
-      required: 'Le sujet est obligatoire.',
-      minLength: 'Le sujet doit contenir au moins 5 caractères.',
-      maxLength: 'Le sujet ne peut pas dépasser 200 caractères.',
+      required: 'Subject is required.',
+      minLength: 'Subject must be at least 5 characters.',
+      maxLength: 'Subject cannot exceed 200 characters.',
     },
   },
   message: {
@@ -159,15 +159,15 @@ const REGLES = {
     minLength: 20,
     maxLength: 2000,
     messages: {
-      required: 'Le message est obligatoire.',
-      minLength: 'Le message doit contenir au moins 20 caractères.',
-      maxLength: 'Le message ne peut pas dépasser 2000 caractères.',
+      required: 'Message is required.',
+      minLength: 'Message must be at least 20 characters.',
+      maxLength: 'Message cannot exceed 2000 characters.',
     },
   },
   consent: {
     required: true,
     messages: {
-      required: 'Vous devez accepter les conditions pour envoyer votre message.',
+      required: 'You must agree to the terms to send your message.',
     },
   },
 };
@@ -269,22 +269,22 @@ function updateCharCounter() {
 
 const AIDE_CATEGORIE = {
   compte: {
-    texte: '💡 Pour les problèmes de connexion, essayez d\'abord "Mot de passe oublié". Pour supprimer votre compte, contactez-nous depuis l\'email associé.',
+    texte: '💡 For login issues, try "Forgot password" first. To delete your account, contact us from the associated email address.',
   },
   reservation: {
-    texte: '💡 Précisez l\'identifiant de votre réservation (visible dans Mon Compte → Mes réservations) pour une réponse plus rapide.',
+    texte: '💡 Include your booking ID (found in My Account → My Bookings) for a faster response.',
   },
   paiement: {
-    texte: '💡 Pour les remboursements, les délais sont de 5 à 10 jours ouvrés selon votre banque. Précisez la date et le montant de la transaction.',
+    texte: '💡 Refunds typically take 5–10 business days depending on your bank. Please include the transaction date and amount.',
   },
   technique: {
-    texte: '💡 Précisez votre navigateur (Chrome, Firefox…), votre système d\'exploitation, et décrivez les étapes pour reproduire le problème.',
+    texte: '💡 Please specify your browser (Chrome, Firefox…), your operating system, and describe the steps to reproduce the issue.',
   },
   signalement: {
-    texte: '⚠️ Pour les signalements urgents, sélectionnez la priorité "Urgente". Précisez l\'identifiant de l\'activité ou de l\'utilisateur concerné.',
+    texte: '⚠️ For urgent reports, select "Urgent" priority. Include the activity or user ID involved.',
   },
   activite: {
-    texte: '💡 Vous souhaitez devenir publisher ? Indiquez-le dans votre message avec votre ville et le type d\'activités que vous proposez.',
+    texte: '💡 Want to become a publisher? Let us know in your message along with your city and the type of activities you offer.',
   },
 };
 
@@ -336,7 +336,7 @@ async function rechercherFaq() {
     }
 
     suggestEl.innerHTML = `
-      <div class="faq-suggestion-title">💡 Peut-être que la FAQ répond à votre question :</div>
+      <div class="faq-suggestion-title">💡 The FAQ might already answer your question:</div>
       ${resultats.map(r => `
         <div class="faq-suggestion-item" onclick="ouvrirFaqSuggestion(${r.id})" role="button" tabindex="0">
           <span class="faq-suggestion-icon">❓</span>
@@ -370,20 +370,20 @@ async function chargerFaqTab() {
   const container = document.getElementById('faq-tab-container');
   if (!container) return;
 
-  container.innerHTML = '<div class="faq-loader">Chargement de la FAQ...</div>';
+  container.innerHTML = '<div class="faq-loader">Loading FAQ...</div>';
 
   try {
     const data = await obtenirFaqData();
     _faqLoaded = true;
 
     if (data.length === 0) {
-      container.innerHTML = '<div class="faq-empty">Aucune question disponible pour le moment.</div>';
+      container.innerHTML = '<div class="faq-empty">No questions available yet.</div>';
       return;
     }
 
     afficherFaqItems(container, data);
   } catch (err) {
-    container.innerHTML = '<div class="faq-empty">Impossible de charger la FAQ. Réessayez plus tard.</div>';
+    container.innerHTML = '<div class="faq-empty">Unable to load the FAQ. Please try again later.</div>';
   }
 }
 
@@ -435,7 +435,7 @@ function rechercherFaqTab() {
   });
 
   if (resultats.length === 0) {
-    container.innerHTML = `<div class="faq-empty">Aucun résultat pour "<strong>${echapper(query)}</strong>".<br>Utilisez le formulaire pour poser votre question.</div>`;
+    container.innerHTML = `<div class="faq-empty">No results for "<strong>${echapper(query)}</strong>".<br>Use the form to ask your question.</div>`;
     return;
   }
 
@@ -471,7 +471,7 @@ function sauvegarderBrouillon() {
   try {
     localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...brouillon, savedAt: Date.now() }));
     afficherIndicateurBrouillon(true);
-    afficherToast('Brouillon sauvegardé', 'info', 1800);
+    afficherToast('Draft saved', 'info', 1800);
   } catch (_) {}
 }
 
@@ -557,7 +557,7 @@ async function envoyerMessage(event) {
   if (globalErrorEl) globalErrorEl.classList.add('hidden');
 
   if (!validerTout()) {
-    afficherErreurGlobale('Veuillez corriger les erreurs dans le formulaire avant d\'envoyer.');
+    afficherErreurGlobale('Please fix the errors in the form before sending.');
     scrollPremierErreur();
     return;
   }
@@ -582,7 +582,7 @@ async function envoyerMessage(event) {
     try { data = await res.json(); } catch (_) {}
 
     if (!res.ok) {
-      const msg = data?.message || 'Une erreur est survenue lors de l\'envoi. Réessayez.';
+      const msg = data?.message || 'An error occurred while sending. Please try again.';
       throw new Error(Array.isArray(msg) ? msg.join(' ') : msg);
     }
 
@@ -646,7 +646,7 @@ function afficherSucces(id) {
   if (formEl)    formEl.classList.add('hidden');
   if (successEl) successEl.classList.remove('hidden');
   if (refEl && id) {
-    refEl.textContent = `Référence : ${String(id).slice(0, 8).toUpperCase()}`;
+    refEl.textContent = `Reference: ${String(id).slice(0, 8).toUpperCase()}`;
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -724,7 +724,7 @@ function retourHistorique() {
 }
 
 function remplirDetail(item) {
-  document.getElementById('detail-sujet').textContent     = item.sujet || '(sans sujet)';
+  document.getElementById('detail-sujet').textContent     = item.sujet || '(no subject)';
   document.getElementById('detail-date').textContent      = formaterDate(item.envoyeA);
   document.getElementById('detail-categorie').textContent = labelCategorie(item.categorie || 'general');
 
@@ -741,11 +741,11 @@ function afficherStatut(item) {
   if (!el) return;
 
   if (item.repondu) {
-    el.innerHTML = '<span class="statut-badge statut-repondu">✓ Répondu</span>';
+    el.innerHTML = '<span class="statut-badge statut-repondu">✓ Replied</span>';
   } else if (item.serverId) {
-    el.innerHTML = '<span class="statut-badge statut-attente">⏳ En attente de réponse</span>';
+    el.innerHTML = '<span class="statut-badge statut-attente">⏳ Awaiting reply</span>';
   } else {
-    el.innerHTML = '<span class="statut-badge statut-local">📨 Envoyé localement</span>';
+    el.innerHTML = '<span class="statut-badge statut-local">📨 Sent locally</span>';
   }
 }
 
@@ -794,7 +794,7 @@ function afficherMessages(item) {
         <div class="thread-msg-avatar admin-avatar">AD</div>
         <div class="thread-msg-body">
           <div class="thread-msg-meta">
-            <strong>Équipe MeetAndDo</strong>
+            <strong>MeetAndDo Team</strong>
             <span>${item.reponse_date ? formaterDate(new Date(item.reponse_date).getTime()) : ''}</span>
           </div>
           <div class="thread-msg-content">${echapper(item.reponse)}</div>
@@ -811,7 +811,7 @@ async function actualiserReponse() {
   const historique = obtenirHistorique();
   const item = historique.find(i => i.id === _detailItemId);
   if (!item?.serverId) {
-    afficherToast('Pas encore synchronisé avec le serveur', 'info');
+    afficherToast('Not yet synced with the server', 'info');
     return;
   }
 
@@ -829,15 +829,15 @@ async function actualiserReponse() {
       const itemMaj = obtenirHistorique().find(i => i.id === _detailItemId);
       if (itemMaj) {
         remplirDetail(itemMaj);
-        afficherToast('L\'admin a répondu à votre message !', 'success', 5000);
+        afficherToast('The admin replied to your message!', 'success', 5000);
       }
     } else {
-      afficherToast('Pas encore de réponse. On vous répond sous 24h.', 'info');
+      afficherToast('No reply yet. We respond within 24 hours.', 'info');
     }
   } catch (_) {
-    afficherToast('Impossible de contacter le serveur', 'error');
+    afficherToast('Unable to reach the server', 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '↻ Actualiser'; }
+    if (btn) { btn.disabled = false; btn.textContent = '↻ Refresh'; }
   }
 }
 
@@ -854,7 +854,7 @@ function demarrerPolling(serverId) {
         const item = obtenirHistorique().find(i => i.id === _detailItemId);
         if (item) remplirDetail(item);
         stopperPolling();
-        afficherToast('Nouvelle réponse de l\'équipe !', 'success', 5000);
+        afficherToast('New reply from the team!', 'success', 5000);
       }
     } catch (_) {}
   }, 30000);
@@ -890,7 +890,7 @@ async function envoyerSuivi() {
   const textarea = document.getElementById('followup-message');
   const message  = textarea?.value.trim();
   if (!message || message.length < 5) {
-    afficherToast('Écrivez un message d\'au moins 5 caractères', 'error');
+    afficherToast('Write a message of at least 5 characters', 'error');
     return;
   }
 
@@ -907,7 +907,7 @@ async function envoyerSuivi() {
   const payload = {
     nom:       item.nom,
     email:     item.email,
-    sujet:     `[Suivi] ${item.sujet}`,
+    sujet:     `[Follow-up] ${item.sujet}`,
     message:   message,
     categorie: item.categorie || 'general',
     priorite:  item.priorite  || 'normale',
@@ -934,7 +934,7 @@ async function envoyerSuivi() {
   if (txtEl) txtEl.classList.remove('hidden');
   if (loaderEl) loaderEl.classList.add('hidden');
 
-  afficherToast('Message de suivi envoyé', 'success');
+  afficherToast('Follow-up message sent', 'success');
 }
 
 function ajouterSuiviLocal(itemId, suivi) {
@@ -978,7 +978,7 @@ function afficherHistorique() {
   const historique = obtenirHistorique();
 
   if (historique.length === 0) {
-    container.innerHTML = `<div class="history-empty">Vous n'avez pas encore envoyé de message depuis cet appareil.</div>`;
+    container.innerHTML = `<div class="history-empty">You haven't sent any messages from this device yet.</div>`;
     return;
   }
 
@@ -986,10 +986,10 @@ function afficherHistorique() {
     const aReponse  = item.repondu || !!item.reponse;
     const nbSuivis  = (item.suivis || []).length;
     const statutHtml = aReponse
-      ? '<span class="statut-badge statut-repondu">✓ Répondu</span>'
+      ? '<span class="statut-badge statut-repondu">✓ Replied</span>'
       : (item.serverId
-          ? '<span class="statut-badge statut-attente">⏳ En attente</span>'
-          : '<span class="statut-badge statut-local">📨 Envoyé</span>');
+          ? '<span class="statut-badge statut-attente">⏳ Waiting</span>'
+          : '<span class="statut-badge statut-local">📨 Sent</span>');
     return `
       <div class="history-item history-item--clickable animate-in" onclick="ouvrirDetail('${item.id}')">
         <div class="history-item-header">
@@ -1002,7 +1002,7 @@ function afficherHistorique() {
         <div class="history-item-meta">
           ${item.categorie ? `<span class="history-badge history-badge-cat">${echapper(labelCategorie(item.categorie))}</span>` : ''}
           <span class="history-badge history-badge-prio-${item.priorite || 'normale'}">${echapper(labelPriorite(item.priorite || 'normale'))}</span>
-          ${nbSuivis > 0 ? `<span class="history-badge history-badge-suivis">${nbSuivis} suivi${nbSuivis > 1 ? 's' : ''}</span>` : ''}
+          ${nbSuivis > 0 ? `<span class="history-badge history-badge-suivis">${nbSuivis} follow-up${nbSuivis > 1 ? 's' : ''}</span>` : ''}
         </div>
         <div class="history-item-msg">${echapper(item.message)}</div>
         <div class="history-item-chevron">›</div>
@@ -1012,10 +1012,10 @@ function afficherHistorique() {
 }
 
 function effacerHistorique() {
-  if (!confirm('Effacer tout l\'historique des messages envoyés ?')) return;
+  if (!confirm('Clear all sent message history?')) return;
   try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
   afficherHistorique();
-  afficherToast('Historique effacé', 'info');
+  afficherToast('History cleared', 'info');
 }
 
 /* =====================================================================
@@ -1029,12 +1029,12 @@ async function copierEmail() {
     await navigator.clipboard.writeText(email);
     if (btn) {
       const original = btn.textContent;
-      btn.textContent = 'Copié !';
+      btn.textContent = 'Copied!';
       setTimeout(() => { btn.textContent = original; }, 2000);
     }
-    afficherToast('Email copié dans le presse-papier', 'success');
+    afficherToast('Email copied to clipboard', 'success');
   } catch (_) {
-    afficherToast('Impossible de copier automatiquement', 'error');
+    afficherToast('Unable to copy automatically', 'error');
   }
 }
 
@@ -1082,7 +1082,7 @@ function tronquer(str, max) {
 function formaterDate(timestamp) {
   if (!timestamp) return '';
   const d = new Date(timestamp);
-  return d.toLocaleDateString('fr-FR', {
+  return d.toLocaleDateString('en-US', {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
@@ -1094,23 +1094,23 @@ function genererIdLocal() {
 
 function labelCategorie(val) {
   const labels = {
-    general: 'Question générale',
-    compte: 'Mon compte',
-    reservation: 'Réservation',
-    activite: 'Activité',
-    paiement: 'Paiement',
-    technique: 'Technique',
-    signalement: 'Signalement',
-    autre: 'Autre',
+    general: 'General question',
+    compte: 'My account',
+    reservation: 'Booking',
+    activite: 'Activity',
+    paiement: 'Payment',
+    technique: 'Technical issue',
+    signalement: 'Report',
+    autre: 'Other',
   };
   return labels[val] || val;
 }
 
 function labelPriorite(val) {
   const labels = {
-    basse: 'Priorité basse',
-    normale: 'Priorité normale',
-    haute: 'Priorité haute',
+    basse: 'Low priority',
+    normale: 'Normal priority',
+    haute: 'High priority',
     urgente: 'Urgent',
   };
   return labels[val] || val;
@@ -1230,11 +1230,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function exporterHistoriqueCSV() {
   const historique = obtenirHistorique();
   if (historique.length === 0) {
-    afficherToast('Aucun message dans l\'historique', 'info');
+    afficherToast('No messages in history', 'info');
     return;
   }
 
-  const entetes = ['Date', 'Nom', 'Email', 'Catégorie', 'Priorité', 'Sujet', 'Message'];
+  const entetes = ['Date', 'Name', 'Email', 'Category', 'Priority', 'Subject', 'Message'];
   const lignes = historique.map(item => [
     formaterDate(item.envoyeA),
     item.nom      || '',
@@ -1255,7 +1255,7 @@ function exporterHistoriqueCSV() {
   lien.click();
   URL.revokeObjectURL(url);
 
-  afficherToast('Historique exporté en CSV', 'success');
+  afficherToast('History exported as CSV', 'success');
 }
 
 /* =====================================================================
@@ -1264,8 +1264,8 @@ function exporterHistoriqueCSV() {
 
 async function partagerPage() {
   const data = {
-    title: 'Contacter MeetAndDo',
-    text: 'Envoyez un message à l\'équipe MeetAndDo.',
+    title: 'Contact MeetAndDo',
+    text: 'Send a message to the MeetAndDo team.',
     url: window.location.href,
   };
 
@@ -1276,9 +1276,9 @@ async function partagerPage() {
   } else {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      afficherToast('Lien copié dans le presse-papier', 'success');
+      afficherToast('Link copied to clipboard', 'success');
     } catch (_) {
-      afficherToast('Impossible de partager', 'error');
+      afficherToast('Unable to share', 'error');
     }
   }
 }
@@ -1287,8 +1287,8 @@ async function partagerPage() {
    DÉTECTION MODE HORS LIGNE
    ===================================================================== */
 
-window.addEventListener('online',  () => afficherToast('Connexion rétablie', 'success'));
-window.addEventListener('offline', () => afficherToast('Vous êtes hors ligne. Le message sera envoyé à la reconnexion.', 'error', 6000));
+window.addEventListener('online',  () => afficherToast('Connection restored', 'success'));
+window.addEventListener('offline', () => afficherToast('You are offline. The message will be sent when you reconnect.', 'error', 6000));
 
 function estEnLigne() {
   return navigator.onLine !== false;
@@ -1340,7 +1340,7 @@ function ajouterFileAttente(payload) {
     const queue = obtenirFileAttente();
     queue.push({ ...payload, queuedAt: Date.now() });
     localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-    afficherToast('Message mis en file d\'attente (hors ligne)', 'info', 5000);
+    afficherToast('Message queued (offline)', 'info', 5000);
   } catch (_) {}
 }
 
@@ -1371,7 +1371,7 @@ async function viderFileAttente() {
   try { localStorage.setItem(QUEUE_KEY, JSON.stringify(restants)); } catch (_) {}
 
   if (restants.length < queue.length) {
-    afficherToast(`${queue.length - restants.length} message(s) envoyé(s) depuis la file d'attente`, 'success');
+    afficherToast(`${queue.length - restants.length} message(s) sent from the queue`, 'success');
   }
 }
 
@@ -1465,21 +1465,6 @@ function piegerFocus(containerEl) {
   return () => containerEl.removeEventListener('keydown', gererTab);
 }
 
-/* =====================================================================
-   THEME — DÉTECTION MODE SOMBRE
-   ===================================================================== */
-
-function detecterModeSombre() {
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-  document.body.classList.toggle('dark-mode', e.matches);
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (detecterModeSombre()) document.body.classList.add('dark-mode');
-});
 
 /* =====================================================================
    IMPRESSION / PDF
@@ -1489,17 +1474,17 @@ function imprimerConfirmation() {
   const historique  = obtenirHistorique();
   const dernier     = historique[0];
   if (!dernier) {
-    afficherToast('Aucun message à imprimer', 'info');
+    afficherToast('No message to print', 'info');
     return;
   }
 
   const win = window.open('', '_blank', 'width=700,height=800');
   win.document.write(`
     <!DOCTYPE html>
-    <html lang="fr">
+    <html lang="en">
     <head>
       <meta charset="UTF-8"/>
-      <title>Confirmation de message — MeetAndDo</title>
+      <title>Message Confirmation — MeetAndDo</title>
       <style>
         body { font-family: Arial, sans-serif; padding: 2rem; color: #1a1a1a; }
         h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
@@ -1512,14 +1497,14 @@ function imprimerConfirmation() {
       </style>
     </head>
     <body>
-      <h1>Confirmation de message — MeetAndDo</h1>
-      <span class="ref">Envoyé le ${formaterDate(dernier.envoyeA)}</span>
+      <h1>Message Confirmation — MeetAndDo</h1>
+      <span class="ref">Sent on ${formaterDate(dernier.envoyeA)}</span>
       <table>
-        <tr><td>Nom</td><td>${sanitiser(dernier.nom)}</td></tr>
+        <tr><td>Name</td><td>${sanitiser(dernier.nom)}</td></tr>
         <tr><td>Email</td><td>${sanitiser(dernier.email)}</td></tr>
-        <tr><td>Catégorie</td><td>${labelCategorie(dernier.categorie || 'general')}</td></tr>
-        <tr><td>Priorité</td><td>${labelPriorite(dernier.priorite || 'normale')}</td></tr>
-        <tr><td>Sujet</td><td>${sanitiser(dernier.sujet)}</td></tr>
+        <tr><td>Category</td><td>${labelCategorie(dernier.categorie || 'general')}</td></tr>
+        <tr><td>Priority</td><td>${labelPriorite(dernier.priorite || 'normale')}</td></tr>
+        <tr><td>Subject</td><td>${sanitiser(dernier.sujet)}</td></tr>
         <tr><td>Message</td><td class="message-body">${sanitiser(dernier.message)}</td></tr>
       </table>
     </body>
@@ -1557,7 +1542,7 @@ function emailEstJetable(email) {
 function validerEmailAvance(email) {
   if (!email) return null;
   if (emailEstJetable(email)) {
-    return 'Les adresses email temporaires ne sont pas acceptées.';
+    return 'Temporary email addresses are not accepted.';
   }
   return null;
 }
@@ -1583,7 +1568,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     msgInput.addEventListener('input', () => {
       const mots = compterMots(msgInput.value);
-      wordCount.textContent = `${mots} mot${mots !== 1 ? 's' : ''} · `;
+      wordCount.textContent = `${mots} word${mots !== 1 ? 's' : ''} · `;
     });
   }
 });
@@ -1628,7 +1613,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="progress-bar-inner" id="progress-bar-inner"></div>
     </div>
     <span class="progress-bar-label">
-      Formulaire complété à <span id="progress-pct">0</span>%
+      Form <span id="progress-pct">0</span>% complete
     </span>
   `;
   formArea.insertBefore(barWrapper, formArea.firstChild);
@@ -1680,24 +1665,24 @@ document.addEventListener('DOMContentLoaded', () => {
    GESTION MULTI-LANGUE — I18N BASIQUE
    ===================================================================== */
 
-const I18N_FR = {
-  'field.required':    'Ce champ est obligatoire.',
-  'form.success':      'Message envoyé avec succès !',
-  'form.error':        'Une erreur est survenue. Réessayez.',
-  'draft.saved':       'Brouillon sauvegardé',
-  'draft.restored':    'Brouillon restauré',
-  'history.cleared':   'Historique effacé',
-  'copy.success':      'Copié dans le presse-papier',
-  'copy.error':        'Impossible de copier',
-  'offline.warning':   'Vous êtes hors ligne',
-  'online.restored':   'Connexion rétablie',
-  'faq.loading':       'Chargement de la FAQ...',
-  'faq.empty':         'Aucune question disponible',
-  'faq.no-results':    'Aucun résultat trouvé',
+const I18N_EN = {
+  'field.required':    'This field is required.',
+  'form.success':      'Message sent successfully!',
+  'form.error':        'An error occurred. Please try again.',
+  'draft.saved':       'Draft saved',
+  'draft.restored':    'Draft restored',
+  'history.cleared':   'History cleared',
+  'copy.success':      'Copied to clipboard',
+  'copy.error':        'Unable to copy',
+  'offline.warning':   'You are offline',
+  'online.restored':   'Connection restored',
+  'faq.loading':       'Loading FAQ...',
+  'faq.empty':         'No questions available',
+  'faq.no-results':    'No results found',
 };
 
 function t(key) {
-  return I18N_FR[key] ?? key;
+  return I18N_EN[key] ?? key;
 }
 
 /* =====================================================================
@@ -1804,7 +1789,7 @@ function afficherHistoriquePagine() {
     const btnPlus = document.createElement('button');
     btnPlus.type = 'button';
     btnPlus.className = 'btn-load-more';
-    btnPlus.textContent = 'Voir plus';
+    btnPlus.textContent = 'Load more';
     btnPlus.onclick = () => { _historyPage++; btnPlus.remove(); afficherHistoriquePagine(); };
     container.appendChild(btnPlus);
   }
@@ -1819,7 +1804,7 @@ function detecterNavigateurObsolete() {
   const estIE = ua.indexOf('MSIE') !== -1 || ua.indexOf('Trident/') !== -1;
   if (estIE) {
     afficherToast(
-      'Votre navigateur n\'est pas supporté. Utilisez Chrome, Firefox ou Edge.',
+      'Your browser is not supported. Please use Chrome, Firefox or Edge.',
       'error',
       8000
     );
@@ -1894,28 +1879,28 @@ const ContactApi = {
    ===================================================================== */
 
 function validerNomComplet(nom) {
-  if (!nom || nom.trim().length < 2) return 'Le nom est trop court.';
-  if (nom.trim().length > 100) return 'Le nom est trop long.';
-  if (/\d/.test(nom)) return 'Le nom ne doit pas contenir de chiffres.';
+  if (!nom || nom.trim().length < 2) return 'Name is too short.';
+  if (nom.trim().length > 100) return 'Name is too long.';
+  if (/\d/.test(nom)) return 'Name must not contain numbers.';
   return null;
 }
 
 function validerEmailComplet(email) {
   const erreurBase = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
-    ? 'Email invalide.' : null;
+    ? 'Invalid email address.' : null;
   if (erreurBase) return erreurBase;
   return validerEmailAvance(email);
 }
 
 function validerSujet(sujet) {
-  if (!sujet || sujet.trim().length < 5) return 'Le sujet est trop court (5 caractères minimum).';
-  if (sujet.trim().length > 200) return 'Le sujet est trop long (200 caractères maximum).';
+  if (!sujet || sujet.trim().length < 5) return 'Subject is too short (5 characters minimum).';
+  if (sujet.trim().length > 200) return 'Subject is too long (200 characters maximum).';
   return null;
 }
 
 function validerMessage(msg) {
-  if (!msg || msg.trim().length < 20) return 'Le message est trop court (20 caractères minimum).';
-  if (msg.trim().length > 2000) return 'Le message est trop long (2000 caractères maximum).';
+  if (!msg || msg.trim().length < 20) return 'Message is too short (20 characters minimum).';
+  if (msg.trim().length > 2000) return 'Message is too long (2000 characters maximum).';
   return null;
 }
 
@@ -1998,10 +1983,10 @@ function tempsRelatif(timestamp) {
   const heures   = Math.floor(minutes / 60);
   const jours    = Math.floor(heures / 24);
 
-  if (secondes < 60)  return 'à l\'instant';
-  if (minutes < 60)   return `il y a ${minutes} min`;
-  if (heures < 24)    return `il y a ${heures}h`;
-  if (jours < 7)      return `il y a ${jours}j`;
+  if (secondes < 60)  return 'just now';
+  if (minutes < 60)   return `${minutes} min ago`;
+  if (heures < 24)    return `${heures}h ago`;
+  if (jours < 7)      return `${jours}d ago`;
   return formaterDate(timestamp);
 }
 
@@ -2053,8 +2038,8 @@ function afficherResumeAvantEnvoi() {
   const priorite = document.querySelector('input[name="priorite"]:checked')?.value;
 
   return `
-    ✉ ${sujet || '(sans sujet)'}
-    👤 ${nom || '(sans nom)'} — ${email || '(sans email)'}
+    ✉ ${sujet || '(no subject)'}
+    👤 ${nom || '(no name)'} — ${email || '(no email)'}
     📂 ${labelCategorie(categorie || 'general')} · ${labelPriorite(priorite || 'normale')}
   `.trim();
 }
@@ -2070,6 +2055,6 @@ function compterFileAttente() {
 document.addEventListener('DOMContentLoaded', () => {
   const nb = compterFileAttente();
   if (nb > 0) {
-    afficherToast(`${nb} message(s) en attente d'envoi`, 'info', 4000);
+    afficherToast(`${nb} pending message(s) to send`, 'info', 4000);
   }
 });
