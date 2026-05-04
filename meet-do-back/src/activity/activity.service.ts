@@ -20,12 +20,18 @@ export class ActivityService {
     return `${date.split('T')[0]}T${heure}:00`;
   }
 
-  private normalizeEventSlot(event: { date: string }) {
+  private normalizeEventSlot(event: {
+    id: number;
+    date: string;
+    id_activity?: number;
+  }) {
     const eventDate = new Date(event.date);
 
     return {
+      id: event.id,
       date: eventDate.toISOString().split('T')[0],
       heure: eventDate.toISOString().slice(11, 16),
+      id_activity: event.id_activity,
     };
   }
 
@@ -38,7 +44,7 @@ export class ActivityService {
     const client = this.supabaseService.getClient();
     const { data: eventData, error: eventError } = await client
       .from('event')
-      .select('date')
+      .select('id, date, id_activity')
       .eq('id_activity', id)
       .order('date', { ascending: true });
 
