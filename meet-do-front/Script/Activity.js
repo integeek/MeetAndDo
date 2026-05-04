@@ -46,7 +46,26 @@ const MOCK_ACTIVITY = {
         "Very nice, I just would have liked a little more time for decoration.",
     },
   ],
+  events: [
+    {
+      id: 1,
+      date: "2026-05-12T18:00:00.000Z",
+      id_activity: 42,
+    },
+    {
+      id: 2,
+      date: "2026-05-19T18:30:00.000Z",
+      id_activity: 42,
+    },
+    {
+      id: 3,
+      date: "2026-06-02T19:00:00.000Z",
+      id_activity: 42,
+    },
+  ],
 };
+
+const EVENT_API_URL = "http://localhost:3000/event";
 
 async function getActivity(id) {
   try {
@@ -57,6 +76,72 @@ async function getActivity(id) {
     console.error("Error while fetching activity:", error);
     return MOCK_ACTIVITY; // Fallback sur le mock en cas d'erreur
   }
+}
+
+async function getActivityEvents(activityId, activity) {
+  const embeddedEvents = normalizeEvents(
+    activity?.events || activity?.eventSlots,
+    activityId,
+  );
+
+  try {
+    const response = await fetch(`${EVENT_API_URL}?activityId=${activityId}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const events = await response.json();
+    const normalizedEvents = normalizeEvents(events, activityId);
+    return normalizedEvents.length ? normalizedEvents : embeddedEvents;
+  } catch (error) {
+    console.error("Error while fetching activity events:", error);
+    return embeddedEvents;
+  }
+}
+
+function normalizeEvents(events, activityId) {
+  if (!Array.isArray(events)) return [];
+
+  return events
+    .map((event, index) => {
+      const rawDate =
+        event?.date && event?.heure
+          ? `${event.date}T${event.heure}`
+          : event?.date || event?.datetime || event?.start_at;
+      if (!rawDate) return null;
+
+      const eventActivityId = Number(
+        event?.id_activity || event?.activityId || event?.idActivity,
+      );
+      const currentActivityId = Number(activityId);
+
+      if (
+        Number.isInteger(eventActivityId) &&
+        Number.isInteger(currentActivityId) &&
+        eventActivityId !== currentActivityId
+      ) {
+        return null;
+      }
+
+      const date = new Date(rawDate);
+      if (Number.isNaN(date.getTime())) return null;
+
+      return {
+        id: event?.id ?? `${activityId}-${index}`,
+        date,
+      };
+    })
+    .filter(Boolean)
+    .sort((firstEvent, secondEvent) => firstEvent.date - secondEvent.date);
+}
+
+function formatEventDateTime(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function renderContactButton() {
@@ -195,13 +280,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const activityId = params.get("id") || 1; // Default to 1 if no ID is provided
   const activity = await getActivity(activityId);
+  const resolvedActivityId = activity?.id || activityId;
   renderActivity(activity);
 
   // Initialize the report modal
   initReportModal();
+  initReservationModal(resolvedActivityId, activity);
 });
 
 let reportModal = null;
+let reservationEventsModal = null;
 
 function initReportModal() {
   // Get the Report button and attach an event listener
@@ -255,4 +343,78 @@ function initReportModal() {
       // });
     });
   }
+}
+
+function initReservationModal(activityId, activity) {
+  const joinButton = document.querySelector(
+    "#activity-participate-button .buttonCo",
+  );
+  const modalElement = document.getElementById("reservationEventsModal");
+
+  if (modalElement) {
+    reservationEventsModal = new bootstrap.Modal(modalElement);
+  }
+
+  if (!joinButton || !modalElement) return;
+
+  joinButton.addEventListener("click", async () => {
+    reservationEventsModal?.show();
+    renderReservationEventsLoading();
+
+    const events = await getActivityEvents(activityId, activity);
+    renderReservationEvents(events);
+  });
+}
+
+function renderReservationEventsLoading() {
+  const list = document.getElementById("reservation-events-list");
+  const feedback = document.getElementById("reservation-events-feedback");
+
+  if (feedback) {
+    feedback.textContent = "Loading available events...";
+    feedback.className = "mb-3 text-secondary";
+  }
+
+  if (list) {
+    list.innerHTML = `
+      <div class="reservation-empty-state" role="status">
+        Loading...
+      </div>
+    `;
+  }
+}
+
+function renderReservationEvents(events) {
+  const list = document.getElementById("reservation-events-list");
+  const feedback = document.getElementById("reservation-events-feedback");
+  if (!list || !feedback) return;
+
+  if (!events.length) {
+    feedback.textContent = "No events are available for this activity yet.";
+    feedback.className = "mb-3 text-secondary";
+    list.innerHTML = "";
+    return;
+  }
+
+  feedback.textContent = "Choose an event to reserve your spot.";
+  feedback.className = "mb-3 text-secondary";
+  list.innerHTML = events
+    .map(
+      (event) => `
+        <div class="reservation-event-row" role="listitem">
+          <div>
+            <p class="reservation-event-title mb-1">Event</p>
+            <p class="reservation-event-date mb-0">${formatEventDateTime(event.date)}</p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary reservation-event-button"
+            data-event-id="${event.id}"
+          >
+            Reserve
+          </button>
+        </div>
+      `,
+    )
+    .join("");
 }
