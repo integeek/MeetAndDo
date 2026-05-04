@@ -171,6 +171,20 @@ h1 {
   text-align: center;
 }
 
+.reservation-full-state {
+  min-width: 160px;
+  text-align: right;
+}
+
+.reservation-full-text {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.reservation-notify-button {
+  min-width: 132px;
+}
+
 .reservation-empty-state {
   padding: 1rem;
   border: 1px solid #e4e7ec;
@@ -216,5 +230,14 @@ h1 {
   .reservation-quantity-control {
     width: 100%;
     grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+
+  .reservation-full-state {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .reservation-notify-button {
+    width: 100%;
   }
 }

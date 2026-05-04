@@ -537,17 +537,11 @@ function renderReservationEvents(events) {
   list.innerHTML = events
     .map((event) => {
       const canReserveEvent = event.availablePlaces > 0;
-      const availabilityText = `${event.availablePlaces} places available`;
-
-      return `
-        <div class="reservation-event-row" role="listitem">
-          <div>
-            <p class="reservation-event-title mb-1">Event</p>
-            <p class="reservation-event-date mb-0">${formatEventDateTime(event.date)}</p>
-            <p class="reservation-event-availability mb-0">
-              ${availabilityText}
-            </p>
-          </div>
+      const availabilityText = canReserveEvent
+        ? `${event.availablePlaces} places available`
+        : "Event full";
+      const eventAction = canReserveEvent
+        ? `
           <div
             class="reservation-quantity-control"
             data-event-key="${event.reservationKey}"
@@ -557,7 +551,6 @@ function renderReservationEvents(events) {
               class="btn btn-outline-primary reservation-quantity-button"
               data-reservation-action="decrease"
               aria-label="Decrease reserved places"
-              ${canReserveEvent ? "" : "disabled"}
             >
               -
             </button>
@@ -569,25 +562,57 @@ function renderReservationEvents(events) {
               max="${event.availablePlaces}"
               inputmode="numeric"
               aria-label="Reserved places"
-              ${canReserveEvent ? "" : "disabled"}
             />
             <button
               type="button"
               class="btn btn-outline-primary reservation-quantity-button"
               data-reservation-action="increase"
               aria-label="Increase reserved places"
-              ${canReserveEvent ? "" : "disabled"}
             >
               +
             </button>
           </div>
+        `
+        : `
+          <div class="reservation-full-state">
+            <p class="reservation-full-text mb-2">Event full</p>
+            <button
+              type="button"
+              class="btn btn-outline-primary reservation-notify-button"
+              data-event-id="${event.id}"
+            >
+              Notify me
+            </button>
+          </div>
+        `;
+
+      return `
+        <div class="reservation-event-row" role="listitem">
+          <div>
+            <p class="reservation-event-title mb-1">Event</p>
+            <p class="reservation-event-date mb-0">${formatEventDateTime(event.date)}</p>
+            <p class="reservation-event-availability mb-0">
+              ${availabilityText}
+            </p>
+          </div>
+          ${eventAction}
         </div>
       `;
     })
     .join("");
 
   bindReservationQuantityControls();
+  bindReservationNotifyButtons();
   updateReservationFooterState();
+}
+
+function bindReservationNotifyButtons() {
+  document.querySelectorAll(".reservation-notify-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      button.textContent = "Notification enabled";
+      button.disabled = true;
+    });
+  });
 }
 
 function bindReservationQuantityControls() {
