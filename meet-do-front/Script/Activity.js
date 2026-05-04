@@ -187,8 +187,10 @@ function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
       const date = new Date(rawDate);
       if (Number.isNaN(date.getTime())) return null;
 
+      const eventId = Number(event?.id);
+
       return {
-        id: event?.id ?? `${activityId}-${index}`,
+        id: Number.isInteger(eventId) && eventId > 0 ? eventId : null,
         date,
         availablePlaces: getEventAvailablePlaces(event, defaultActivityGroupSize),
         reservedPlaces: Number(
@@ -687,6 +689,19 @@ async function submitReservations() {
   const selectedItems = getSelectedReservationItems();
 
   if (!selectedItems.length) return;
+
+  if (
+    selectedItems.some(
+      ({ event }) => !Number.isInteger(Number(event.id)) || Number(event.id) <= 0,
+    )
+  ) {
+    if (feedback) {
+      feedback.textContent =
+        "Unable to confirm this reservation because an event id is missing. Please refresh the page and try again.";
+      feedback.className = "mb-3 text-danger";
+    }
+    return;
+  }
 
   const currentUser = await getCurrentUser();
   const userId = getAuthenticatedUserId(currentUser);
