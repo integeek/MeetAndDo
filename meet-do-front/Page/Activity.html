@@ -289,6 +289,35 @@
               class="reservation-events-list"
               role="list"
             ></div>
+            <div
+              id="reservation-summary"
+              class="reservation-summary d-none"
+              aria-live="polite"
+            ></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="reservation-review-button"
+              disabled
+            >
+              Review reservation
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary d-none"
+              id="reservation-confirm-button"
+            >
+              Confirm reservation
+            </button>
           </div>
         </div>
       </div>
