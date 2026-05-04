@@ -28,41 +28,41 @@ function setSearch(v) { state.search = v; rafraichirTableau(); }
 // ---- Menus par rôle ----
 const MENUS = {
   admin: [
-    { id: 'overview',             icone: 'bi-grid-fill',          label: 'Tableau de bord' },
-    { id: 'users',                icone: 'bi-people-fill',         label: 'Gestion des clients' },
-    { id: 'admin_messaging',      icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
-    { id: 'reports_users',        icone: 'bi-person-exclamation',  label: 'Signalement utilisateur' },
-    { id: 'reports_activities',   icone: 'bi-flag-fill',           label: 'Signalement annonce' },
-    { id: 'validation',           icone: 'bi-patch-check-fill',    label: 'Accepter Meeters' },
-    { id: 'settings',             icone: 'bi-gear-fill',           label: 'Modifier les tables' },
+    { id: 'overview',             icone: 'bi-grid-fill',          label: 'Dashboard' },
+    { id: 'users',                icone: 'bi-people-fill',         label: 'Client Management' },
+    { id: 'admin_messaging',      icone: 'bi-chat-dots-fill',      label: 'Messaging' },
+    { id: 'reports_users',        icone: 'bi-person-exclamation',  label: 'User Reports' },
+    { id: 'reports_activities',   icone: 'bi-flag-fill',           label: 'Listing Reports' },
+    { id: 'validation',           icone: 'bi-patch-check-fill',    label: 'Approve Meeters' },
+    { id: 'settings',             icone: 'bi-gear-fill',           label: 'Edit Tables' },
   ],
   user: [
-    { id: 'overview',   icone: 'bi-grid-fill',           label: 'Mon Dashboard' },
-    { id: 'historique', icone: 'bi-clock-history',       label: 'Historique' },
-    { id: 'activities', icone: 'bi-calendar3',           label: 'Mes Activités' },
-    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
-    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favoris' },
-    { id: 'parrainage', icone: 'bi-people-fill',         label: 'Parrainage' },
-    { id: 'account',    icone: 'bi-person-fill',         label: 'Mon Compte' },
+    { id: 'overview',   icone: 'bi-grid-fill',           label: 'My Dashboard' },
+    { id: 'historique', icone: 'bi-clock-history',       label: 'History' },
+    { id: 'activities', icone: 'bi-calendar3',           label: 'My Activities' },
+    { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
+    { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favorites' },
+    { id: 'parrainage', icone: 'bi-people-fill',         label: 'Referral' },
+    { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
   ],
   publisher: [
-    { id: 'overview',       icone: 'bi-grid-fill',           label: 'Vue d\'ensemble' },
-    { id: 'listings',       icone: 'bi-megaphone-fill',      label: 'Mes Annonces' },
-    { id: 'bookings',       icone: 'bi-calendar-check-fill', label: 'Réservations' },
-    { id: 'messaging',      icone: 'bi-chat-dots-fill',      label: 'Messagerie' },
-    { id: 'stats',          icone: 'bi-bar-chart-fill',      label: 'Statistiques' },
-    { id: 'pub_activites',  icone: 'bi-calendar3',           label: 'Mes Activités' },
-    { id: 'pub_historique', icone: 'bi-clock-history',       label: 'Historique' },
-    { id: 'parrainage',     icone: 'bi-people-fill',         label: 'Parrainage' },
+    { id: 'overview',       icone: 'bi-grid-fill',           label: 'Overview' },
+    { id: 'listings',       icone: 'bi-megaphone-fill',      label: 'My Listings' },
+    { id: 'bookings',       icone: 'bi-calendar-check-fill', label: 'Bookings' },
+    { id: 'messaging',      icone: 'bi-chat-dots-fill',      label: 'Messaging' },
+    { id: 'stats',          icone: 'bi-bar-chart-fill',      label: 'Statistics' },
+    { id: 'pub_activites',  icone: 'bi-calendar3',           label: 'My Activities' },
+    { id: 'pub_historique', icone: 'bi-clock-history',       label: 'History' },
+    { id: 'parrainage',     icone: 'bi-people-fill',         label: 'Referral' },
   ],
 };
 
 // Données trafic statiques pour le graphique admin
 const TRAFIC_DEMO = [
-  { label: 'Lun', val: 320 }, { label: 'Mar', val: 480 },
-  { label: 'Mer', val: 410 }, { label: 'Jeu', val: 560 },
-  { label: 'Ven', val: 620 }, { label: 'Sam', val: 740 },
-  { label: 'Dim', val: 530 },
+  { label: 'Mon', val: 320 }, { label: 'Tue', val: 480 },
+  { label: 'Wed', val: 410 }, { label: 'Thu', val: 560 },
+  { label: 'Fri', val: 620 }, { label: 'Sat', val: 740 },
+  { label: 'Sun', val: 530 },
 ];
 
 // ---- Helpers ----
@@ -72,7 +72,7 @@ function initiales(prenom, nom) {
 
 function formatDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function escapeHtml(str) {
@@ -92,14 +92,14 @@ function formatDateConv(iso) {
   const d = new Date(iso);
   const now = new Date();
   if (d.toDateString() === now.toDateString()) {
-    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
 
 function formatPrix(val) {
   if (val === undefined || val === null) return '—';
-  return Number(val).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  return Number(val).toLocaleString('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 }
 
 function etoiles(note) {
@@ -109,10 +109,10 @@ function etoiles(note) {
 
 function badgeStatut(statut) {
   const map = {
-    actif:    '<span class="badge-status badge-actif"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Actif</span>',
-    inactif:  '<span class="badge-status badge-inactif"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Inactif</span>',
-    attente:  '<span class="badge-status badge-attente"><i class="bi bi-clock-fill" style="font-size:.6rem"></i> En attente</span>',
-    confirme: '<span class="badge-status badge-actif"><i class="bi bi-check-circle-fill" style="font-size:.6rem"></i> Confirmé</span>',
+    actif:    '<span class="badge-status badge-actif"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Active</span>',
+    inactif:  '<span class="badge-status badge-inactif"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Inactive</span>',
+    attente:  '<span class="badge-status badge-attente"><i class="bi bi-clock-fill" style="font-size:.6rem"></i> Pending</span>',
+    confirme: '<span class="badge-status badge-actif"><i class="bi bi-check-circle-fill" style="font-size:.6rem"></i> Confirmed</span>',
   };
   return map[statut] || `<span class="badge-status badge-attente">${statut}</span>`;
 }
@@ -121,8 +121,8 @@ function badgeRole(role) {
   const r = (role || '').toLowerCase();
   const map = {
     admin:     '<span class="badge-status badge-admin">Admin</span>',
-    user:      '<span class="badge-status badge-user">Utilisateur</span>',
-    publisher: '<span class="badge-status badge-publisher">Éditeur</span>',
+    user:      '<span class="badge-status badge-user">User</span>',
+    publisher: '<span class="badge-status badge-publisher">Publisher</span>',
   };
   return map[r] || `<span class="badge-status badge-attente">${role}</span>`;
 }
@@ -205,8 +205,8 @@ async function appelApi(chemin, methode = 'GET', corps = null) {
   if (corps) options.body = JSON.stringify(corps);
 
   const res = await fetch(`${API}${chemin}`, options);
-  if (res.status === 401) { window.location.href = 'Login.html'; throw new Error('Non authentifié'); }
-  if (!res.ok) throw new Error(`Erreur ${res.status} sur ${chemin}`);
+  if (res.status === 401) { window.location.href = 'Login.html'; throw new Error('Not authenticated'); }
+  if (!res.ok) throw new Error(`Error ${res.status} on ${chemin}`);
   return res.json();
 }
 
@@ -239,7 +239,7 @@ async function chargerDonnees() {
       demarrerNotificationsPublisher();
     }
   } catch (err) {
-    if (!err.message.includes('Non authentifié')) {
+    if (!err.message.includes('Not authenticated')) {
       afficherErreur(err.message);
     }
   }
@@ -252,7 +252,7 @@ function afficherLoader(visible) {
     main.innerHTML = `
       <div class="dash-loader">
         <div class="dash-spinner"></div>
-        <p>Chargement de votre espace…</p>
+        <p>Loading your space…</p>
       </div>`;
   }
 }
@@ -263,9 +263,9 @@ function afficherErreur(message) {
   main.innerHTML = `
     <div class="dash-loader">
       <span style="font-size:2rem">⚠️</span>
-      <p style="color:var(--text-muted)">${message || 'Impossible de charger les données.'}</p>
+      <p style="color:var(--text-muted)">${message || 'Unable to load data.'}</p>
       <button type="button" class="btn-primary" onclick="chargerDonnees()">
-        <i class="bi bi-arrow-clockwise"></i> Réessayer
+        <i class="bi bi-arrow-clockwise"></i> Try again
       </button>
     </div>`;
 }
@@ -283,16 +283,16 @@ function renderSidebar() {
   const items  = MENUS[role] || [];
   const profil = state.profil || {};
 
-  const nomRole = role === 'admin' ? 'Administrateur'
-    : role === 'publisher'         ? 'Client Éditeur'
-    : 'Utilisateur';
+  const nomRole = role === 'admin' ? 'Administrator'
+    : role === 'publisher'         ? 'Publisher'
+    : 'User';
 
   sidebar.innerHTML = `
     <div class="sidebar-brand">
       <div class="sidebar-logo">M</div>
       <div class="sidebar-brand-text">
         <div class="sidebar-brand-name">MEET & DO</div>
-        <div class="sidebar-brand-sub">Espace ${nomRole}</div>
+        <div class="sidebar-brand-sub">${nomRole} Space</div>
       </div>
     </div>
 
@@ -300,7 +300,7 @@ function renderSidebar() {
     <ul class="sidebar-nav">
       ${items.map((item) => item.id === 'sep' ? `
         <li style="padding:.35rem .5rem;font-size:.7rem;color:var(--text-muted);letter-spacing:.05em;user-select:none">
-          ── En tant qu'utilisateur
+          ── As user
         </li>` : `
         <li class="sidebar-nav-item">
           <button type="button"
@@ -348,9 +348,9 @@ function renderAdminView() {
     const label = MENUS.admin.find((m) => m.id === onglet)?.label || 'Section';
     return `
       <header class="view-header animate-in">
-        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Bientôt disponible.</p></div>
+        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Coming soon.</p></div>
       </header>
-      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">Cette section sera disponible prochainement.</p>' })}`;
+      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">This section will be available soon.</p>' })}`;
   }
 
   const lignes = (recherche) => {
@@ -361,7 +361,7 @@ function renderAdminView() {
       : users;
 
     if (!liste.length) {
-      return '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun résultat.</td></tr>';
+      return '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No results.</td></tr>';
     }
     return liste.map((u) => `
       <tr>
@@ -379,15 +379,15 @@ function renderAdminView() {
         <td style="font-size:.8rem;color:var(--text-muted)">${formatDate(u.created_at)}</td>
         <td>
           <div style="display:flex;gap:.35rem">
-            <button type="button" class="icon-btn" title="Voir le profil"
+            <button type="button" class="icon-btn" title="View profile"
               onclick="adminOverviewVoir(${u.id})">
               <i class="bi bi-eye-fill"></i>
             </button>
-            <button type="button" class="icon-btn" title="Modifier le rôle"
+            <button type="button" class="icon-btn" title="Edit role"
               onclick="adminOverviewEditer(${u.id})">
               <i class="bi bi-pencil-fill"></i>
             </button>
-            <button type="button" class="icon-btn danger" title="Supprimer"
+            <button type="button" class="icon-btn danger" title="Delete"
               onclick="adminOverviewSupprimer(${u.id})">
               <i class="bi bi-trash-fill"></i>
             </button>
@@ -399,8 +399,8 @@ function renderAdminView() {
   return `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Tableau de bord Admin</h1>
-        <p class="view-subtitle">Bienvenue 👋 — Vue d'ensemble de la plateforme</p>
+        <h1 class="view-title">Admin Dashboard</h1>
+        <p class="view-subtitle">Welcome 👋 — Platform overview</p>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <button type="button" class="btn-outline" onclick="exporterDonneesAdminPDF()">
@@ -414,10 +414,10 @@ function renderAdminView() {
 
     <div class="kpi-grid mb-6">
       ${[
-        { icone: '💰', titre: 'Revenu total',       valeur: formatPrix(kpi.revenu),            tendance: null,              sens: 'up',      couleur: '#dbeafe', couleurIcone: '#2563eb' },
-        { icone: '👥', titre: 'Nouveaux Meeters',   valeur: kpi.nouveauxUtilisateurs,          tendance: '7 derniers jours', sens: 'up',      couleur: '#d1fae5', couleurIcone: '#059669' },
-        { icone: '🚩', titre: 'Signalements',       valeur: kpi.signalements,                  tendance: null,              sens: 'neutral', couleur: '#fee2e2', couleurIcone: '#dc2626' },
-        { icone: '📈', titre: 'Taux de conversion', valeur: `${kpi.tauxConversion ?? 0} %`,    tendance: null,              sens: 'up',      couleur: '#ede9fe', couleurIcone: '#7c3aed' },
+        { icone: '💰', titre: 'Total Revenue',       valeur: formatPrix(kpi.revenu),            tendance: null,           sens: 'up',      couleur: '#dbeafe', couleurIcone: '#2563eb' },
+        { icone: '👥', titre: 'New Meeters',        valeur: kpi.nouveauxUtilisateurs,          tendance: 'Last 7 days',  sens: 'up',      couleur: '#d1fae5', couleurIcone: '#059669' },
+        { icone: '🚩', titre: 'Reports',            valeur: kpi.signalements,                  tendance: null,           sens: 'neutral', couleur: '#fee2e2', couleurIcone: '#dc2626' },
+        { icone: '📈', titre: 'Conversion rate',    valeur: `${kpi.tauxConversion ?? 0} %`,    tendance: null,           sens: 'up',      couleur: '#ede9fe', couleurIcone: '#7c3aed' },
       ].map((k) => KpiCard(k)).join('')}
     </div>
 
@@ -429,8 +429,8 @@ function renderAdminView() {
       classes: 'chart-card mb-6',
       contenu: `
         <div class="chart-header">
-          <span class="chart-title">Inscriptions hebdomadaires</span>
-          <span class="chart-badge">${kpi.totalUtilisateurs ?? 0} utilisateurs au total</span>
+          <span class="chart-title">Weekly registrations</span>
+          <span class="chart-badge">${kpi.totalUtilisateurs ?? 0} total users</span>
         </div>
         <div class="chart-wrapper" id="admin-traffic-chart">
           ${creerGraphiqueArea(TRAFIC_DEMO, '#2563eb')}
@@ -441,16 +441,16 @@ function renderAdminView() {
       classes: 'table-card',
       contenu: `
         <div class="table-header">
-          <span class="card-title" style="margin:0">Derniers utilisateurs inscrits</span>
+          <span class="card-title" style="margin:0">Recently registered users</span>
           <div class="table-search">
             <i class="bi bi-search" style="color:var(--text-muted);font-size:.85rem"></i>
-            <input type="text" id="user-search" placeholder="Rechercher…" value="${getSearch()}"
+            <input type="text" id="user-search" placeholder="Search…" value="${getSearch()}"
               oninput="setSearch(this.value.toLowerCase())">
           </div>
         </div>
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Inscrit le</th><th>Action</th></tr></thead>
+            <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Registered on</th><th>Action</th></tr></thead>
             <tbody id="users-tbody">${lignes(getSearch())}</tbody>
           </table>
         </div>`,
@@ -479,9 +479,9 @@ function renderUserView() {
     const label = MENUS.user.find((m) => m.id === onglet)?.label || 'Section';
     return `
       <header class="view-header animate-in">
-        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Bientôt disponible.</p></div>
+        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Coming soon.</p></div>
       </header>
-      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">Cette section sera disponible prochainement.</p>' })}`;
+      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">This section will be available soon.</p>' })}`;
   }
 
   const sessionItems = sessions.length
@@ -492,10 +492,10 @@ function renderUserView() {
           <div class="session-item" style="animation:fadeUp .4s ${0.05*(i+1)}s ease both">
             <div class="session-date-badge">
               <span class="session-date-day">${d.getDate()}</span>
-              <span class="session-date-month">${d.toLocaleString('fr-FR',{month:'short'}).toUpperCase()}</span>
+              <span class="session-date-month">${d.toLocaleString('en-US',{month:'short'}).toUpperCase()}</span>
             </div>
             <div class="session-info">
-              <div class="session-title">🎯 ${activity.title || 'Activité'}</div>
+              <div class="session-title">🎯 ${activity.title || 'Activity'}</div>
               <div class="session-meta">
                 <i class="bi bi-geo-alt-fill" style="color:var(--accent);font-size:.7rem"></i>
                 ${activity.address || '—'}
@@ -504,13 +504,13 @@ function renderUserView() {
             ${badgeStatut('confirme')}
           </div>`;
       }).join('')
-    : '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">Aucune session à venir.</p>';
+    : '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">No upcoming sessions.</p>';
 
   const suggestItems = suggest.length
     ? suggest.map((a, i) => {
         const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
         const emoji = emojiTheme(a.theme);
-        const prix = a.price != null ? `${Number(a.price).toLocaleString('fr-FR')}€` : 'Gratuit';
+        const prix = a.price != null ? `${Number(a.price).toLocaleString('en-US')}€` : 'Free';
         return `
           <div class="home-activity-card" style="animation-delay:${0.05*(i+1)}s" onclick="">
             ${img
@@ -518,13 +518,13 @@ function renderUserView() {
               : `<div class="home-card-img-placeholder">${emoji}</div>`}
             <div class="home-card-content">
               <h2 class="home-card-title">${escapeHtml(a.title || '—')}</h2>
-              <p><strong>Lieu :</strong> ${escapeHtml(a.address || '—')}</p>
-              <p><strong>Prix :</strong> ${prix}</p>
-              <p><strong>Note :</strong> ⭐ ${(a.average_rating || 0).toFixed(1)}</p>
+              <p><strong>Location:</strong> ${escapeHtml(a.address || '—')}</p>
+              <p><strong>Price:</strong> ${prix}</p>
+              <p><strong>Rating:</strong> ⭐ ${(a.average_rating || 0).toFixed(1)}</p>
             </div>
           </div>`;
       }).join('')
-    : '<p style="color:var(--text-muted);font-size:.85rem">Aucune suggestion disponible.</p>';
+    : '<p style="color:var(--text-muted);font-size:.85rem">No suggestions available.</p>';
 
   return `
     <div class="profile-premium-card">
@@ -537,7 +537,7 @@ function renderUserView() {
         <div class="profile-premium-name">${profil.firstname || ''} ${profil.lastname || ''}</div>
         <div class="profile-premium-email">${profil.email || ''}</div>
         <div class="profile-premium-badges">
-          <span class="profile-badge-pill"><i class="bi bi-patch-check-fill"></i> Vérifié</span>
+          <span class="profile-badge-pill"><i class="bi bi-patch-check-fill"></i> Verified</span>
           <span class="profile-badge-pill"><i class="bi bi-calendar-event"></i> ${sessions.length} session(s)</span>
         </div>
       </div>
@@ -554,9 +554,9 @@ function renderUserView() {
     </div>
 
     <div class="two-col">
-      ${Card({ titre: '📅 Prochaines sessions', contenu: `<div class="sessions-list">${sessionItems}</div>`, classes: 'animate-in' })}
+      ${Card({ titre: '📅 Upcoming sessions', contenu: `<div class="sessions-list">${sessionItems}</div>`, classes: 'animate-in' })}
       ${Card({
-        titre: '✨ À découvrir',
+        titre: '✨ Discover',
         classes: 'animate-in',
         contenu: `<div class="suggest-grid" style="grid-template-columns:1fr">${
           suggest.slice(0,3).map((a) => `
@@ -571,7 +571,7 @@ function renderUserView() {
       })}
     </div>
 
-    ${Card({ titre: '✨ Suggéré pour vous', classes: 'animate-in', contenu: `<div class="explorer-grid">${suggestItems}</div>` })}`;
+    ${Card({ titre: '✨ Suggested for you', classes: 'animate-in', contenu: `<div class="explorer-grid">${suggestItems}</div>` })}`;
 }
 
 // ============================================================
@@ -598,9 +598,9 @@ function renderPublisherView() {
     const label = MENUS.publisher.find((m) => m.id === onglet)?.label || 'Section';
     return `
       <header class="view-header animate-in">
-        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Bientôt disponible.</p></div>
+        <div><h1 class="view-title">${label}</h1><p class="view-subtitle">Coming soon.</p></div>
       </header>
-      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">Cette section sera disponible prochainement.</p>' })}`;
+      ${Card({ contenu: '<p style="color:var(--text-muted);padding:1rem 0">This section will be available soon.</p>' })}`;
   }
 
   const lignesAnnonces = annonces.length
@@ -609,7 +609,7 @@ function renderPublisherView() {
           <td style="font-weight:600;font-size:.85rem">${a.title}</td>
           <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
           <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
-          <td><span class="badge-status ${a.is_visible ? 'badge-actif' : 'badge-inactif'}">${a.is_visible ? 'Visible' : 'Masquée'}</span></td>
+          <td><span class="badge-status ${a.is_visible ? 'badge-actif' : 'badge-inactif'}">${a.is_visible ? 'Visible' : 'Hidden'}</span></td>
           <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
           <td>
             <button type="button" class="btn-outline" style="padding:.3rem .7rem;font-size:.72rem">
@@ -617,34 +617,34 @@ function renderPublisherView() {
             </button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="6" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucune annonce publiée.</td></tr>';
+    : '<tr><td colspan="6" style="color:var(--text-muted);padding:1.5rem;text-align:center">No listings published.</td></tr>';
 
   const lignesResa = reservations.length
     ? reservations.map((r) => `
         <tr>
           <td style="font-weight:600;font-size:.8rem">#${r.id}</td>
           <td style="font-size:.82rem">${formatDate(r.date)}</td>
-          <td><span class="badge-status badge-user">${r.group_size ?? 1} pers.</span></td>
+          <td><span class="badge-status badge-user">${r.group_size ?? 1} ppl.</span></td>
         </tr>`).join('')
-    : '<tr><td colspan="3" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucune réservation reçue.</td></tr>';
+    : '<tr><td colspan="3" style="color:var(--text-muted);padding:1.5rem;text-align:center">No bookings received.</td></tr>';
 
   return `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Bonjour ${profil.firstname || ''} 👋</h1>
-        <p class="view-subtitle">Gérez vos annonces et suivez vos performances.</p>
+        <h1 class="view-title">Hello ${profil.firstname || ''} 👋</h1>
+        <p class="view-subtitle">Manage your listings and track your performance.</p>
       </div>
       <button type="button" class="btn-primary">
-        <i class="bi bi-plus-lg"></i> Nouvelle annonce
+        <i class="bi bi-plus-lg"></i> New listing
       </button>
     </header>
 
     <div class="kpi-grid mb-6">
       ${[
-        { icone: '📋', titre: 'Annonces actives',    valeur: kpi.annoncesActives  ?? 0, couleur: '#dbeafe', couleurIcone: '#2563eb' },
-        { icone: '📆', titre: 'Réservations reçues', valeur: kpi.reservationsRecues ?? 0, couleur: '#d1fae5', couleurIcone: '#059669' },
-        { icone: '💰', titre: 'Revenus du mois',     valeur: formatPrix(kpi.revenuDuMois), couleur: '#ede9fe', couleurIcone: '#7c3aed' },
-        { icone: '↩',  titre: 'Taux de réponse',     valeur: `${kpi.tauxReponse ?? 0} %`, couleur: '#fef3c7', couleurIcone: '#d97706' },
+        { icone: '📋', titre: 'Active listings',    valeur: kpi.annoncesActives  ?? 0, couleur: '#dbeafe', couleurIcone: '#2563eb' },
+        { icone: '📆', titre: 'Bookings received', valeur: kpi.reservationsRecues ?? 0, couleur: '#d1fae5', couleurIcone: '#059669' },
+        { icone: '💰', titre: 'Monthly revenue',   valeur: formatPrix(kpi.revenuDuMois), couleur: '#ede9fe', couleurIcone: '#7c3aed' },
+        { icone: '↩',  titre: 'Response rate',     valeur: `${kpi.tauxReponse ?? 0} %`, couleur: '#fef3c7', couleurIcone: '#d97706' },
       ].map((k) => KpiCard(k)).join('')}
     </div>
 
@@ -652,11 +652,11 @@ function renderPublisherView() {
       classes: 'table-card mb-6 animate-in',
       contenu: `
         <div class="table-header">
-          <span class="card-title" style="margin:0">Mes annonces</span>
+          <span class="card-title" style="margin:0">My listings</span>
         </div>
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>Titre</th><th>Prix</th><th>Note</th><th>Statut</th><th>Créée le</th><th></th></tr></thead>
+            <thead><tr><th>Title</th><th>Price</th><th>Rating</th><th>Status</th><th>Created on</th><th></th></tr></thead>
             <tbody>${lignesAnnonces}</tbody>
           </table>
         </div>`,
@@ -666,11 +666,11 @@ function renderPublisherView() {
       classes: 'animate-in',
       contenu: `
         <div class="table-header">
-          <span class="card-title" style="margin:0">Dernières réservations reçues</span>
+          <span class="card-title" style="margin:0">Latest bookings received</span>
         </div>
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>#</th><th>Date</th><th>Groupe</th></tr></thead>
+            <thead><tr><th>#</th><th>Date</th><th>Group</th></tr></thead>
             <tbody>${lignesResa}</tbody>
           </table>
         </div>`,
@@ -691,9 +691,9 @@ async function renderActivitiesTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Mes Activités</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">My Activities</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const reservations = await appelApi('/dashboard/activites');
@@ -721,8 +721,8 @@ function afficherCalendrier(reservations) {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Mes Activités</h1>
-        <p class="view-subtitle">${reservations.length} réservation(s) au total.</p>
+        <h1 class="view-title">My Activities</h1>
+        <p class="view-subtitle">${reservations.length} booking(s) total.</p>
       </div>
     </header>
     <div class="cal-layout animate-in">
@@ -742,9 +742,9 @@ function renduCalendrierMois(parJour) {
   const root = document.getElementById('cal-root');
   if (!root) return;
 
-  const JOURS  = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-  const MOIS   = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                  'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const JOURS  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MOIS   = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
 
   const premier = new Date(_calAnnee, _calMois, 1);
   const dernier  = new Date(_calAnnee, _calMois + 1, 0);
@@ -822,8 +822,8 @@ function selJourCal(cle) {
     if (!events.length) { panel.innerHTML = renduDetailVide(); return; }
 
     const [annee, mois, jour] = cle.split('-');
-    const MOIS_COMPLET = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                         'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    const MOIS_COMPLET = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
     panel.innerHTML = `
       <div class="cal-detail-titre">${parseInt(jour)} ${MOIS_COMPLET[parseInt(mois)-1]} ${annee}</div>
       <div class="cal-detail-liste">
@@ -836,11 +836,11 @@ function selJourCal(cle) {
                 ${img ? `<img src="${img}" alt="">` : `<span style="font-size:1.5rem">${emojiTheme(a.theme)}</span>`}
               </div>
               <div style="flex:1;min-width:0">
-                <div class="cal-detail-name">${escapeHtml(a.title || 'Activité')}</div>
+                <div class="cal-detail-name">${escapeHtml(a.title || 'Activity')}</div>
                 ${a.address ? `<div class="cal-detail-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
                 <div style="display:flex;gap:.5rem;margin-top:.35rem;flex-wrap:wrap">
-                  <span class="badge-status badge-actif"><i class="bi bi-check-circle-fill" style="font-size:.55rem"></i> Confirmé</span>
-                  <span style="font-size:.72rem;color:var(--text-muted)">${r.group_size ?? 1} pers.</span>
+                  <span class="badge-status badge-actif"><i class="bi bi-check-circle-fill" style="font-size:.55rem"></i> Confirmed</span>
+                  <span style="font-size:.72rem;color:var(--text-muted)">${r.group_size ?? 1} ppl.</span>
                   ${a.price != null ? `<span style="font-size:.72rem;font-weight:700;color:var(--accent)">${formatPrix(a.price)}</span>` : ''}
                 </div>
               </div>
@@ -854,7 +854,7 @@ function renduDetailVide() {
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.75rem;color:var(--text-muted);padding:2rem;text-align:center">
       <i class="bi bi-calendar3" style="font-size:2.5rem;opacity:.35"></i>
-      <p style="font-size:.85rem">Sélectionne un jour<br>pour voir tes activités</p>
+      <p style="font-size:.85rem">Select a day<br>to view your activities</p>
     </div>`;
 }
 
@@ -868,9 +868,9 @@ async function renderFavoritesTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Mes Favoris</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">My Favorites</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const favoris = await appelApi('/dashboard/favoris');
@@ -890,38 +890,38 @@ function afficherFavoris(favoris) {
         const a = f.activity || {};
         const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
         const note = (a.average_rating || 0).toFixed(1);
-        const prix = a.price != null ? `${Number(a.price).toLocaleString('fr-FR')}€` : 'Gratuit';
+        const prix = a.price != null ? `${Number(a.price).toLocaleString('en-US')}€` : 'Free';
         const emoji = emojiTheme(a.theme);
         return `
           <div class="home-activity-card" style="animation:fadeUp .35s ${0.04*i}s ease both;position:relative">
             ${img
               ? `<img src="${img}" class="home-card-img" alt="${escapeHtml(a.title || '')}" loading="lazy">`
               : `<div class="home-card-img-placeholder">${emoji}</div>`}
-            <button type="button" class="fav-remove-btn" data-fav-id="${f.id_activity}" title="Retirer des favoris"
+            <button type="button" class="fav-remove-btn" data-fav-id="${f.id_activity}" title="Remove from favorites"
               style="position:absolute;top:.6rem;right:.6rem;z-index:1">
               <i class="bi bi-heart-fill"></i>
             </button>
             <div class="home-card-content">
               <h2 class="home-card-title">${escapeHtml(a.title || '—')}</h2>
-              <p><strong>Lieu :</strong> ${escapeHtml(a.address || '—')}</p>
-              <p><strong>Prix :</strong> ${prix}</p>
-              <p><strong>Note :</strong> ⭐ ${note}</p>
+              <p><strong>Location:</strong> ${escapeHtml(a.address || '—')}</p>
+              <p><strong>Price:</strong> ${prix}</p>
+              <p><strong>Rating:</strong> ⭐ ${note}</p>
             </div>
           </div>`;
       }).join('')
     : `<div class="explorer-empty" style="grid-column:1/-1">
         <span style="font-size:2.5rem">💔</span>
-        <p>Aucun favori pour le moment.</p>
+        <p>No favorites yet.</p>
         <button type="button" class="btn-primary" onclick="setOnglet('explore')">
-          <i class="bi bi-search"></i> Explorer les activités
+          <i class="bi bi-search"></i> Explore activities
         </button>
       </div>`;
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Mes Favoris</h1>
-        <p class="view-subtitle">${favoris.length} activité(s) sauvegardée(s).</p>
+        <h1 class="view-title">My Favorites</h1>
+        <p class="view-subtitle">${favoris.length} saved activity(ies).</p>
       </div>
     </header>
     <div class="explorer-grid" id="favoris-grid">${cartes}</div>`;
@@ -940,11 +940,11 @@ function afficherFavoris(favoris) {
           btn.closest('.explorer-card').remove();
           const grid = document.getElementById('favoris-grid');
           const count = main.querySelector('.view-subtitle');
-          if (count) count.textContent = `${grid?.children.length ?? 0} activité(s) sauvegardée(s).`;
+          if (count) count.textContent = `${grid?.children.length ?? 0} saved activity(ies).`;
         }, 260);
       } catch (err) {
         btn.disabled = false;
-        alert('Erreur : ' + err.message);
+        alert('Error: ' + err.message);
       }
     });
   });
@@ -973,9 +973,9 @@ async function renderExplorerTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Explorer</h1><p class="view-subtitle">Chargement des activités…</p></div>
+      <div><h1 class="view-title">Explore</h1><p class="view-subtitle">Loading activities…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     if (!_explorerCache) {
@@ -1000,8 +1000,8 @@ function afficherExplorer(activites) {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Explorer</h1>
-        <p class="view-subtitle" id="explorer-count">${activites.length} activité(s) disponible(s).</p>
+        <h1 class="view-title">Explore</h1>
+        <p class="view-subtitle" id="explorer-count">${activites.length} activity(ies) available.</p>
       </div>
     </header>
 
@@ -1009,23 +1009,23 @@ function afficherExplorer(activites) {
       <div class="explorer-filter-row">
         <div class="explorer-search-wrap">
           <i class="bi bi-search" style="color:var(--text-muted)"></i>
-          <input type="text" id="exp-search" placeholder="Rechercher une activité…" autocomplete="off">
+          <input type="text" id="exp-search" placeholder="Search for an activity…" autocomplete="off">
         </div>
         <select id="exp-theme" class="explorer-select">
-          <option value="">Tous les thèmes</option>
+          <option value="">All themes</option>
           ${options}
         </select>
         <select id="exp-prix" class="explorer-select">
-          <option value="">Tous les prix</option>
-          <option value="25">Moins de 25 €</option>
-          <option value="50">Moins de 50 €</option>
-          <option value="100">Moins de 100 €</option>
-          <option value="200">Moins de 200 €</option>
+          <option value="">All prices</option>
+          <option value="25">Under €25</option>
+          <option value="50">Under €50</option>
+          <option value="100">Under €100</option>
+          <option value="200">Under €200</option>
         </select>
         <select id="exp-tri" class="explorer-select">
-          <option value="note">Mieux notés</option>
-          <option value="prix-asc">Prix croissant</option>
-          <option value="prix-desc">Prix décroissant</option>
+          <option value="note">Best rated</option>
+          <option value="prix-asc">Price: low to high</option>
+          <option value="prix-desc">Price: high to low</option>
         </select>
       </div>
       <div id="exp-tags" class="explorer-tags"></div>
@@ -1058,15 +1058,15 @@ function appliquerFiltresExplorer(activites) {
 
   const grid = document.getElementById('explorer-grid');
   const count = document.getElementById('explorer-count');
-  if (count) count.textContent = `${liste.length} activité(s) trouvée(s).`;
+  if (count) count.textContent = `${liste.length} activity(ies) found.`;
 
   if (!grid) return;
   if (!liste.length) {
     grid.innerHTML = `
       <div class="explorer-empty">
         <span style="font-size:2.5rem">🔍</span>
-        <p>Aucune activité ne correspond à vos filtres.</p>
-        <button type="button" class="btn-outline" onclick="resetFiltresExplorer()">Réinitialiser les filtres</button>
+        <p>No activities match your filters.</p>
+        <button type="button" class="btn-outline" onclick="resetFiltresExplorer()">Reset filters</button>
       </div>`;
     return;
   }
@@ -1074,7 +1074,7 @@ function appliquerFiltresExplorer(activites) {
   grid.innerHTML = liste.map((a, i) => {
     const img = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
     const note = (a.average_rating || 0).toFixed(1);
-    const prix = a.price != null ? `${Number(a.price).toLocaleString('fr-FR')}€` : 'Gratuit';
+    const prix = a.price != null ? `${Number(a.price).toLocaleString('en-US')}€` : 'Free';
     const emoji = emojiTheme(a.theme);
     return `
       <div class="home-activity-card" style="animation:fadeUp .35s ${0.04 * i}s ease both" onclick="">
@@ -1083,9 +1083,9 @@ function appliquerFiltresExplorer(activites) {
           : `<div class="home-card-img-placeholder">${emoji}</div>`}
         <div class="home-card-content">
           <h2 class="home-card-title">${escapeHtml(a.title || '—')}</h2>
-          <p><strong>Lieu :</strong> ${escapeHtml(a.address || '—')}</p>
-          <p><strong>Prix :</strong> ${prix}</p>
-          <p><strong>Note :</strong> ⭐ ${note}</p>
+          <p><strong>Location:</strong> ${escapeHtml(a.address || '—')}</p>
+          <p><strong>Price:</strong> ${prix}</p>
+          <p><strong>Rating:</strong> ⭐ ${note}</p>
         </div>
       </div>`;
   }).join('');
@@ -1119,7 +1119,7 @@ function mettreAJourTags() {
   const liste = [];
   if (f.search)  liste.push({ label: `"${f.search}"`, key: 'search' });
   if (f.theme)   liste.push({ label: `${emojiTheme(f.theme)} ${f.theme}`, key: 'theme' });
-  if (f.maxPrix) liste.push({ label: `Moins de ${f.maxPrix} €`, key: 'maxPrix' });
+  if (f.maxPrix) liste.push({ label: `Under €${f.maxPrix}`, key: 'maxPrix' });
 
   tags.innerHTML = liste.map((t) => `
     <span class="explorer-tag">
@@ -1160,9 +1160,9 @@ async function renderMessagingTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Messagerie</h1><p class="view-subtitle">Chargement des conversations…</p></div>
+      <div><h1 class="view-title">Messaging</h1><p class="view-subtitle">Loading conversations…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const conversations = await appelApi('/dashboard/conversations');
@@ -1172,7 +1172,7 @@ async function renderMessagingTab() {
       ? conversations.map((conv, i) => {
           const isUnread = !conv.is_read;
           const time = formatDateConv(conv.last_message_at);
-          const nomAutre = conv.other_user_id ? `Utilisateur #${conv.other_user_id}` : 'Inconnu';
+          const nomAutre = conv.other_user_id ? `User #${conv.other_user_id}` : 'Unknown';
           return `
             <div class="conv-dash-item ${isUnread ? 'unread' : ''}"
                  data-conv-id="${conv.id}"
@@ -1184,25 +1184,25 @@ async function renderMessagingTab() {
                 <div class="conv-dash-name">${escapeHtml(nomAutre)}</div>
                 <div class="conv-dash-last">
                   ${conv.is_mine ? '<i class="bi bi-arrow-up-right" style="color:var(--accent);font-size:.7rem"></i> ' : ''}
-                  ${conv.last_message ? escapeHtml(truncate(conv.last_message, 45)) : '<em>Nouvelle conversation</em>'}
+                  ${conv.last_message ? escapeHtml(truncate(conv.last_message, 45)) : '<em>New conversation</em>'}
                 </div>
               </div>
               <div class="conv-dash-meta">
                 ${time ? `<span class="conv-dash-time">${time}</span>` : ''}
-                ${isUnread ? '<span class="conv-dash-badge"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Non lu</span>' : ''}
+                ${isUnread ? '<span class="conv-dash-badge"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Unread</span>' : ''}
               </div>
             </div>`;
         }).join('')
-      : '<p style="color:var(--text-muted);font-size:.85rem;padding:.75rem 0">Aucune conversation pour le moment.</p>';
+      : '<p style="color:var(--text-muted);font-size:.85rem;padding:.75rem 0">No conversations yet.</p>';
 
     main.innerHTML = `
       <header class="view-header animate-in">
         <div>
-          <h1 class="view-title">Messagerie</h1>
-          <p class="view-subtitle">${conversations.length} conversation(s) active(s).</p>
+          <h1 class="view-title">Messaging</h1>
+          <p class="view-subtitle">${conversations.length} active conversation(s).</p>
         </div>
         <a href="../Page/Messagerie.html" class="btn-primary">
-          <i class="bi bi-chat-dots-fill"></i> Ouvrir la messagerie
+          <i class="bi bi-chat-dots-fill"></i> Open messaging
         </a>
       </header>
       ${Card({ classes: 'animate-in', contenu: `<div class="conv-dash-list">${lignes}</div>` })}`;
@@ -1223,9 +1223,9 @@ async function renderMessagingTab() {
 // ============================================================
 
 const RATING_CONFIG = {
-  like:      { label: 'J\'ai adoré',    icon: 'bi-hand-thumbs-up-fill',  color: '#059669', bg: '#d1fae5' },
-  dislike:   { label: 'Pas pour moi',   icon: 'bi-hand-thumbs-down-fill', color: '#dc2626', bg: '#fee2e2' },
-  recommend: { label: 'Je conseille',   icon: 'bi-star-fill',             color: '#d97706', bg: '#fef3c7' },
+  like:      { label: 'Loved it',      icon: 'bi-hand-thumbs-up-fill',  color: '#059669', bg: '#d1fae5' },
+  dislike:   { label: 'Not for me',    icon: 'bi-hand-thumbs-down-fill', color: '#dc2626', bg: '#fee2e2' },
+  recommend: { label: 'Recommended',   icon: 'bi-star-fill',             color: '#d97706', bg: '#fef3c7' },
 };
 
 async function renderHistoriqueTab() {
@@ -1235,11 +1235,11 @@ async function renderHistoriqueTab() {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Historique</h1>
-        <p class="view-subtitle">Vos activités passées — classez-les et partagez vos avis.</p>
+        <h1 class="view-title">History</h1>
+        <p class="view-subtitle">Your past activities — rate them and share your opinions.</p>
       </div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const historique = await appelApi('/dashboard/historique');
@@ -1264,7 +1264,7 @@ function afficherHistorique(items) {
 
   function carteHistorique(item) {
     const act = item.event?.activity || {};
-    const date = item.date ? new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const date = item.date ? new Date(item.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     const img = (act.images && act.images[0]) ? act.images[0] : '';
     const rating = item.user_rating;
     const cfg = rating ? RATING_CONFIG[rating] : null;
@@ -1276,7 +1276,7 @@ function afficherHistorique(items) {
           ${cfg ? `<div class="hist-badge" style="background:${cfg.bg};color:${cfg.color}"><i class="bi ${cfg.icon}"></i> ${cfg.label}</div>` : ''}
         </div>
         <div class="hist-card-body">
-          <div class="hist-card-title">${escapeHtml(act.title || 'Activité')}</div>
+          <div class="hist-card-title">${escapeHtml(act.title || 'Activity')}</div>
           <div class="hist-card-meta">
             <span><i class="bi bi-calendar3"></i> ${date}</span>
             ${act.address ? `<span><i class="bi bi-geo-alt"></i> ${escapeHtml(act.address)}</span>` : ''}
@@ -1300,7 +1300,7 @@ function afficherHistorique(items) {
 
     document.getElementById('hist-list').innerHTML = filtered.length
       ? filtered.map(carteHistorique).join('')
-      : `<p style="color:var(--text-muted);text-align:center;padding:3rem 0;grid-column:1/-1">Aucune activité dans cette catégorie.</p>`;
+      : `<p style="color:var(--text-muted);text-align:center;padding:3rem 0;grid-column:1/-1">No activities in this category.</p>`;
 
     attachRatingListeners();
   }
@@ -1308,15 +1308,15 @@ function afficherHistorique(items) {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Historique</h1>
-        <p class="view-subtitle">Vos activités passées — classez-les et partagez vos avis.</p>
+        <h1 class="view-title">History</h1>
+        <p class="view-subtitle">Your past activities — rate them and share your opinions.</p>
       </div>
     </header>
 
     ${!items.length ? `
       <div class="glass-card animate-in" style="text-align:center;padding:3rem">
         <i class="bi bi-clock-history" style="font-size:3rem;color:var(--accent-mid);display:block;margin-bottom:1rem"></i>
-        <p style="color:var(--text-muted)">Vous n'avez encore participé à aucune activité.</p>
+        <p style="color:var(--text-muted)">You haven't participated in any activity yet.</p>
       </div>` : `
 
     <!-- Stats rapides -->
@@ -1330,18 +1330,18 @@ function afficherHistorique(items) {
       <div class="hist-stat-pill" style="background:var(--accent-soft);color:var(--accent)">
         <i class="bi bi-clock-history"></i>
         <span class="hist-stat-count">${groups.none.length}</span>
-        <span>Non classées</span>
+        <span>Unrated</span>
       </div>
     </div>
 
     <!-- Filtres -->
     <div class="hist-filters animate-in">
       ${[
-        { key: 'all', label: 'Toutes', icon: 'bi-grid' },
-        { key: 'like', label: 'Adorées', icon: 'bi-hand-thumbs-up-fill' },
-        { key: 'recommend', label: 'Conseillées', icon: 'bi-star-fill' },
-        { key: 'dislike', label: 'Pas pour moi', icon: 'bi-hand-thumbs-down-fill' },
-        { key: 'none', label: 'Non classées', icon: 'bi-question-circle' },
+        { key: 'all', label: 'All', icon: 'bi-grid' },
+        { key: 'like', label: 'Loved', icon: 'bi-hand-thumbs-up-fill' },
+        { key: 'recommend', label: 'Recommended', icon: 'bi-star-fill' },
+        { key: 'dislike', label: 'Not for me', icon: 'bi-hand-thumbs-down-fill' },
+        { key: 'none', label: 'Unrated', icon: 'bi-question-circle' },
       ].map(f => `
         <button class="hist-filter-btn ${f.key === 'all' ? 'active' : ''}" data-filter="${f.key}">
           <i class="bi ${f.icon}"></i> ${f.label}
@@ -1407,17 +1407,17 @@ async function renderParrainageTab() {
   const points = profil.referral_points || 0;
 
   const paliers = [
-    { pts: 50,  label: '5% de réduction',     icon: 'bi-tag-fill',        color: '#059669' },
-    { pts: 100, label: '10% de réduction',    icon: 'bi-percent',          color: '#2563eb' },
-    { pts: 200, label: 'Activité offerte',    icon: 'bi-gift-fill',        color: '#7c3aed' },
-    { pts: 500, label: 'Statut VIP 1 mois',  icon: 'bi-star-fill',        color: '#d97706' },
+    { pts: 50,  label: '5% discount',      icon: 'bi-tag-fill',        color: '#059669' },
+    { pts: 100, label: '10% discount',     icon: 'bi-percent',          color: '#2563eb' },
+    { pts: 200, label: 'Free activity',    icon: 'bi-gift-fill',        color: '#7c3aed' },
+    { pts: 500, label: 'VIP status 1 month', icon: 'bi-star-fill',     color: '#d97706' },
   ];
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Parrainage</h1>
-        <p class="view-subtitle">Invitez vos proches et gagnez des réductions.</p>
+        <h1 class="view-title">Referral</h1>
+        <p class="view-subtitle">Invite your friends and earn discounts.</p>
       </div>
     </header>
 
@@ -1428,21 +1428,21 @@ async function renderParrainageTab() {
         <div class="parr-hero-icon"><i class="bi bi-people-fill"></i></div>
         <div>
           <div class="parr-pts-val">${points} pts</div>
-          <div class="parr-pts-label">Points de parrainage cumulés</div>
+          <div class="parr-pts-label">Referral points earned</div>
         </div>
       </div>
 
       <!-- Lien de parrainage -->
       <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">🔗 Votre lien de parrainage</div>
+        <div class="card-title">🔗 Your referral link</div>
         <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
-          Partagez ce lien. Pour chaque ami qui s'inscrit et fait sa première réservation,
-          vous gagnez <strong>10 points</strong>.
+          Share this link. For each friend who signs up and makes their first booking,
+          you earn <strong>10 points</strong>.
         </p>
         <div class="parr-link-row">
           <div class="parr-link-box" id="parr-link-text">${link}</div>
-          <button class="btn-primary parr-copy-btn" id="parr-copy" title="Copier le lien">
-            <i class="bi bi-clipboard-fill"></i> Copier
+          <button class="btn-primary parr-copy-btn" id="parr-copy" title="Copy link">
+            <i class="bi bi-clipboard-fill"></i> Copy
           </button>
         </div>
         <div id="parr-copy-feedback" style="font-size:.78rem;color:#059669;margin-top:.5rem;min-height:1rem"></div>
@@ -1458,7 +1458,7 @@ async function renderParrainageTab() {
             <i class="bi bi-linkedin"></i> LinkedIn
           </a>
           <a class="parr-share-btn" style="background:#25d366"
-             href="https://wa.me/?text=${encodeURIComponent('Rejoins Meet&Do avec mon lien : ' + link)}" target="_blank">
+             href="https://wa.me/?text=${encodeURIComponent('Join Meet&Do with my link: ' + link)}" target="_blank">
             <i class="bi bi-whatsapp"></i> WhatsApp
           </a>
         </div>
@@ -1466,9 +1466,9 @@ async function renderParrainageTab() {
 
       <!-- Paliers de récompenses -->
       <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">🎁 Récompenses disponibles</div>
+        <div class="card-title">🎁 Available rewards</div>
         <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1.25rem">
-          Accumulez des points pour débloquer des avantages exclusifs.
+          Accumulate points to unlock exclusive benefits.
         </p>
         <div class="parr-paliers">
           ${paliers.map(p => {
@@ -1489,8 +1489,8 @@ async function renderParrainageTab() {
                   </div>
                   <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">
                     ${atteint
-                      ? `<span style="color:${p.color};font-weight:600"><i class="bi bi-check-circle-fill"></i> Débloqué !</span>`
-                      : `${points}/${p.pts} pts — encore ${p.pts - points} pts`}
+                      ? `<span style="color:${p.color};font-weight:600"><i class="bi bi-check-circle-fill"></i> Unlocked!</span>`
+                      : `${points}/${p.pts} pts — ${p.pts - points} pts to go`}
                   </div>
                 </div>
               </div>`;
@@ -1500,13 +1500,13 @@ async function renderParrainageTab() {
 
       <!-- Comment ça marche -->
       <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">❓ Comment ça marche ?</div>
+        <div class="card-title">❓ How does it work?</div>
         <div class="parr-steps">
-          <div class="parr-step"><div class="parr-step-num">1</div><div>Copiez votre lien unique ci-dessus</div></div>
-          <div class="parr-step"><div class="parr-step-num">2</div><div>Partagez-le à vos amis par message, réseaux sociaux…</div></div>
-          <div class="parr-step"><div class="parr-step-num">3</div><div>Votre ami s'inscrit avec votre lien</div></div>
-          <div class="parr-step"><div class="parr-step-num">4</div><div>Il fait sa première réservation → vous gagnez <strong>10 pts</strong></div></div>
-          <div class="parr-step"><div class="parr-step-num">5</div><div>Utilisez vos points pour des réductions lors de votre prochaine réservation</div></div>
+          <div class="parr-step"><div class="parr-step-num">1</div><div>Copy your unique link above</div></div>
+          <div class="parr-step"><div class="parr-step-num">2</div><div>Share it with your friends via message, social media…</div></div>
+          <div class="parr-step"><div class="parr-step-num">3</div><div>Your friend signs up with your link</div></div>
+          <div class="parr-step"><div class="parr-step-num">4</div><div>They make their first booking → you earn <strong>10 pts</strong></div></div>
+          <div class="parr-step"><div class="parr-step-num">5</div><div>Use your points for discounts on your next booking</div></div>
         </div>
       </div>
 
@@ -1516,7 +1516,7 @@ async function renderParrainageTab() {
     navigator.clipboard.writeText(link).then(() => {
       const fb = document.getElementById('parr-copy-feedback');
       if (fb) {
-        fb.innerHTML = '<i class="bi bi-check-circle-fill"></i> Lien copié dans le presse-papier !';
+        fb.innerHTML = '<i class="bi bi-check-circle-fill"></i> Link copied to clipboard!';
         setTimeout(() => { if (fb) fb.innerHTML = ''; }, 3000);
       }
     });
@@ -1535,28 +1535,28 @@ function renderMonCompte() {
 
   const sectionPublisher = (!isPublisher && role === 'user') ? `
     <div class="glass-card animate-in" style="margin-top:1.5rem;border:2px solid var(--accent-mid)">
-      <div class="card-title">📢 Devenir éditeur d'annonces</div>
+      <div class="card-title">📢 Become a listing publisher</div>
       ${isPending ? `
         <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--accent-soft);border-radius:var(--radius-sm)">
           <span style="font-size:1.4rem">⏳</span>
           <div>
-            <div style="font-weight:600;font-size:.9rem;color:var(--accent)">Demande en cours de traitement</div>
+            <div style="font-weight:600;font-size:.9rem;color:var(--accent)">Request being processed</div>
             <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
-              Un administrateur examinera votre demande prochainement.
+              An administrator will review your request soon.
             </div>
           </div>
         </div>` : `
         <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
-          En devenant éditeur, vous pourrez publier vos propres annonces d'activités
-          sur la plateforme et recevoir des réservations de la communauté Meet&Do.
+          By becoming a publisher, you can post your own activity listings
+          on the platform and receive bookings from the Meet&Do community.
         </p>
         <ul style="font-size:.82rem;color:var(--text-muted);margin-bottom:1.25rem;padding-left:1.2rem;line-height:1.8">
-          <li>Créez et gérez vos activités facilement</li>
-          <li>Recevez des réservations en temps réel</li>
-          <li>Accédez à vos statistiques de performance</li>
+          <li>Create and manage your activities easily</li>
+          <li>Receive bookings in real time</li>
+          <li>Access your performance statistics</li>
         </ul>
         <button type="button" class="btn-primary" id="btn-request-publisher">
-          <i class="bi bi-send-fill"></i> Envoyer ma demande
+          <i class="bi bi-send-fill"></i> Send my request
         </button>`}
     </div>` : '';
 
@@ -1568,8 +1568,8 @@ function renderMonCompte() {
   return `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Mon Compte</h1>
-        <p class="view-subtitle">Gérez vos informations personnelles.</p>
+        <h1 class="view-title">My Account</h1>
+        <p class="view-subtitle">Manage your personal information.</p>
       </div>
     </header>
 
@@ -1577,7 +1577,7 @@ function renderMonCompte() {
 
       <!-- Photo de profil -->
       <div class="glass-card animate-in" style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.25rem">
-        <div class="account-avatar-wrap" id="avatar-wrap" title="Changer la photo">
+        <div class="account-avatar-wrap" id="avatar-wrap" title="Change photo">
           ${avatarHtml}
           <div class="account-avatar-overlay"><i class="bi bi-camera-fill"></i></div>
           <input type="file" id="avatar-input" accept="image/*" style="display:none">
@@ -1590,20 +1590,20 @@ function renderMonCompte() {
       </div>
 
       <form class="glass-card animate-in" id="form-profil">
-        <div class="card-title">👤 Informations personnelles</div>
+        <div class="card-title">👤 Personal information</div>
 
         <div id="form-profil-feedback" style="margin-bottom:.75rem"></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Prénom</label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">First name</label>
             <input type="text" name="firstname" value="${profil.firstname || ''}"
               style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                      font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
               onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
           </div>
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Nom</label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Last name</label>
             <input type="text" name="lastname" value="${profil.lastname || ''}"
               style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                      font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
@@ -1616,11 +1616,11 @@ function renderMonCompte() {
           <input type="email" value="${profil.email || ''}" disabled
             style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.06);border-radius:.75rem;
                    font-family:Inter,sans-serif;font-size:.88rem;background:var(--bg);color:var(--text-muted);cursor:not-allowed">
-          <p style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem">L'email ne peut pas être modifié.</p>
+          <p style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem">Email cannot be changed.</p>
         </div>
 
         <div style="margin-bottom:1.25rem">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Adresse</label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Address</label>
           <input type="text" name="address" value="${profil.address || ''}"
             style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                    font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
@@ -1628,43 +1628,43 @@ function renderMonCompte() {
         </div>
 
         <button type="submit" class="btn-primary">
-          <i class="bi bi-check-lg"></i> Enregistrer les modifications
+          <i class="bi bi-check-lg"></i> Save changes
         </button>
       </form>
 
-      <!-- Réservations -->
+      <!-- Bookings -->
       <div class="glass-card animate-in" id="compte-reservations-card" style="margin-top:1.25rem">
-        <div class="card-title">📅 Mes réservations</div>
+        <div class="card-title">📅 My bookings</div>
         <div id="compte-reservations-list"><div class="dash-loader" style="min-height:5rem"><div class="dash-spinner"></div></div></div>
       </div>
 
       <!-- Changer le mot de passe -->
       <form class="glass-card animate-in" id="form-password" style="margin-top:1.25rem">
-        <div class="card-title">🔒 Changer le mot de passe</div>
+        <div class="card-title">🔒 Change password</div>
         <div id="form-password-feedback" style="margin-bottom:.75rem"></div>
         <div style="margin-bottom:1rem">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Mot de passe actuel</label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Current password</label>
           <input type="password" id="pwd-current" autocomplete="current-password"
             style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                    font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
         </div>
         <div style="margin-bottom:1rem">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Nouveau mot de passe</label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">New password</label>
           <input type="password" id="pwd-new" autocomplete="new-password"
             style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                    font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
         </div>
         <div style="margin-bottom:1.25rem">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Confirmer le nouveau mot de passe</label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.35rem">Confirm new password</label>
           <input type="password" id="pwd-confirm" autocomplete="new-password"
             style="width:100%;padding:.6rem .9rem;border:1.5px solid rgba(0,0,0,0.1);border-radius:.75rem;
                    font-family:Inter,sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;background:var(--bg)"
             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
         </div>
         <button type="submit" class="btn-primary">
-          <i class="bi bi-shield-lock-fill"></i> Mettre à jour le mot de passe
+          <i class="bi bi-shield-lock-fill"></i> Update password
         </button>
       </form>
 
@@ -1688,9 +1688,9 @@ async function renderPublisherActivitesTab() {
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Mes Activités</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">My Activities</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const activites = await appelApi('/dashboard/publisher/activites');
@@ -1711,23 +1711,23 @@ function afficherPublisherActivites(activites) {
       <div class="pub-act-vue-toggle">
         <button type="button" class="pub-vue-btn ${_pubActVue === 'grid' ? 'active' : ''}"
           onclick="changerVuePubAct('grid')">
-          <i class="bi bi-grid-3x3-gap-fill"></i> Cartes
+          <i class="bi bi-grid-3x3-gap-fill"></i> Cards
         </button>
         <button type="button" class="pub-vue-btn ${_pubActVue === 'calendar' ? 'active' : ''}"
           onclick="changerVuePubAct('calendar')">
-          <i class="bi bi-calendar3"></i> Calendrier
+          <i class="bi bi-calendar3"></i> Calendar
         </button>
       </div>
       <button type="button" class="btn-primary" style="margin-left:auto">
-        <i class="bi bi-plus-lg"></i> Nouvelle activité
+        <i class="bi bi-plus-lg"></i> New activity
       </button>
     </div>`;
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Mes Activités</h1>
-        <p class="view-subtitle">${activites.length} activité(s) créée(s).</p>
+        <h1 class="view-title">My Activities</h1>
+        <p class="view-subtitle">${activites.length} created activity(ies).</p>
       </div>
     </header>
     ${toolbar}
@@ -1740,7 +1740,7 @@ function changerVuePubAct(vue) {
   _pubActVue = vue;
   // Mettre à jour les boutons toggle
   document.querySelectorAll('.pub-vue-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.textContent.trim().toLowerCase().includes(vue === 'grid' ? 'carte' : 'calendrier'));
+    btn.classList.toggle('active', btn.textContent.trim().toLowerCase().includes(vue === 'grid' ? 'card' : 'calendar'));
   });
   rendrePubActContenu(_pubActData);
 }
@@ -1757,20 +1757,20 @@ function rendrePubActContenu(activites) {
 
 /* ---- VUE GRILLE ---- */
 function rendrePubGrille(activites, contenu) {
-  const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const MOIS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
 
   const cartes = activites.length
     ? activites.map((a, i) => {
         const img   = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
         const emoji = emojiTheme(a.theme);
-        const prix  = a.price != null ? formatPrix(a.price) : 'Gratuit';
+        const prix  = a.price != null ? formatPrix(a.price) : 'Free';
         const note  = (a.average_rating || 0).toFixed(1);
         const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif">Désactivée</span>'
+          ? '<span class="badge-status badge-inactif">Disabled</span>'
           : a.is_visible
             ? '<span class="badge-status badge-actif">Visible</span>'
-            : '<span class="badge-status badge-attente">Masquée</span>';
+            : '<span class="badge-status badge-attente">Hidden</span>';
 
         const prochaineDate = a.prochaine_date
           ? (() => {
@@ -1794,16 +1794,16 @@ function rendrePubGrille(activites, contenu) {
                 <span><i class="bi bi-tag-fill" style="color:var(--accent)"></i> ${prix}</span>
                 <span><i class="bi bi-star-fill" style="color:#f59e0b"></i> ${note}</span>
                 <span><i class="bi bi-calendar3" style="color:var(--accent)"></i> ${formatDate(a.created_at)}</span>
-                ${a.nb_evenements ? `<span><i class="bi bi-calendar-event" style="color:var(--accent)"></i> ${a.nb_evenements} événement(s)</span>` : ''}
-                ${prochaineDate ? `<span><i class="bi bi-clock-fill" style="color:#059669"></i> Prochain : ${prochaineDate}</span>` : ''}
+                ${a.nb_evenements ? `<span><i class="bi bi-calendar-event" style="color:var(--accent)"></i> ${a.nb_evenements} event(s)</span>` : ''}
+                ${prochaineDate ? `<span><i class="bi bi-clock-fill" style="color:#059669"></i> Next: ${prochaineDate}</span>` : ''}
               </div>
               ${a.description ? `<p class="pub-act-desc">${escapeHtml(truncate(a.description, 120))}</p>` : ''}
               <div class="pub-act-actions">
                 <button type="button" class="btn-primary" style="font-size:.78rem;padding:.4rem .9rem">
-                  <i class="bi bi-pencil-fill"></i> Modifier
+                  <i class="bi bi-pencil-fill"></i> Edit
                 </button>
                 <button type="button" class="btn-outline" style="font-size:.78rem;padding:.4rem .9rem">
-                  <i class="bi bi-eye-fill"></i> Réservations
+                  <i class="bi bi-eye-fill"></i> Bookings
                 </button>
               </div>
             </div>
@@ -1811,8 +1811,8 @@ function rendrePubGrille(activites, contenu) {
       }).join('')
     : `<div class="explorer-empty" style="grid-column:1/-1">
         <span style="font-size:3rem">📋</span>
-        <p style="color:var(--text-muted)">Vous n'avez pas encore créé d'activité.</p>
-        <button type="button" class="btn-primary"><i class="bi bi-plus-lg"></i> Créer une activité</button>
+        <p style="color:var(--text-muted)">You haven't created any activity yet.</p>
+        <button type="button" class="btn-primary"><i class="bi bi-plus-lg"></i> Create an activity</button>
       </div>`;
 
   contenu.innerHTML = `<div class="pub-act-grid">${cartes}</div>`;
@@ -1849,9 +1849,9 @@ function rendrePubCalMois(parJour) {
   const root = document.getElementById('pub-cal-root');
   if (!root) return;
 
-  const JOURS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-  const MOIS_NOM = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                    'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const JOURS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MOIS_NOM = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
 
   const premier  = new Date(_pubCalAnnee, _pubCalMois, 1);
   const dernier  = new Date(_pubCalAnnee, _pubCalMois + 1, 0);
@@ -1944,24 +1944,24 @@ function selJourPubCal(cle, parJourStr) {
     return;
   }
 
-  const MOIS_COMPLET = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                        'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const MOIS_COMPLET = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
   const [annee, mois, jour] = cle.split('-');
   const labelDate = `${parseInt(jour)} ${MOIS_COMPLET[parseInt(mois)-1]} ${annee}`;
 
   panel.innerHTML = `
     <div class="cal-detail-titre">${labelDate}</div>
     <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">
-      ${evts.length} événement(s) ce jour
+      ${evts.length} event(s) this day
     </div>
     <div class="cal-detail-liste">
       ${evts.map((a) => {
         const img    = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
         const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif" style="font-size:.65rem">Désactivée</span>'
+          ? '<span class="badge-status badge-inactif" style="font-size:.65rem">Disabled</span>'
           : a.is_visible
             ? '<span class="badge-status badge-actif" style="font-size:.65rem">Visible</span>'
-            : '<span class="badge-status badge-attente" style="font-size:.65rem">Masquée</span>';
+            : '<span class="badge-status badge-attente" style="font-size:.65rem">Hidden</span>';
         return `
           <div class="cal-detail-item">
             <div class="cal-detail-img">
@@ -1970,7 +1970,7 @@ function selJourPubCal(cle, parJourStr) {
                 : `<span style="font-size:1.5rem">${emojiTheme(a.theme)}</span>`}
             </div>
             <div style="flex:1;min-width:0">
-              <div class="cal-detail-name">${escapeHtml(a.title || 'Activité')}</div>
+              <div class="cal-detail-name">${escapeHtml(a.title || 'Activity')}</div>
               ${a.address ? `<div class="cal-detail-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
               <div style="display:flex;gap:.4rem;margin-top:.35rem;flex-wrap:wrap;align-items:center">
                 ${statut}
@@ -1988,7 +1988,7 @@ function renduPubCalDetailVide() {
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                 height:100%;gap:.75rem;color:var(--text-muted);padding:2rem;text-align:center">
       <i class="bi bi-calendar3" style="font-size:2.5rem;opacity:.35"></i>
-      <p style="font-size:.85rem">Sélectionne un jour<br>pour voir tes événements</p>
+      <p style="font-size:.85rem">Select a day<br>to view your events</p>
     </div>`;
 }
 
@@ -2001,9 +2001,9 @@ async function renderPublisherHistoriqueTab() {
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Historique</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">History</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const historique = await appelApi('/dashboard/publisher/historique');
@@ -2023,7 +2023,7 @@ function afficherPublisherHistorique(items) {
   // Regrouper par activité
   const parActivite = {};
   items.forEach((r) => {
-    const titre = r.event?.activity?.title || 'Activité inconnue';
+    const titre = r.event?.activity?.title || 'Unknown activity';
     if (!parActivite[titre]) parActivite[titre] = [];
     parActivite[titre].push(r);
   });
@@ -2036,7 +2036,7 @@ function afficherPublisherHistorique(items) {
   const lignes = items.length
     ? items.map((r, i) => {
         const act = r.event?.activity || {};
-        const dateR = r.date ? new Date(r.date).toLocaleDateString('fr-FR', {
+        const dateR = r.date ? new Date(r.date).toLocaleDateString('en-US', {
           day: 'numeric', month: 'short', year: 'numeric',
         }) : '—';
         const revenu = (act.price ?? 0) * (r.group_size ?? 1);
@@ -2047,39 +2047,39 @@ function afficherPublisherHistorique(items) {
             <td>
               <span class="badge-status badge-user">
                 <i class="bi bi-people-fill" style="font-size:.6rem"></i>
-                ${r.group_size ?? 1} pers.
+                ${r.group_size ?? 1} ppl.
               </span>
             </td>
             <td style="font-weight:700;color:var(--accent)">${formatPrix(revenu)}</td>
             <td>
               ${r.user_rating
                 ? `<span class="badge-status badge-actif" style="font-size:.7rem">
-                    ${r.user_rating === 'like' ? '👍 Adoré' : r.user_rating === 'recommend' ? '⭐ Conseillé' : '👎 Non apprécié'}
+                    ${r.user_rating === 'like' ? '👍 Loved' : r.user_rating === 'recommend' ? '⭐ Recommended' : '👎 Not liked'}
                   </span>`
                 : '<span style="color:var(--text-muted);font-size:.78rem">—</span>'}
             </td>
           </tr>`;
       }).join('')
     : `<tr><td colspan="5" style="color:var(--text-muted);padding:2rem;text-align:center">
-        Aucune réservation passée pour vos activités.
+        No past bookings for your activities.
       </td></tr>`;
 
   const statsPills = Object.entries(parActivite).slice(0, 4).map(([titre, resa]) => `
     <div class="kpi-card" style="min-width:0">
       <div class="kpi-label" style="font-size:.72rem">${escapeHtml(truncate(titre, 22))}</div>
       <div class="kpi-value">${resa.length}</div>
-      <div class="kpi-trend neutral" style="font-size:.72rem">réservation(s)</div>
+      <div class="kpi-trend neutral" style="font-size:.72rem">booking(s)</div>
     </div>`).join('');
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Historique des réservations</h1>
-        <p class="view-subtitle">${items.length} réservation(s) passée(s) — Revenu total : ${formatPrix(revenuTotal)}</p>
+        <h1 class="view-title">Booking history</h1>
+        <p class="view-subtitle">${items.length} past booking(s) — Total revenue: ${formatPrix(revenuTotal)}</p>
       </div>
       ${items.length ? `
         <button type="button" class="btn-primary" onclick="exporterReservationsPublisher(window._pubHistItems)">
-          <i class="bi bi-download"></i> Exporter CSV
+          <i class="bi bi-download"></i> Export CSV
         </button>` : ''}
     </header>
 
@@ -2089,17 +2089,17 @@ function afficherPublisherHistorique(items) {
       classes: 'table-card animate-in',
       contenu: `
         <div class="table-header">
-          <span class="card-title" style="margin:0">Toutes les réservations reçues</span>
+          <span class="card-title" style="margin:0">All received bookings</span>
         </div>
         <div class="dash-table-wrap">
           <table class="dash-table">
             <thead>
               <tr>
-                <th>Activité</th>
+                <th>Activity</th>
                 <th>Date</th>
-                <th>Groupe</th>
-                <th>Revenu</th>
-                <th>Avis client</th>
+                <th>Group</th>
+                <th>Revenue</th>
+                <th>Customer review</th>
               </tr>
             </thead>
             <tbody>${lignes}</tbody>
@@ -2117,9 +2117,9 @@ async function renderPublisherStatsTab() {
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Statistiques</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Statistics</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const stats = await appelApi('/dashboard/publisher/statistiques');
@@ -2158,21 +2158,21 @@ function afficherPublisherStats(stats) {
             </div>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="4" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucune donnée.</td></tr>';
+    : '<tr><td colspan="4" style="color:var(--text-muted);padding:1.5rem;text-align:center">No data.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Statistiques</h1>
-        <p class="view-subtitle">Performance de vos activités sur les 6 derniers mois.</p>
+        <h1 class="view-title">Statistics</h1>
+        <p class="view-subtitle">Your activities performance over the last 6 months.</p>
       </div>
     </header>
 
     <div class="kpi-grid mb-6 animate-in">
-      ${KpiCard({ icone: '💰', titre: 'Revenu total (6 mois)', valeur: formatPrix(stats.revenuTotal || 0), couleur: '#dbeafe', couleurIcone: '#2563eb' })}
-      ${KpiCard({ icone: '📆', titre: 'Réservations reçues',   valeur: stats.totalReservations || 0,      couleur: '#d1fae5', couleurIcone: '#059669' })}
-      ${KpiCard({ icone: '📋', titre: 'Annonces actives',       valeur: stats.annoncesActives || 0,         couleur: '#ede9fe', couleurIcone: '#7c3aed' })}
-      ${KpiCard({ icone: '📉', titre: 'Annonces inactives',     valeur: stats.annoncesInactives || 0,       couleur: '#fef3c7', couleurIcone: '#d97706' })}
+      ${KpiCard({ icone: '💰', titre: 'Total revenue (6 months)', valeur: formatPrix(stats.revenuTotal || 0), couleur: '#dbeafe', couleurIcone: '#2563eb' })}
+      ${KpiCard({ icone: '📆', titre: 'Bookings received',        valeur: stats.totalReservations || 0,      couleur: '#d1fae5', couleurIcone: '#059669' })}
+      ${KpiCard({ icone: '📋', titre: 'Active listings',          valeur: stats.annoncesActives || 0,         couleur: '#ede9fe', couleurIcone: '#7c3aed' })}
+      ${KpiCard({ icone: '📉', titre: 'Inactive listings',        valeur: stats.annoncesInactives || 0,       couleur: '#fef3c7', couleurIcone: '#d97706' })}
     </div>
 
     <div class="two-col mb-6">
@@ -2180,22 +2180,22 @@ function afficherPublisherStats(stats) {
         classes: 'chart-card animate-in',
         contenu: `
           <div class="chart-header">
-            <span class="chart-title">Revenus mensuels</span>
-            <span class="chart-badge">6 derniers mois</span>
+            <span class="chart-title">Monthly revenue</span>
+            <span class="chart-badge">Last 6 months</span>
           </div>
           <div class="chart-wrapper">
-            ${revMois.length ? creerGraphiqueArea(revMois, 'var(--accent)') : '<p style="color:var(--text-muted);padding:1rem">Données insuffisantes.</p>'}
+            ${revMois.length ? creerGraphiqueArea(revMois, 'var(--accent)') : '<p style="color:var(--text-muted);padding:1rem">Insufficient data.</p>'}
           </div>`,
       })}
       ${Card({
         classes: 'chart-card animate-in',
         contenu: `
           <div class="chart-header">
-            <span class="chart-title">Réservations par mois</span>
-            <span class="chart-badge">6 derniers mois</span>
+            <span class="chart-title">Bookings by month</span>
+            <span class="chart-badge">Last 6 months</span>
           </div>
           <div class="chart-wrapper">
-            ${resaMois.length ? creerGraphiqueArea(resaMois, '#059669') : '<p style="color:var(--text-muted);padding:1rem">Données insuffisantes.</p>'}
+            ${resaMois.length ? creerGraphiqueArea(resaMois, '#059669') : '<p style="color:var(--text-muted);padding:1rem">Insufficient data.</p>'}
           </div>`,
       })}
     </div>
@@ -2204,11 +2204,11 @@ function afficherPublisherStats(stats) {
       classes: 'table-card animate-in',
       contenu: `
         <div class="table-header">
-          <span class="card-title" style="margin:0">Top activités</span>
+          <span class="card-title" style="margin:0">Top activities</span>
         </div>
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>Activité</th><th>Prix</th><th>Note</th><th>Réservations</th></tr></thead>
+            <thead><tr><th>Activity</th><th>Price</th><th>Rating</th><th>Bookings</th></tr></thead>
             <tbody>${lignesTop}</tbody>
           </table>
         </div>`,
@@ -2224,9 +2224,9 @@ async function renderPublisherListingsTab() {
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Mes Annonces</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">My Listings</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const annonces = await appelApi('/dashboard/publisher/activites');
@@ -2248,10 +2248,10 @@ function afficherPublisherListings(annonces) {
   const lignes = annonces.length
     ? annonces.map((a) => {
         const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif">Désactivée</span>'
+          ? '<span class="badge-status badge-inactif">Disabled</span>'
           : a.is_visible
             ? '<span class="badge-status badge-actif">Visible</span>'
-            : '<span class="badge-status badge-attente">Masquée</span>';
+            : '<span class="badge-status badge-attente">Hidden</span>';
         return `
           <tr>
             <td style="font-weight:600;font-size:.85rem">${escapeHtml(a.title || '—')}</td>
@@ -2259,32 +2259,32 @@ function afficherPublisherListings(annonces) {
             <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
             <td>${statut}</td>
             <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
-            <td style="font-size:.78rem;color:var(--text-muted)">${a.nb_evenements || 0} événement(s)</td>
+            <td style="font-size:.78rem;color:var(--text-muted)">${a.nb_evenements || 0} event(s)</td>
             <td>
               <div style="display:flex;gap:.4rem">
-                <button type="button" class="icon-btn" title="Modifier"><i class="bi bi-pencil-fill"></i></button>
-                <button type="button" class="icon-btn" title="Voir"><i class="bi bi-eye-fill"></i></button>
+                <button type="button" class="icon-btn" title="Edit"><i class="bi bi-pencil-fill"></i></button>
+                <button type="button" class="icon-btn" title="View"><i class="bi bi-eye-fill"></i></button>
               </div>
             </td>
           </tr>`;
       }).join('')
-    : '<tr><td colspan="7" style="color:var(--text-muted);padding:2rem;text-align:center">Aucune annonce publiée.</td></tr>';
+    : '<tr><td colspan="7" style="color:var(--text-muted);padding:2rem;text-align:center">No listings published.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Mes Annonces</h1>
-        <p class="view-subtitle">${annonces.length} annonce(s) au total.</p>
+        <h1 class="view-title">My Listings</h1>
+        <p class="view-subtitle">${annonces.length} total listing(s).</p>
       </div>
       <button type="button" class="btn-primary">
-        <i class="bi bi-plus-lg"></i> Nouvelle annonce
+        <i class="bi bi-plus-lg"></i> New listing
       </button>
     </header>
 
     <div class="kpi-grid mb-6 animate-in" style="grid-template-columns:repeat(3,1fr)">
-      ${KpiCard({ icone: '✅', titre: 'Visibles',    valeur: visibles, couleur: '#d1fae5', couleurIcone: '#059669' })}
-      ${KpiCard({ icone: '👁',  titre: 'Masquées',   valeur: masquees, couleur: '#fef3c7', couleurIcone: '#d97706' })}
-      ${KpiCard({ icone: '🚫', titre: 'Désactivées', valeur: desact,   couleur: '#fee2e2', couleurIcone: '#dc2626' })}
+      ${KpiCard({ icone: '✅', titre: 'Visible',   valeur: visibles, couleur: '#d1fae5', couleurIcone: '#059669' })}
+      ${KpiCard({ icone: '👁',  titre: 'Hidden',   valeur: masquees, couleur: '#fef3c7', couleurIcone: '#d97706' })}
+      ${KpiCard({ icone: '🚫', titre: 'Disabled', valeur: desact,   couleur: '#fee2e2', couleurIcone: '#dc2626' })}
     </div>
 
     ${Card({
@@ -2292,7 +2292,7 @@ function afficherPublisherListings(annonces) {
       contenu: `
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>Titre</th><th>Prix</th><th>Note</th><th>Statut</th><th>Créée le</th><th>Événements</th><th></th></tr></thead>
+            <thead><tr><th>Title</th><th>Price</th><th>Rating</th><th>Status</th><th>Created on</th><th>Events</th><th></th></tr></thead>
             <tbody>${lignes}</tbody>
           </table>
         </div>`,
@@ -2308,9 +2308,9 @@ async function renderPublisherBookingsTab() {
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Réservations</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Bookings</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const data = state.dashboardData || await appelApi('/dashboard/publisher');
@@ -2336,18 +2336,18 @@ function afficherPublisherBookings(reservations) {
           <td>
             <span class="badge-status badge-user">
               <i class="bi bi-people-fill" style="font-size:.55rem"></i>
-              ${r.group_size ?? 1} pers.
+              ${r.group_size ?? 1} ppl.
             </span>
           </td>
           <td>${badgeStatut('confirme')}</td>
         </tr>`).join('')
-    : '<tr><td colspan="4" style="color:var(--text-muted);padding:2rem;text-align:center">Aucune réservation reçue.</td></tr>';
+    : '<tr><td colspan="4" style="color:var(--text-muted);padding:2rem;text-align:center">No bookings received.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Réservations</h1>
-        <p class="view-subtitle">${reservations.length} réservation(s) — ${totalPersonnes} participant(s) au total.</p>
+        <h1 class="view-title">Bookings</h1>
+        <p class="view-subtitle">${reservations.length} booking(s) — ${totalPersonnes} total participant(s).</p>
       </div>
     </header>
     ${Card({
@@ -2355,7 +2355,7 @@ function afficherPublisherBookings(reservations) {
       contenu: `
         <div class="dash-table-wrap">
           <table class="dash-table">
-            <thead><tr><th>#</th><th>Date</th><th>Groupe</th><th>Statut</th></tr></thead>
+            <thead><tr><th>#</th><th>Date</th><th>Group</th><th>Status</th></tr></thead>
             <tbody>${lignes}</tbody>
           </table>
         </div>`,
@@ -2372,9 +2372,9 @@ async function renderAdminUsersTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Gestion des clients</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Client Management</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const users = await appelApi('/dashboard/admin/users');
@@ -2424,39 +2424,39 @@ function afficherAdminUsers(users, page) {
           <td>${badgeRoleAdmin(u.role)}</td>
           <td>
             <span class="badge-status ${u.enabled ? 'badge-actif' : 'badge-inactif'}" style="font-size:.7rem">
-              ${u.enabled ? '● Actif' : '● Bloqué'}
+              ${u.enabled ? '● Active' : '● Blocked'}
             </span>
           </td>
           <td>
-            <button class="icon-btn" title="Voir le profil" data-action="view" data-id="${u.id}"><i class="bi bi-eye-fill"></i></button>
-            <button class="icon-btn" title="Modifier le rôle" data-action="edit" data-id="${u.id}"><i class="bi bi-pencil-fill"></i></button>
-            <button class="icon-btn ${u.enabled ? 'danger' : ''}" title="${u.enabled ? 'Bloquer' : 'Débloquer'}"
+            <button class="icon-btn" title="View profile" data-action="view" data-id="${u.id}"><i class="bi bi-eye-fill"></i></button>
+            <button class="icon-btn" title="Edit role" data-action="edit" data-id="${u.id}"><i class="bi bi-pencil-fill"></i></button>
+            <button class="icon-btn ${u.enabled ? 'danger' : ''}" title="${u.enabled ? 'Block' : 'Unblock'}"
               data-action="block" data-id="${u.id}" data-enabled="${u.enabled}">
               <i class="bi ${u.enabled ? 'bi-slash-circle-fill' : 'bi-check-circle-fill'}"></i>
             </button>
-            <button class="icon-btn danger" title="Supprimer" data-action="delete" data-id="${u.id}"><i class="bi bi-trash-fill"></i></button>
+            <button class="icon-btn danger" title="Delete" data-action="delete" data-id="${u.id}"><i class="bi bi-trash-fill"></i></button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun résultat.</td></tr>';
+    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No results.</td></tr>';
 
   const paginationHtml = renderPagination(total, current, totalPages, 'adminUsersGoPage');
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Gestion des clients</h1></div>
+      <div><h1 class="view-title">Client Management</h1></div>
     </header>
     <div class="glass-card animate-in">
       <div class="admin-search-row">
         <div class="table-search">
           <i class="bi bi-search" style="color:var(--text-muted);font-size:.85rem"></i>
-          <input type="text" id="admin-users-search" placeholder="Rechercher…" value="${escapeHtml(_adminUsersSearch)}"
+          <input type="text" id="admin-users-search" placeholder="Search…" value="${escapeHtml(_adminUsersSearch)}"
             oninput="adminUsersFilter(this.value)">
         </div>
-        <span class="admin-count">Nombre de clients : <strong>${total}</strong></span>
+        <span class="admin-count">Number of clients: <strong>${total}</strong></span>
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Last name</th><th>First name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="admin-users-tbody">${lignes}</tbody>
         </table>
       </div>
@@ -2479,26 +2479,26 @@ function afficherAdminUsers(users, page) {
     btn.addEventListener('click', async () => {
       const id      = btn.dataset.id;
       const enabled = btn.dataset.enabled === 'true';
-      const libelle = enabled ? 'Bloquer' : 'Débloquer';
-      if (!confirm(`${libelle} l'utilisateur #${id} ?`)) return;
+      const libelle = enabled ? 'Block' : 'Unblock';
+      if (!confirm(`${libelle} user #${id}?`)) return;
       btn.disabled = true;
       try {
         await appelApi(`/dashboard/admin/users/${id}/toggle-block`, 'PATCH', { block: enabled });
         const idx = _adminUsersData.findIndex((x) => String(x.id) === id);
         if (idx !== -1) _adminUsersData[idx].enabled = !enabled;
         afficherAdminUsers(_adminUsersData, current);
-      } catch (e) { alert('Erreur : ' + e.message); btn.disabled = false; }
+      } catch (e) { alert('Error: ' + e.message); btn.disabled = false; }
     });
   });
 
   main.querySelectorAll('[data-action="delete"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm(`Supprimer l'utilisateur #${btn.dataset.id} ?`)) return;
+      if (!confirm(`Delete user #${btn.dataset.id}?`)) return;
       try {
         await appelApi(`/dashboard/admin/users/${btn.dataset.id}`, 'DELETE');
         _adminUsersData = _adminUsersData.filter((x) => String(x.id) !== btn.dataset.id);
         afficherAdminUsers(_adminUsersData, current);
-      } catch (e) { alert('Erreur : ' + e.message); }
+      } catch (e) { alert('Error: ' + e.message); }
     });
   });
 }
@@ -2540,18 +2540,18 @@ function ouvrirModalUtilisateur(u) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-person-fill"></i> Profil utilisateur</span>
+        <span><i class="bi bi-person-fill"></i> User Profile</span>
         <button class="admin-modal-close" id="modal-close-btn"><i class="bi bi-x-lg"></i></button>
       </div>
-      <div class="admin-modal-field"><label>Nom</label><input type="text" value="${escapeHtml(u.lastname || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Prénom</label><input type="text" value="${escapeHtml(u.firstname || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Last name</label><input type="text" value="${escapeHtml(u.lastname || '')}" readonly></div>
+      <div class="admin-modal-field"><label>First name</label><input type="text" value="${escapeHtml(u.firstname || '')}" readonly></div>
       <div class="admin-modal-field"><label>Email</label><input type="text" value="${escapeHtml(u.email || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Rôle</label><input type="text" value="${escapeHtml(u.role || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Inscrit le</label><input type="text" value="${formatDate(u.created_at)}" readonly></div>
-      <div class="admin-modal-field"><label>Statut</label><input type="text" value="${u.enabled ? 'Actif' : 'Inactif'}" readonly></div>
-      ${u.address ? `<div class="admin-modal-field"><label>Adresse</label><input type="text" value="${escapeHtml(u.address)}" readonly></div>` : ''}
+      <div class="admin-modal-field"><label>Role</label><input type="text" value="${escapeHtml(u.role || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Registered on</label><input type="text" value="${formatDate(u.created_at)}" readonly></div>
+      <div class="admin-modal-field"><label>Status</label><input type="text" value="${u.enabled ? 'Active' : 'Inactive'}" readonly></div>
+      ${u.address ? `<div class="admin-modal-field"><label>Address</label><input type="text" value="${escapeHtml(u.address)}" readonly></div>` : ''}
       <div class="admin-modal-actions">
-        <button class="btn-primary" id="modal-close-btn2"><i class="bi bi-check-lg"></i> Fermer</button>
+        <button class="btn-primary" id="modal-close-btn2"><i class="bi bi-check-lg"></i> Close</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -2567,25 +2567,25 @@ function ouvrirModalEditerRole(u) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-pencil-fill"></i> Modifier le rôle</span>
+        <span><i class="bi bi-pencil-fill"></i> Edit role</span>
         <button class="admin-modal-close" id="modal-close-edit"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="admin-modal-field">
-        <label>Utilisateur</label>
+        <label>User</label>
         <input type="text" value="${escapeHtml((u.firstname || '') + ' ' + (u.lastname || ''))}" readonly>
       </div>
       <div class="admin-modal-field">
-        <label>Rôle actuel</label>
+        <label>Current role</label>
         <select id="edit-role-select">
-          <option value="USER" ${(u.role||'').toUpperCase()==='USER'?'selected':''}>Client</option>
+          <option value="USER" ${(u.role||'').toUpperCase()==='USER'?'selected':''}>User</option>
           <option value="PUBLISHER" ${(u.role||'').toUpperCase()==='PUBLISHER'?'selected':''}>Meeter (Publisher)</option>
           <option value="ADMIN" ${(u.role||'').toUpperCase()==='ADMIN'?'selected':''}>Admin</option>
         </select>
       </div>
       <div id="edit-role-feedback"></div>
       <div class="admin-modal-actions">
-        <button class="btn-outline" id="modal-cancel-edit">Annuler</button>
-        <button class="btn-primary" id="modal-save-role"><i class="bi bi-check-lg"></i> Enregistrer</button>
+        <button class="btn-outline" id="modal-cancel-edit">Cancel</button>
+        <button class="btn-primary" id="modal-save-role"><i class="bi bi-check-lg"></i> Save</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -2600,7 +2600,7 @@ function ouvrirModalEditerRole(u) {
       await appelApi(`/dashboard/admin/users/${u.id}/role`, 'PATCH', { role: newRole });
       const idx = _adminUsersData.findIndex((x) => x.id === u.id);
       if (idx !== -1) _adminUsersData[idx].role = newRole;
-      fb.innerHTML = `<div style="color:#059669;font-size:.82rem;padding:.4rem 0"><i class="bi bi-check-circle-fill"></i> Rôle mis à jour.</div>`;
+      fb.innerHTML = `<div style="color:#059669;font-size:.82rem;padding:.4rem 0"><i class="bi bi-check-circle-fill"></i> Role updated.</div>`;
       setTimeout(close, 900);
     } catch (e) {
       fb.innerHTML = `<div style="color:#dc2626;font-size:.82rem;padding:.4rem 0"><i class="bi bi-exclamation-circle-fill"></i> ${escapeHtml(e.message)}</div>`;
@@ -2622,9 +2622,9 @@ async function renderAdminMessagingTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Messagerie</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Messaging</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const msgs = await appelApi('/dashboard/admin/contact-messages');
@@ -2661,29 +2661,29 @@ function afficherAdminMessages(msgs, page) {
           <td style="font-size:.82rem">${escapeHtml(m.subject || '—')}</td>
           <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(m.created_at)}</td>
           <td>
-            <button class="icon-btn" title="Voir" data-action="view-msg" data-id="${m.id}"><i class="bi bi-eye-fill"></i></button>
-            <button class="icon-btn" title="Répondre" data-action="reply-msg" data-id="${m.id}"><i class="bi bi-reply-fill"></i></button>
-            <button class="icon-btn danger" title="Supprimer" data-action="delete-msg" data-id="${m.id}"><i class="bi bi-trash-fill"></i></button>
+            <button class="icon-btn" title="View" data-action="view-msg" data-id="${m.id}"><i class="bi bi-eye-fill"></i></button>
+            <button class="icon-btn" title="Reply" data-action="reply-msg" data-id="${m.id}"><i class="bi bi-reply-fill"></i></button>
+            <button class="icon-btn danger" title="Delete" data-action="delete-msg" data-id="${m.id}"><i class="bi bi-trash-fill"></i></button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun message.</td></tr>';
+    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No messages.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Messagerie</h1></div>
+      <div><h1 class="view-title">Messaging</h1></div>
     </header>
     <div class="glass-card animate-in">
       <div class="admin-search-row">
         <div class="table-search">
           <i class="bi bi-search" style="color:var(--text-muted);font-size:.85rem"></i>
-          <input type="text" id="admin-msg-search" placeholder="Rechercher…" value="${escapeHtml(_adminMsgSearch)}"
+          <input type="text" id="admin-msg-search" placeholder="Search…" value="${escapeHtml(_adminMsgSearch)}"
             oninput="adminMsgFilter(this.value)">
         </div>
-        <span class="admin-count">Nombre de messages : <strong>${total}</strong></span>
+        <span class="admin-count">Number of messages: <strong>${total}</strong></span>
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Nom</th><th>Prénom</th><th>Sujet</th><th>Date</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Last name</th><th>First name</th><th>Subject</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody>${lignes}</tbody>
         </table>
       </div>
@@ -2699,12 +2699,12 @@ function afficherAdminMessages(msgs, page) {
   });
   main.querySelectorAll('[data-action="delete-msg"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Supprimer ce message ?')) return;
+      if (!confirm('Delete this message?')) return;
       try {
         await appelApi(`/dashboard/admin/contact-messages/${btn.dataset.id}`, 'DELETE');
         _adminMsgData = _adminMsgData.filter((x) => String(x.id) !== btn.dataset.id);
         afficherAdminMessages(_adminMsgData, current);
-      } catch (e) { alert('Erreur : ' + e.message); }
+      } catch (e) { alert('Error: ' + e.message); }
     });
   });
 }
@@ -2725,30 +2725,30 @@ function ouvrirModalMessage(m, showReply) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-envelope-fill"></i> ${showReply ? 'Répondre au message' : 'Voir le message'}</span>
+        <span><i class="bi bi-envelope-fill"></i> ${showReply ? 'Reply to message' : 'View message'}</span>
         <button class="admin-modal-close" id="msg-modal-close"><i class="bi bi-x-lg"></i></button>
       </div>
-      <div class="admin-modal-field"><label>Nom</label><input type="text" value="${escapeHtml(m.lastname || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Prénom</label><input type="text" value="${escapeHtml(m.firstname || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Last name</label><input type="text" value="${escapeHtml(m.lastname || '')}" readonly></div>
+      <div class="admin-modal-field"><label>First name</label><input type="text" value="${escapeHtml(m.firstname || '')}" readonly></div>
       <div class="admin-modal-field"><label>Email</label><input type="text" value="${escapeHtml(m.email || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Sujet du message</label><input type="text" value="${escapeHtml(m.subject || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Message subject</label><input type="text" value="${escapeHtml(m.subject || '')}" readonly></div>
       <div class="admin-modal-field"><label>Message</label><textarea rows="4" readonly>${escapeHtml(m.message || '')}</textarea></div>
       ${hasReponse ? `
         <div style="padding:.6rem .9rem;background:var(--accent-soft);border-radius:.75rem;margin-bottom:.75rem;font-size:.82rem">
-          <strong>Message initial par ${escapeHtml(m.firstname || '')} ${escapeHtml(m.lastname || '')}</strong>
+          <strong>Initial message by ${escapeHtml(m.firstname || '')} ${escapeHtml(m.lastname || '')}</strong>
         </div>
-        <div class="admin-modal-field"><label>Réponse précédente</label><textarea rows="3" readonly>${escapeHtml(m.reply || '')}</textarea></div>
+        <div class="admin-modal-field"><label>Previous reply</label><textarea rows="3" readonly>${escapeHtml(m.reply || '')}</textarea></div>
       ` : ''}
       ${showReply ? `
         <div class="admin-modal-field">
-          <label>Réponse</label>
-          <textarea id="msg-reply-text" rows="4" placeholder="Votre réponse…">${escapeHtml(m.reply || '')}</textarea>
+          <label>Reply</label>
+          <textarea id="msg-reply-text" rows="4" placeholder="Your reply…">${escapeHtml(m.reply || '')}</textarea>
         </div>
       ` : ''}
       <div id="msg-modal-feedback"></div>
       <div class="admin-modal-actions">
-        <button class="btn-danger" id="msg-modal-delete"><i class="bi bi-trash-fill"></i> Supprimer</button>
-        ${showReply ? `<button class="btn-primary" id="msg-modal-reply"><i class="bi bi-reply-fill"></i> Répondre</button>` : ''}
+        <button class="btn-danger" id="msg-modal-delete"><i class="bi bi-trash-fill"></i> Delete</button>
+        ${showReply ? `<button class="btn-primary" id="msg-modal-reply"><i class="bi bi-reply-fill"></i> Reply</button>` : ''}
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -2756,24 +2756,24 @@ function ouvrirModalMessage(m, showReply) {
   overlay.querySelector('#msg-modal-close').addEventListener('click', close);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   overlay.querySelector('#msg-modal-delete').addEventListener('click', async () => {
-    if (!confirm('Supprimer ce message ?')) return;
+    if (!confirm('Delete this message?')) return;
     try {
       await appelApi(`/dashboard/admin/contact-messages/${m.id}`, 'DELETE');
       _adminMsgData = _adminMsgData.filter((x) => x.id !== m.id);
       afficherAdminMessages(_adminMsgData, 1);
       close();
-    } catch (e) { alert('Erreur : ' + e.message); }
+    } catch (e) { alert('Error: ' + e.message); }
   });
   if (showReply) {
     overlay.querySelector('#msg-modal-reply').addEventListener('click', async () => {
       const replyText = overlay.querySelector('#msg-reply-text').value.trim();
       const fb = overlay.querySelector('#msg-modal-feedback');
-      if (!replyText) { fb.innerHTML = '<div style="color:#dc2626;font-size:.82rem">Veuillez saisir une réponse.</div>'; return; }
-      fb.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">Envoi…</div>';
+      if (!replyText) { fb.innerHTML = '<div style="color:#dc2626;font-size:.82rem">Please enter a reply.</div>'; return; }
+      fb.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">Sending…</div>';
       try {
         await appelApi(`/dashboard/admin/contact-messages/${m.id}/reply`, 'POST', { reply: replyText });
         m.reply = replyText;
-        fb.innerHTML = '<div style="color:#059669;font-size:.82rem"><i class="bi bi-check-circle-fill"></i> Réponse envoyée.</div>';
+        fb.innerHTML = '<div style="color:#059669;font-size:.82rem"><i class="bi bi-check-circle-fill"></i> Reply sent.</div>';
         setTimeout(close, 1000);
       } catch (e) {
         fb.innerHTML = `<div style="color:#dc2626;font-size:.82rem"><i class="bi bi-exclamation-circle-fill"></i> ${escapeHtml(e.message)}</div>`;
@@ -2795,9 +2795,9 @@ async function renderAdminReportsUsersTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Signalement utilisateur</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">User Reports</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const reports = await appelApi('/dashboard/admin/reports/users');
@@ -2836,28 +2836,28 @@ function afficherAdminReportsUsers(reports, page) {
             ${r.reason ? `<span class="report-badge report-badge-medium">${escapeHtml(truncate(r.reason, 30))}</span>` : '—'}
           </td>
           <td>
-            <button class="icon-btn" title="Voir" data-action="view-rpt-user" data-id="${r.id}"><i class="bi bi-eye-fill"></i></button>
-            <button class="icon-btn danger" title="Supprimer" data-action="delete-rpt-user" data-id="${r.id}"><i class="bi bi-trash-fill"></i></button>
+            <button class="icon-btn" title="View" data-action="view-rpt-user" data-id="${r.id}"><i class="bi bi-eye-fill"></i></button>
+            <button class="icon-btn danger" title="Delete" data-action="delete-rpt-user" data-id="${r.id}"><i class="bi bi-trash-fill"></i></button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun signalement.</td></tr>';
+    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No reports.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Signalement utilisateur</h1></div>
+      <div><h1 class="view-title">User Reports</h1></div>
     </header>
     <div class="glass-card animate-in">
       <div class="admin-search-row">
         <div class="table-search">
           <i class="bi bi-search" style="color:var(--text-muted);font-size:.85rem"></i>
-          <input type="text" placeholder="Rechercher…" value="${escapeHtml(_adminRptUsersSearch)}"
+          <input type="text" placeholder="Search…" value="${escapeHtml(_adminRptUsersSearch)}"
             oninput="adminRptUsersFilter(this.value)">
         </div>
-        <span class="admin-count">Nombre de signalements : <strong>${total}</strong></span>
+        <span class="admin-count">Number of reports: <strong>${total}</strong></span>
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Nom</th><th>Prénom</th><th>Date du signalement</th><th>Raison</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Last name</th><th>First name</th><th>Report date</th><th>Reason</th><th>Actions</th></tr></thead>
           <tbody>${lignes}</tbody>
         </table>
       </div>
@@ -2872,12 +2872,12 @@ function afficherAdminReportsUsers(reports, page) {
   });
   main.querySelectorAll('[data-action="delete-rpt-user"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Enlever ce signalement ?')) return;
+      if (!confirm('Remove this report?')) return;
       try {
         await appelApi(`/dashboard/admin/reports/${btn.dataset.id}`, 'DELETE');
         _adminRptUsersData = _adminRptUsersData.filter((x) => String(x.id) !== btn.dataset.id);
         afficherAdminReportsUsers(_adminRptUsersData, current);
-      } catch (e) { alert('Erreur : ' + e.message); }
+      } catch (e) { alert('Error: ' + e.message); }
     });
   });
 }
@@ -2897,15 +2897,15 @@ function ouvrirModalReportUser(r) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-flag-fill"></i> Raison du signalement</span>
+        <span><i class="bi bi-flag-fill"></i> Report Reason</span>
         <button class="admin-modal-close" id="rpt-modal-close"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="admin-modal-field">
-        <label>Utilisateur</label>
+        <label>User</label>
         <input type="text" value="${escapeHtml((r.reported_lastname || '') + ' ' + (r.reported_firstname || ''))}" readonly>
       </div>
       <div class="admin-modal-field">
-        <label>Motif</label>
+        <label>Reason</label>
         <input type="text" value="${escapeHtml(r.reason || '—')}" readonly>
       </div>
       <div class="admin-modal-field">
@@ -2913,13 +2913,13 @@ function ouvrirModalReportUser(r) {
         <textarea rows="4" readonly>${escapeHtml(r.description || r.message || '—')}</textarea>
       </div>
       <div class="admin-modal-field">
-        <label>Signalé le</label>
+        <label>Reported on</label>
         <input type="text" value="${formatDate(r.created_at)}" readonly>
       </div>
       <div id="rpt-user-modal-feedback"></div>
       <div class="admin-modal-actions">
-        <button class="btn-primary" id="rpt-enlever"><i class="bi bi-shield-check"></i> Enlever le signalement</button>
-        <button class="btn-danger" id="rpt-bloquer"><i class="bi bi-ban"></i> Bloquer</button>
+        <button class="btn-primary" id="rpt-enlever"><i class="bi bi-shield-check"></i> Remove report</button>
+        <button class="btn-danger" id="rpt-bloquer"><i class="bi bi-ban"></i> Block</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -2936,10 +2936,10 @@ function ouvrirModalReportUser(r) {
     } catch (e) { fb.innerHTML = `<div style="color:#dc2626;font-size:.82rem">${escapeHtml(e.message)}</div>`; }
   });
   overlay.querySelector('#rpt-bloquer').addEventListener('click', async () => {
-    if (!confirm('Bloquer cet utilisateur ?')) return;
+    if (!confirm('Block this user?')) return;
     try {
       await appelApi(`/dashboard/admin/reports/users/${r.id_reported}/block`, 'PATCH');
-      fb.innerHTML = '<div style="color:#059669;font-size:.82rem"><i class="bi bi-check-circle-fill"></i> Utilisateur bloqué.</div>';
+      fb.innerHTML = '<div style="color:#059669;font-size:.82rem"><i class="bi bi-check-circle-fill"></i> User blocked.</div>';
       setTimeout(close, 1000);
     } catch (e) { fb.innerHTML = `<div style="color:#dc2626;font-size:.82rem">${escapeHtml(e.message)}</div>`; }
   });
@@ -2958,9 +2958,9 @@ async function renderAdminReportsActivitiesTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Signalement annonce</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Listing Reports</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const reports = await appelApi('/dashboard/admin/reports/activities');
@@ -2998,28 +2998,28 @@ function afficherAdminReportsActivities(reports, page) {
             ${r.reason ? `<span class="report-badge report-badge-medium">${escapeHtml(truncate(r.reason, 30))}</span>` : '—'}
           </td>
           <td>
-            <button class="icon-btn" title="Voir" data-action="view-rpt-act" data-id="${r.id}"><i class="bi bi-eye-fill"></i></button>
-            <button class="icon-btn danger" title="Supprimer" data-action="delete-rpt-act" data-id="${r.id}"><i class="bi bi-trash-fill"></i></button>
+            <button class="icon-btn" title="View" data-action="view-rpt-act" data-id="${r.id}"><i class="bi bi-eye-fill"></i></button>
+            <button class="icon-btn danger" title="Delete" data-action="delete-rpt-act" data-id="${r.id}"><i class="bi bi-trash-fill"></i></button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="4" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun signalement.</td></tr>';
+    : '<tr><td colspan="4" style="color:var(--text-muted);padding:1.5rem;text-align:center">No reports.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Signalement annonce</h1></div>
+      <div><h1 class="view-title">Listing Reports</h1></div>
     </header>
     <div class="glass-card animate-in">
       <div class="admin-search-row">
         <div class="table-search">
           <i class="bi bi-search" style="color:var(--text-muted);font-size:.85rem"></i>
-          <input type="text" placeholder="Rechercher…" value="${escapeHtml(_adminRptActSearch)}"
+          <input type="text" placeholder="Search…" value="${escapeHtml(_adminRptActSearch)}"
             oninput="adminRptActFilter(this.value)">
         </div>
-        <span class="admin-count">Nombre de signalements : <strong>${total}</strong></span>
+        <span class="admin-count">Number of reports: <strong>${total}</strong></span>
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Nom (activité)</th><th>Date du signalement</th><th>Raison</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Activity name</th><th>Report date</th><th>Reason</th><th>Actions</th></tr></thead>
           <tbody>${lignes}</tbody>
         </table>
       </div>
@@ -3034,12 +3034,12 @@ function afficherAdminReportsActivities(reports, page) {
   });
   main.querySelectorAll('[data-action="delete-rpt-act"]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Enlever ce signalement ?')) return;
+      if (!confirm('Remove this report?')) return;
       try {
         await appelApi(`/dashboard/admin/reports/${btn.dataset.id}`, 'DELETE');
         _adminRptActData = _adminRptActData.filter((x) => String(x.id) !== btn.dataset.id);
         afficherAdminReportsActivities(_adminRptActData, current);
-      } catch (e) { alert('Erreur : ' + e.message); }
+      } catch (e) { alert('Error: ' + e.message); }
     });
   });
 }
@@ -3059,15 +3059,15 @@ function ouvrirModalReportActivity(r) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-flag-fill"></i> Signalement — Annonce</span>
+        <span><i class="bi bi-flag-fill"></i> Report — Listing</span>
         <button class="admin-modal-close" id="rpt-act-close"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="admin-modal-field">
-        <label>Activité signalée</label>
+        <label>Reported activity</label>
         <input type="text" value="${escapeHtml(r.activity_title || '—')}" readonly>
       </div>
       <div class="admin-modal-field">
-        <label>Motif</label>
+        <label>Reason</label>
         <input type="text" value="${escapeHtml(r.reason || '—')}" readonly>
       </div>
       <div class="admin-modal-field">
@@ -3075,14 +3075,14 @@ function ouvrirModalReportActivity(r) {
         <textarea rows="4" readonly>${escapeHtml(r.description || r.message || '—')}</textarea>
       </div>
       <div class="admin-modal-field">
-        <label>Signalé le</label>
+        <label>Reported on</label>
         <input type="text" value="${formatDate(r.created_at)}" readonly>
       </div>
       <div id="rpt-act-feedback"></div>
       <div class="admin-modal-actions">
-        <button class="btn-primary" id="rpt-act-enlever"><i class="bi bi-shield-check"></i> Enlever le signalement</button>
+        <button class="btn-primary" id="rpt-act-enlever"><i class="bi bi-shield-check"></i> Remove report</button>
         ${r.activity_id || r.id_activity
-          ? `<button class="btn-danger" id="rpt-act-desactiver"><i class="bi bi-slash-circle-fill"></i> Désactiver l'activité</button>`
+          ? `<button class="btn-danger" id="rpt-act-desactiver"><i class="bi bi-slash-circle-fill"></i> Disable activity</button>`
           : ''}
       </div>
     </div>`;
@@ -3105,19 +3105,19 @@ function ouvrirModalReportActivity(r) {
   if (btnDesact) {
     btnDesact.addEventListener('click', async () => {
       const actId = r.id_activity || r.activity_id;
-      if (!actId || !confirm('Désactiver cette activité ? Elle ne sera plus visible par les utilisateurs.')) return;
+      if (!actId || !confirm('Disable this activity? It will no longer be visible to users.')) return;
       btnDesact.disabled = true;
-      btnDesact.innerHTML = '<i class="bi bi-hourglass-split"></i> Désactivation…';
+      btnDesact.innerHTML = '<i class="bi bi-hourglass-split"></i> Disabling…';
       try {
         await appelApi(`/dashboard/admin/activities/${actId}/disable`, 'PATCH');
         fb.innerHTML = `<div style="color:#059669;font-size:.82rem;padding:.4rem 0">
-          <i class="bi bi-check-circle-fill"></i> Activité désactivée avec succès.
+          <i class="bi bi-check-circle-fill"></i> Activity disabled successfully.
         </div>`;
         setTimeout(close, 1200);
       } catch (e) {
         fb.innerHTML = `<div style="color:#dc2626;font-size:.82rem">${escapeHtml(e.message)}</div>`;
         btnDesact.disabled = false;
-        btnDesact.innerHTML = '<i class="bi bi-slash-circle-fill"></i> Désactiver l\'activité';
+        btnDesact.innerHTML = '<i class="bi bi-slash-circle-fill"></i> Disable activity';
       }
     });
   }
@@ -3128,11 +3128,11 @@ function ouvrirModalReportActivity(r) {
 // ============================================================
 
 const THEMES_CATEGORIES = [
-  { key: 'activites',              label: 'Thèmes activités' },
-  { key: 'faq',                    label: 'Thèmes FAQ' },
-  { key: 'forum',                  label: 'Thèmes Forum' },
-  { key: 'signalement_utilisateur', label: 'Thèmes signalement utilisateur' },
-  { key: 'signalement_activite',   label: 'Thèmes signalement activité' },
+  { key: 'activites',              label: 'Activity themes' },
+  { key: 'faq',                    label: 'FAQ themes' },
+  { key: 'forum',                  label: 'Forum themes' },
+  { key: 'signalement_utilisateur', label: 'User report themes' },
+  { key: 'signalement_activite',   label: 'Activity report themes' },
 ];
 
 let _themesData = {};
@@ -3143,9 +3143,9 @@ async function renderAdminSettingsTab() {
 
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">Modifier les tables</h1><p class="view-subtitle">Chargement…</p></div>
+      <div><h1 class="view-title">Edit Tables</h1><p class="view-subtitle">Loading…</p></div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const themes = await appelApi('/dashboard/admin/themes');
@@ -3166,7 +3166,7 @@ function afficherAdminSettings() {
     const pills = tags.map((t) => `
       <span class="tag-pill">
         ${escapeHtml(t)}
-        <button class="tag-remove" title="Retirer" onclick="retirerTheme('${cat.key}', '${escapeHtml(t)}')" type="button">
+        <button class="tag-remove" title="Remove" onclick="retirerTheme('${cat.key}', '${escapeHtml(t)}')" type="button">
           <i class="bi bi-x"></i>
         </button>
       </span>`).join('');
@@ -3175,14 +3175,14 @@ function afficherAdminSettings() {
       <div class="glass-card animate-in" style="margin-bottom:1.25rem">
         <div class="card-title">${escapeHtml(cat.label)} :</div>
         <div class="tag-add-row">
-          <input type="text" id="theme-input-${cat.key}" placeholder="Nouveau thème…">
+          <input type="text" id="theme-input-${cat.key}" placeholder="New theme…">
           <button class="btn-primary" style="white-space:nowrap" type="button"
             onclick="ajouterTheme('${cat.key}')">
-            <i class="bi bi-plus-lg"></i> Ajouter
+            <i class="bi bi-plus-lg"></i> Add
           </button>
         </div>
         <div class="tag-pills-wrap" id="theme-pills-${cat.key}">
-          ${pills || '<span style="font-size:.8rem;color:var(--text-muted)">Aucun thème.</span>'}
+          ${pills || '<span style="font-size:.8rem;color:var(--text-muted)">No themes.</span>'}
         </div>
       </div>`;
   }).join('');
@@ -3190,8 +3190,8 @@ function afficherAdminSettings() {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Modifier les tables</h1>
-        <p class="view-subtitle">Gérez les thèmes et catégories de la plateforme.</p>
+        <h1 class="view-title">Edit Tables</h1>
+        <p class="view-subtitle">Manage the platform themes and categories.</p>
       </div>
     </header>
     <div style="max-width:720px">
@@ -3211,7 +3211,7 @@ async function ajouterTheme(categoryKey) {
     if (!_themesData[categoryKey].includes(value)) _themesData[categoryKey].push(value);
     input.value = '';
     rafraichirThemePills(categoryKey);
-  } catch (e) { alert('Erreur : ' + e.message); }
+  } catch (e) { alert('Error: ' + e.message); }
 }
 
 async function retirerTheme(categoryKey, theme) {
@@ -3221,7 +3221,7 @@ async function retirerTheme(categoryKey, theme) {
       _themesData[categoryKey] = _themesData[categoryKey].filter((t) => t !== theme);
     }
     rafraichirThemePills(categoryKey);
-  } catch (e) { alert('Erreur : ' + e.message); }
+  } catch (e) { alert('Error: ' + e.message); }
 }
 
 function rafraichirThemePills(categoryKey) {
@@ -3229,13 +3229,13 @@ function rafraichirThemePills(categoryKey) {
   if (!container) return;
   const tags = _themesData[categoryKey] || [];
   if (!tags.length) {
-    container.innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">Aucun thème.</span>';
+    container.innerHTML = '<span style="font-size:.8rem;color:var(--text-muted)">No themes.</span>';
     return;
   }
   container.innerHTML = tags.map((t) => `
     <span class="tag-pill">
       ${escapeHtml(t)}
-      <button class="tag-remove" title="Retirer" onclick="retirerTheme('${categoryKey}', '${escapeHtml(t)}')" type="button">
+      <button class="tag-remove" title="Remove" onclick="retirerTheme('${categoryKey}', '${escapeHtml(t)}')" type="button">
         <i class="bi bi-x"></i>
       </button>
     </span>`).join('');
@@ -3252,11 +3252,11 @@ async function renderValidationTab() {
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">Validation Meeters</h1>
-        <p class="view-subtitle">Demandes de passage au rôle éditeur.</p>
+        <h1 class="view-title">Approve Meeters</h1>
+        <p class="view-subtitle">Publisher role upgrade requests.</p>
       </div>
     </header>
-    <div class="dash-loader"><div class="dash-spinner"></div><p>Chargement…</p></div>`;
+    <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
     const demandes = await appelApi('/dashboard/admin/publisher-requests');
@@ -3279,22 +3279,22 @@ async function renderValidationTab() {
               <div style="display:flex;gap:.5rem">
                 <button type="button" class="btn-primary" style="padding:.35rem .9rem;font-size:.75rem"
                   data-action="approve" data-id="${u.id}">
-                  <i class="bi bi-check-lg"></i> Approuver
+                  <i class="bi bi-check-lg"></i> Approve
                 </button>
                 <button type="button" class="btn-outline" style="padding:.35rem .9rem;font-size:.75rem;color:#dc2626;border-color:#dc2626"
                   data-action="reject" data-id="${u.id}">
-                  <i class="bi bi-x-lg"></i> Refuser
+                  <i class="bi bi-x-lg"></i> Reject
                 </button>
               </div>
             </td>
           </tr>`).join('')
-      : '<tr><td colspan="3" style="color:var(--text-muted);padding:2rem;text-align:center">Aucune demande en attente.</td></tr>';
+      : '<tr><td colspan="3" style="color:var(--text-muted);padding:2rem;text-align:center">No pending requests.</td></tr>';
 
     main.innerHTML = `
       <header class="view-header animate-in">
         <div>
-          <h1 class="view-title">Validation Meeters</h1>
-          <p class="view-subtitle">${demandes.length} demande(s) en attente.</p>
+          <h1 class="view-title">Approve Meeters</h1>
+          <p class="view-subtitle">${demandes.length} pending request(s).</p>
         </div>
       </header>
       ${Card({
@@ -3302,7 +3302,7 @@ async function renderValidationTab() {
         contenu: `
           <div class="dash-table-wrap">
             <table class="dash-table">
-              <thead><tr><th>Utilisateur</th><th>Inscrit le</th><th>Actions</th></tr></thead>
+              <thead><tr><th>User</th><th>Registered on</th><th>Actions</th></tr></thead>
               <tbody>${lignes}</tbody>
             </table>
           </div>`,
@@ -3318,7 +3318,7 @@ async function renderValidationTab() {
           renderValidationTab();
         } catch (e) {
           btn.disabled = false;
-          alert('Erreur : ' + e.message);
+          alert('Error: ' + e.message);
         }
       });
     });
@@ -3345,7 +3345,7 @@ function rafraichirTableau() {
     : users;
 
   if (!liste.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">Aucun résultat.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No results.</td></tr>';
     return;
   }
   tbody.innerHTML = liste.map((u) => `
@@ -3364,15 +3364,15 @@ function rafraichirTableau() {
       <td style="font-size:.8rem;color:var(--text-muted)">${formatDate(u.created_at)}</td>
       <td>
         <div style="display:flex;gap:.35rem">
-          <button type="button" class="icon-btn" title="Voir le profil"
+          <button type="button" class="icon-btn" title="View profile"
             onclick="adminOverviewVoir(${u.id})">
             <i class="bi bi-eye-fill"></i>
           </button>
-          <button type="button" class="icon-btn" title="Modifier le rôle"
+          <button type="button" class="icon-btn" title="Edit role"
             onclick="adminOverviewEditer(${u.id})">
             <i class="bi bi-pencil-fill"></i>
           </button>
-          <button type="button" class="icon-btn danger" title="Supprimer"
+          <button type="button" class="icon-btn danger" title="Delete"
             onclick="adminOverviewSupprimer(${u.id})">
             <i class="bi bi-trash-fill"></i>
           </button>
@@ -3398,25 +3398,25 @@ function adminOverviewEditer(id) {
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
-        <span><i class="bi bi-pencil-fill"></i> Modifier le rôle</span>
+        <span><i class="bi bi-pencil-fill"></i> Edit role</span>
         <button class="admin-modal-close" id="ov-edit-close"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="admin-modal-field">
-        <label>Utilisateur</label>
+        <label>User</label>
         <input type="text" value="${escapeHtml((u.firstname || '') + ' ' + (u.lastname || ''))}" readonly>
       </div>
       <div class="admin-modal-field">
-        <label>Rôle actuel</label>
+        <label>Current role</label>
         <select id="ov-edit-role-select">
-          <option value="USER"      ${(u.role||'').toUpperCase()==='USER'      ?'selected':''}>Client</option>
+          <option value="USER"      ${(u.role||'').toUpperCase()==='USER'      ?'selected':''}>User</option>
           <option value="PUBLISHER" ${(u.role||'').toUpperCase()==='PUBLISHER' ?'selected':''}>Meeter (Publisher)</option>
           <option value="ADMIN"     ${(u.role||'').toUpperCase()==='ADMIN'     ?'selected':''}>Admin</option>
         </select>
       </div>
       <div id="ov-edit-feedback"></div>
       <div class="admin-modal-actions">
-        <button class="btn-outline" id="ov-edit-cancel">Annuler</button>
-        <button class="btn-primary" id="ov-edit-save"><i class="bi bi-check-lg"></i> Enregistrer</button>
+        <button class="btn-outline" id="ov-edit-cancel">Cancel</button>
+        <button class="btn-primary" id="ov-edit-save"><i class="bi bi-check-lg"></i> Save</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -3434,7 +3434,7 @@ function adminOverviewEditer(id) {
       const idx = users.findIndex((x) => x.id === u.id);
       if (idx !== -1) users[idx].role = newRole;
       fb.innerHTML = `<div style="color:#059669;font-size:.82rem;padding:.4rem 0">
-        <i class="bi bi-check-circle-fill"></i> Rôle mis à jour.
+        <i class="bi bi-check-circle-fill"></i> Role updated.
       </div>`;
       setTimeout(() => { close(); rafraichirTableau(); }, 900);
     } catch (err) {
@@ -3446,7 +3446,7 @@ function adminOverviewEditer(id) {
 }
 
 async function adminOverviewSupprimer(id) {
-  if (!confirm(`Supprimer l'utilisateur #${id} ?`)) return;
+  if (!confirm(`Delete user #${id}?`)) return;
   try {
     await appelApi(`/dashboard/admin/users/${id}`, 'DELETE');
     // Retirer du cache local
@@ -3454,7 +3454,7 @@ async function adminOverviewSupprimer(id) {
     data.derniersUtilisateurs = (data.derniersUtilisateurs || []).filter((x) => x.id !== id);
     rafraichirTableau();
   } catch (err) {
-    alert('Erreur : ' + err.message);
+    alert('Error: ' + err.message);
   }
 }
 
@@ -3470,32 +3470,32 @@ function exporterDonneesAdmin() {
   // Construire le CSV
   const lignesCSV = [
     // En-tête
-    ['Nom', 'Prénom', 'Email', 'Rôle', 'Statut', 'Inscrit le'].join(';'),
+    ['Last name', 'First name', 'Email', 'Role', 'Status', 'Registered on'].join(';'),
     // Données utilisateurs
     ...users.map((u) => [
       u.lastname  || '',
       u.firstname || '',
       u.email     || '',
       (u.role     || '').toLowerCase(),
-      u.enabled ? 'Actif' : 'Inactif',
+      u.enabled ? 'Active' : 'Inactive',
       formatDate(u.created_at),
     ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')),
   ];
 
   // Ajouter un bloc KPI en fin de fichier
   lignesCSV.push('');
-  lignesCSV.push('--- Statistiques ---');
-  lignesCSV.push(`"Revenu total";"${formatPrix(kpi.revenu)}"`);
-  lignesCSV.push(`"Nouveaux Meeters (7j)";"${kpi.nouveauxUtilisateurs ?? 0}"`);
-  lignesCSV.push(`"Signalements";"${kpi.signalements ?? 0}"`);
-  lignesCSV.push(`"Taux de conversion";"${kpi.tauxConversion ?? 0} %"`);
-  lignesCSV.push(`"Total utilisateurs";"${kpi.totalUtilisateurs ?? 0}"`);
+  lignesCSV.push('--- Statistics ---');
+  lignesCSV.push(`"Total Revenue";"${formatPrix(kpi.revenu)}"`);
+  lignesCSV.push(`"New Meeters (7d)";"${kpi.nouveauxUtilisateurs ?? 0}"`);
+  lignesCSV.push(`"Reports";"${kpi.signalements ?? 0}"`);
+  lignesCSV.push(`"Conversion rate";"${kpi.tauxConversion ?? 0} %"`);
+  lignesCSV.push(`"Total users";"${kpi.totalUtilisateurs ?? 0}"`);
 
   const contenu = '﻿' + lignesCSV.join('\n'); // BOM UTF-8 pour Excel
   const blob    = new Blob([contenu], { type: 'text/csv;charset=utf-8;' });
   const url     = URL.createObjectURL(blob);
 
-  const today = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+  const today = new Date().toLocaleDateString('en-US').replace(/\//g, '-');
   const a     = document.createElement('a');
   a.href      = url;
   a.download  = `meetando-admin-export-${today}.csv`;
@@ -3513,22 +3513,22 @@ function exporterDonneesAdminPDF() {
   const data  = state.dashboardData || {};
   const kpi   = data.kpi || {};
   const users = data.derniersUtilisateurs || [];
-  const today = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const today = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const lignesHTML = users.map((u) => `
     <tr>
       <td>${escapeHtml((u.lastname || '') + ' ' + (u.firstname || ''))}</td>
       <td>${escapeHtml(u.email || '')}</td>
       <td>${escapeHtml(u.role || '')}</td>
-      <td>${u.enabled ? 'Actif' : 'Inactif'}</td>
+      <td>${u.enabled ? 'Active' : 'Inactive'}</td>
       <td>${formatDate(u.created_at)}</td>
     </tr>`).join('');
 
   const html = `<!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rapport Admin — Meet&Do</title>
+  <title>Admin Report — Meet&Do</title>
   <style>
     body { font-family: Arial, sans-serif; color: #1e293b; padding: 2rem; font-size: 13px; }
     h1 { color: #2563eb; margin-bottom: .25rem; }
@@ -3546,28 +3546,28 @@ function exporterDonneesAdminPDF() {
   </style>
 </head>
 <body>
-  <h1>📊 Rapport administrateur — Meet&amp;Do</h1>
-  <div class="subtitle">Généré le ${today}</div>
+  <h1>📊 Admin report — Meet&amp;Do</h1>
+  <div class="subtitle">Generated on ${today}</div>
   <div class="kpi-row">
-    <div class="kpi-box"><div class="label">Revenu total</div><div class="val">${escapeHtml(formatPrix(kpi.revenu))}</div></div>
-    <div class="kpi-box"><div class="label">Nouveaux Meeters (7j)</div><div class="val">${kpi.nouveauxUtilisateurs ?? 0}</div></div>
-    <div class="kpi-box"><div class="label">Signalements</div><div class="val">${kpi.signalements ?? 0}</div></div>
-    <div class="kpi-box"><div class="label">Taux de conversion</div><div class="val">${kpi.tauxConversion ?? 0} %</div></div>
-    <div class="kpi-box"><div class="label">Total utilisateurs</div><div class="val">${kpi.totalUtilisateurs ?? 0}</div></div>
+    <div class="kpi-box"><div class="label">Total revenue</div><div class="val">${escapeHtml(formatPrix(kpi.revenu))}</div></div>
+    <div class="kpi-box"><div class="label">New Meeters (7d)</div><div class="val">${kpi.nouveauxUtilisateurs ?? 0}</div></div>
+    <div class="kpi-box"><div class="label">Reports</div><div class="val">${kpi.signalements ?? 0}</div></div>
+    <div class="kpi-box"><div class="label">Conversion rate</div><div class="val">${kpi.tauxConversion ?? 0} %</div></div>
+    <div class="kpi-box"><div class="label">Total users</div><div class="val">${kpi.totalUtilisateurs ?? 0}</div></div>
   </div>
-  <h2>Derniers utilisateurs inscrits (${users.length})</h2>
+  <h2>Recently registered users (${users.length})</h2>
   <table>
-    <thead><tr><th>Nom &amp; Prénom</th><th>Email</th><th>Rôle</th><th>Statut</th><th>Inscrit le</th></tr></thead>
+    <thead><tr><th>Full name</th><th>Email</th><th>Role</th><th>Status</th><th>Registered on</th></tr></thead>
     <tbody>${lignesHTML}</tbody>
   </table>
-  <div class="footer">Meet&amp;Do — Rapport confidentiel — ${today}</div>
+  <div class="footer">Meet&amp;Do — Confidential report — ${today}</div>
   <script>window.onload = function() { window.print(); }<\/script>
 </body>
 </html>`;
 
   const win = window.open('', '_blank');
   if (!win) {
-    alert('Veuillez autoriser les fenêtres popup pour générer le PDF.');
+    alert('Please allow popups to generate the PDF.');
     return;
   }
   win.document.write(html);
@@ -3605,15 +3605,15 @@ async function chargerActiviteRecente() {
     const demandesEdit  = r.nouvellesDemandesEditeur ?? r.newPublisherRequests  ?? 0;
 
     const pills = [
-      { icone: '👥', label: 'Nouvelles inscriptions',  val: inscriptions, couleur: '#d1fae5', couleurIcone: '#059669' },
-      { icone: '📆', label: 'Nouvelles réservations',  val: reservations, couleur: '#dbeafe', couleurIcone: '#2563eb' },
-      { icone: '📢', label: 'Demandes éditeur',         val: demandesEdit, couleur: '#ede9fe', couleurIcone: '#7c3aed' },
+      { icone: '👥', label: 'New registrations',  val: inscriptions, couleur: '#d1fae5', couleurIcone: '#059669' },
+      { icone: '📆', label: 'New bookings',       val: reservations, couleur: '#dbeafe', couleurIcone: '#2563eb' },
+      { icone: '📢', label: 'Publisher requests', val: demandesEdit, couleur: '#ede9fe', couleurIcone: '#7c3aed' },
     ];
 
     container.innerHTML = `
       <div class="glass-card mb-6 animate-in">
         <div class="card-title" style="margin-bottom:1rem">
-          <i class="bi bi-activity" style="color:var(--accent)"></i> Activité des dernières 24h
+          <i class="bi bi-activity" style="color:var(--accent)"></i> Activity in the last 24h
         </div>
         <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
           ${pills.map((p) => KpiCard(p)).join('')}
@@ -3630,19 +3630,19 @@ async function chargerActiviteRecente() {
 
 function exporterReservationsPublisher(items) {
   if (!items || !items.length) {
-    alert('Aucune réservation à exporter.');
+    alert('No bookings to export.');
     return;
   }
 
   const lignesCSV = [
-    ['Activité', 'Date', 'Personnes', 'Revenu', 'Avis client'].join(';'),
+    ['Activity', 'Date', 'Persons', 'Revenue', 'Customer review'].join(';'),
     ...items.map((r) => {
       const act   = r.event?.activity || {};
-      const dateR = r.date ? new Date(r.date).toLocaleDateString('fr-FR') : '—';
+      const dateR = r.date ? new Date(r.date).toLocaleDateString('en-US') : '—';
       const revenu = (act.price ?? 0) * (r.group_size ?? 1);
-      const avis  = r.user_rating === 'like'      ? 'Adoré'
-                  : r.user_rating === 'recommend' ? 'Conseillé'
-                  : r.user_rating === 'dislike'   ? 'Non apprécié'
+      const avis  = r.user_rating === 'like'      ? 'Loved'
+                  : r.user_rating === 'recommend' ? 'Recommended'
+                  : r.user_rating === 'dislike'   ? 'Not liked'
                   : '';
       return [act.title || '—', dateR, String(r.group_size ?? 1), formatPrix(revenu), avis]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';');
@@ -3651,13 +3651,13 @@ function exporterReservationsPublisher(items) {
 
   const revenuTotal = items.reduce((s, r) => s + (r.event?.activity?.price ?? 0) * (r.group_size ?? 1), 0);
   lignesCSV.push('');
-  lignesCSV.push(`"Revenu total";"${escapeHtml(formatPrix(revenuTotal))}"`);
-  lignesCSV.push(`"Nombre de réservations";"${items.length}"`);
+  lignesCSV.push(`"Total revenue";"${escapeHtml(formatPrix(revenuTotal))}"`);
+  lignesCSV.push(`"Number of bookings";"${items.length}"`);
 
   const contenu = '﻿' + lignesCSV.join('\n');
   const blob    = new Blob([contenu], { type: 'text/csv;charset=utf-8;' });
   const url     = URL.createObjectURL(blob);
-  const today   = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+  const today   = new Date().toLocaleDateString('en-US').replace(/\//g, '-');
   const a       = document.createElement('a');
   a.href        = url;
   a.download    = `meetando-reservations-${today}.csv`;
@@ -3711,8 +3711,8 @@ function afficherToastNotification(nb) {
     <div class="notif-toast-inner">
       <i class="bi bi-bell-fill" style="color:#059669;font-size:1.4rem;flex-shrink:0"></i>
       <div>
-        <div class="notif-toast-title">Nouvelle réservation !</div>
-        <div class="notif-toast-body">${nb} nouvelle(s) réservation(s) reçue(s).</div>
+        <div class="notif-toast-title">New booking!</div>
+        <div class="notif-toast-body">${nb} new booking(s) received.</div>
       </div>
       <button type="button" class="notif-toast-close" onclick="fermerToast()">
         <i class="bi bi-x-lg"></i>
@@ -3760,7 +3760,7 @@ function attachEventListeners() {
   if (compteResa) {
     appelApi('/dashboard/activites').then((reservations) => {
       if (!reservations.length) {
-        compteResa.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">Aucune réservation.</p>';
+        compteResa.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">No bookings.</p>';
         return;
       }
       const now = new Date();
@@ -3770,7 +3770,7 @@ function attachEventListeners() {
         const d = dateVal ? new Date(dateVal) : null;
         const isPast = d ? d < now : false;
         const jour   = d ? d.getDate() : '—';
-        const mois   = d ? d.toLocaleString('fr-FR', { month: 'short' }).toUpperCase() : '';
+        const mois   = d ? d.toLocaleString('en-US', { month: 'short' }).toUpperCase() : '';
         return `
           <div class="resa-item ${isPast ? 'past' : ''}">
             <div class="resa-item-date">
@@ -3778,20 +3778,20 @@ function attachEventListeners() {
               <span class="resa-item-month">${mois}</span>
             </div>
             <div class="resa-item-info">
-              <div class="resa-item-title">${escapeHtml(a.title || 'Activité')}</div>
+              <div class="resa-item-title">${escapeHtml(a.title || 'Activity')}</div>
               <div class="resa-item-meta">
-                <i class="bi bi-people-fill" style="color:var(--accent)"></i> ${r.group_size ?? 1} pers.
+                <i class="bi bi-people-fill" style="color:var(--accent)"></i> ${r.group_size ?? 1} ppl.
                 ${a.address ? `· ${escapeHtml(a.address)}` : ''}
               </div>
             </div>
             ${isPast
-              ? '<span class="badge-status badge-inactif" style="font-size:.7rem">Passée</span>'
-              : '<span class="badge-status badge-actif" style="font-size:.7rem">À venir</span>'}
+              ? '<span class="badge-status badge-inactif" style="font-size:.7rem">Past</span>'
+              : '<span class="badge-status badge-actif" style="font-size:.7rem">Upcoming</span>'}
           </div>`;
       }).join('');
       compteResa.innerHTML = `<div class="resa-list">${items}</div>`;
     }).catch(() => {
-      compteResa.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">Impossible de charger les réservations.</p>';
+      compteResa.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem;padding:.5rem 0">Failed to load bookings.</p>';
     });
   }
 
@@ -3808,21 +3808,21 @@ function attachEventListeners() {
       };
       const btn = form.querySelector('button[type="submit"]');
       btn.disabled = true;
-      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enregistrement…';
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
       try {
         const updated = await appelApi('/user/me', 'PATCH', data);
         state.profil = { ...state.profil, ...updated };
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#d1fae5;color:#065f46;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-check-circle-fill"></i> Modifications enregistrées avec succès.
+          <i class="bi bi-check-circle-fill"></i> Changes saved successfully.
         </div>`;
         renderSidebar();
       } catch (err) {
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-exclamation-circle-fill"></i> Erreur : ${err.message}
+          <i class="bi bi-exclamation-circle-fill"></i> Error: ${err.message}
         </div>`;
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-lg"></i> Enregistrer les modifications';
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> Save changes';
       }
     });
   }
@@ -3836,7 +3836,7 @@ function attachEventListeners() {
       const file = avatarInput.files[0];
       if (!file) return;
       const feedback = document.getElementById('avatar-feedback');
-      feedback.innerHTML = '<span style="color:var(--text-muted)">Envoi en cours…</span>';
+      feedback.innerHTML = '<span style="color:var(--text-muted)">Uploading…</span>';
       const formData = new FormData();
       formData.append('avatar', file);
       try {
@@ -3846,7 +3846,7 @@ function attachEventListeners() {
         if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erreur'); }
         const result = await res.json();
         state.profil = { ...state.profil, avatar_url: result.avatar_url };
-        feedback.innerHTML = '<span style="color:#059669;font-weight:600"><i class="bi bi-check-circle-fill"></i> Photo mise à jour !</span>';
+        feedback.innerHTML = '<span style="color:#059669;font-weight:600"><i class="bi bi-check-circle-fill"></i> Photo updated!</span>';
         const wrap = document.getElementById('avatar-wrap');
         if (wrap) {
           const img = wrap.querySelector('.account-avatar-img') || document.createElement('img');
@@ -3872,26 +3872,26 @@ function attachEventListeners() {
       const confirmPassword = document.getElementById('pwd-confirm').value;
       if (!currentPassword || !newPassword || !confirmPassword) {
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-exclamation-circle-fill"></i> Veuillez remplir tous les champs.
+          <i class="bi bi-exclamation-circle-fill"></i> Please fill in all fields.
         </div>`; return;
       }
       if (newPassword !== confirmPassword) {
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-exclamation-circle-fill"></i> Les nouveaux mots de passe ne correspondent pas.
+          <i class="bi bi-exclamation-circle-fill"></i> New passwords do not match.
         </div>`; return;
       }
       if (newPassword.length < 6) {
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#fee2e2;color:#991b1b;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-exclamation-circle-fill"></i> Le mot de passe doit contenir au moins 6 caractères.
+          <i class="bi bi-exclamation-circle-fill"></i> Password must be at least 6 characters.
         </div>`; return;
       }
       const btn = formPwd.querySelector('button[type="submit"]');
       btn.disabled = true;
-      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Mise à jour…';
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Updating…';
       try {
         await appelApi('/user/me/password', 'PATCH', { currentPassword, newPassword });
         feedback.innerHTML = `<div style="padding:.6rem 1rem;background:#d1fae5;color:#065f46;border-radius:.75rem;font-size:.83rem;font-weight:600">
-          <i class="bi bi-check-circle-fill"></i> Mot de passe modifié avec succès.
+          <i class="bi bi-check-circle-fill"></i> Password changed successfully.
         </div>`;
         formPwd.reset();
       } catch (err) {
@@ -3900,7 +3900,7 @@ function attachEventListeners() {
         </div>`;
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-shield-lock-fill"></i> Mettre à jour le mot de passe';
+        btn.innerHTML = '<i class="bi bi-shield-lock-fill"></i> Update password';
       }
     });
   }
@@ -3910,15 +3910,15 @@ function attachEventListeners() {
   if (btnReq) {
     btnReq.addEventListener('click', async () => {
       btnReq.disabled = true;
-      btnReq.innerHTML = '<i class="bi bi-hourglass-split"></i> Envoi…';
+      btnReq.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending…';
       try {
         await appelApi('/user/request-publisher', 'POST');
         state.profil = { ...state.profil, publisher_request: true };
         setOnglet('account');
       } catch (err) {
         btnReq.disabled = false;
-        btnReq.innerHTML = '<i class="bi bi-send-fill"></i> Envoyer ma demande';
-        alert('Erreur : ' + err.message);
+        btnReq.innerHTML = '<i class="bi bi-send-fill"></i> Send my request';
+        alert('Error: ' + err.message);
       }
     });
   }
