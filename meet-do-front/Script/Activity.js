@@ -152,54 +152,16 @@ async function getActivityEvents(activityId, activity) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const events = await response.json();
-    const normalizedEvents = normalizeEvents(events, activityId);
-    const resolvedEvents = normalizedEvents.length
-      ? normalizedEvents
-      : await resolveMissingEventIds(embeddedEvents, activityId);
+    const backendEvents = normalizeEvents(events, activityId).filter(
+      (event) => event.id,
+    );
 
-    return resolvedEvents.length ? resolvedEvents : embeddedEvents;
+    if (backendEvents.length) return backendEvents;
+
+    return embeddedEvents.filter((event) => event.id);
   } catch (error) {
     console.error("Error while fetching activity events:", error);
-    return resolveMissingEventIds(embeddedEvents, activityId);
-  }
-}
-
-async function resolveMissingEventIds(events, activityId) {
-  if (!events.length || events.every((event) => event.id)) {
-    return events;
-  }
-
-  try {
-    const response = await fetch(EVENT_API_URL);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const allEvents = normalizeEvents(await response.json(), activityId);
-    return events.map((event, index) => {
-      if (event.id) return event;
-
-      const matchingEvent = allEvents.find(
-        (candidate) =>
-          candidate.id &&
-          candidate.date.toISOString().slice(0, 16) ===
-            event.date.toISOString().slice(0, 16),
-      );
-      const indexedEvent =
-        allEvents.length === events.length ? allEvents[index] : null;
-      const resolvedEvent = matchingEvent || indexedEvent;
-
-      return resolvedEvent?.id
-        ? {
-            ...event,
-            id: resolvedEvent.id,
-            availablePlaces: resolvedEvent.availablePlaces,
-            reservedPlaces: resolvedEvent.reservedPlaces,
-            activityGroupSize: resolvedEvent.activityGroupSize,
-          }
-        : event;
-    });
-  } catch (error) {
-    console.error("Error while resolving event ids:", error);
-    return events;
+    return embeddedEvents.filter((event) => event.id);
   }
 }
 
@@ -239,9 +201,8 @@ function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
       return {
         id: Number.isInteger(eventId) && eventId > 0 ? eventId : null,
         date,
-        reservationKey: Number.isInteger(eventId) && eventId > 0
-          ? `event-${eventId}`
-          : `slot-${activityId}-${date.toISOString()}`,
+        reservationKey:
+          Number.isInteger(eventId) && eventId > 0 ? `event-${eventId}` : null,
         availablePlaces: getEventAvailablePlaces(event, defaultActivityGroupSize),
         reservedPlaces: Number(
           event?.reserved_places || event?.reservedPlaces || 0,
@@ -563,7 +524,8 @@ function renderReservationEvents(events) {
   if (!list || !feedback) return;
 
   if (!events.length) {
-    feedback.textContent = "No events are available for this activity yet.";
+    feedback.textContent =
+      "No reservable events are available for this activity yet.";
     feedback.className = "mb-3 text-secondary";
     list.innerHTML = "";
     updateReservationFooterState();
@@ -772,9 +734,7 @@ async function submitReservations() {
             date: new Date().toISOString(),
             group_size: quantity,
             id_user: userId,
-            ...(event.id ? { id_event: Number(event.id) } : {}),
-            id_activity: Number(currentReservationActivity?.id),
-            event_date: event.date.toISOString(),
+            id_event: Number(event.id),
           }),
         }).then(async (response) => {
           if (!response.ok) {
