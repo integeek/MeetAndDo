@@ -153,11 +153,58 @@ async function getActivityEvents(activityId, activity) {
 
     const events = await response.json();
     const normalizedEvents = normalizeEvents(events, activityId);
-    return normalizedEvents.length ? normalizedEvents : embeddedEvents;
+    const resolvedEvents = normalizedEvents.length
+      ? normalizedEvents
+      : await resolveMissingEventIds(embeddedEvents, activityId);
+
+    return resolvedEvents.length ? resolvedEvents : embeddedEvents;
   } catch (error) {
     console.error("Error while fetching activity events:", error);
-    return embeddedEvents;
+    return resolveMissingEventIds(embeddedEvents, activityId);
   }
+}
+
+async function resolveMissingEventIds(events, activityId) {
+  if (!events.length || events.every((event) => event.id)) {
+    return events;
+  }
+
+  try {
+    const response = await fetch(EVENT_API_URL);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const allEvents = normalizeEvents(await response.json(), activityId);
+    return events.map((event, index) => {
+      if (event.id) return event;
+
+      const matchingEvent = allEvents.find(
+        (candidate) =>
+          candidate.id &&
+          candidate.date.toISOString().slice(0, 16) ===
+            event.date.toISOString().slice(0, 16),
+      );
+      const indexedEvent =
+        allEvents.length === events.length ? allEvents[index] : null;
+      const resolvedEvent = matchingEvent || indexedEvent;
+
+      return resolvedEvent?.id
+        ? {
+            ...event,
+            id: resolvedEvent.id,
+            availablePlaces: resolvedEvent.availablePlaces,
+            reservedPlaces: resolvedEvent.reservedPlaces,
+            activityGroupSize: resolvedEvent.activityGroupSize,
+          }
+        : event;
+    });
+  } catch (error) {
+    console.error("Error while resolving event ids:", error);
+    return events;
+  }
+}
+
+function getRawEventId(event) {
+  return event?.id ?? event?.id_event ?? event?.eventId ?? event?.idEvent;
 }
 
 function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
@@ -187,7 +234,7 @@ function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
       const date = new Date(rawDate);
       if (Number.isNaN(date.getTime())) return null;
 
-      const eventId = Number(event?.id);
+      const eventId = Number(getRawEventId(event));
 
       return {
         id: Number.isInteger(eventId) && eventId > 0 ? eventId : null,
@@ -523,14 +570,19 @@ function renderReservationEvents(events) {
   feedback.textContent = "Choose an event to reserve your spot.";
   feedback.className = "mb-3 text-secondary";
   list.innerHTML = events
-    .map(
-      (event) => `
+    .map((event) => {
+      const canReserveEvent = Boolean(event.id) && event.availablePlaces > 0;
+      const availabilityText = event.id
+        ? `${event.availablePlaces} places available`
+        : "Event id unavailable";
+
+      return `
         <div class="reservation-event-row" role="listitem">
           <div>
             <p class="reservation-event-title mb-1">Event</p>
             <p class="reservation-event-date mb-0">${formatEventDateTime(event.date)}</p>
             <p class="reservation-event-availability mb-0">
-              ${event.availablePlaces} places available
+              ${availabilityText}
             </p>
           </div>
           <div
@@ -542,7 +594,7 @@ function renderReservationEvents(events) {
               class="btn btn-outline-primary reservation-quantity-button"
               data-reservation-action="decrease"
               aria-label="Decrease reserved places"
-              ${event.availablePlaces === 0 ? "disabled" : ""}
+              ${canReserveEvent ? "" : "disabled"}
             >
               -
             </button>
@@ -554,21 +606,21 @@ function renderReservationEvents(events) {
               max="${event.availablePlaces}"
               inputmode="numeric"
               aria-label="Reserved places"
-              ${event.availablePlaces === 0 ? "disabled" : ""}
+              ${canReserveEvent ? "" : "disabled"}
             />
             <button
               type="button"
               class="btn btn-outline-primary reservation-quantity-button"
               data-reservation-action="increase"
               aria-label="Increase reserved places"
-              ${event.availablePlaces === 0 ? "disabled" : ""}
+              ${canReserveEvent ? "" : "disabled"}
             >
               +
             </button>
           </div>
         </div>
-      `,
-    )
+      `;
+    })
     .join("");
 
   bindReservationQuantityControls();
