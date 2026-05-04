@@ -12,6 +12,7 @@ import { FaqModule } from './faq/faq.module';
 import { ActivityModule } from './activity/activity.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { EventModule } from './event/event.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { EventModule } from './event/event.module';
     ActivityModule,
     ReservationModule,
     EventModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
