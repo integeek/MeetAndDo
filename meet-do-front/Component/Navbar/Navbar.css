@@ -1,137 +1,217 @@
-
-@font-face {
-    font-family: "Inter";
-    src: url(../assets/font/Inter-VariableFont_opsz\,wght.ttf);
-}
-
-.navbar-container {
-    background-color: rgb(255, 255, 255);
-    width: 100%;
-    box-shadow: 0px 1px 5px 0px;
-}
-
 body {
     padding: 0;
     margin: 0;
-    font-family: "Inter";
+    font-family: Inter, Arial, sans-serif;
+}
+
+.navbar-container {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e7edf5;
+    position: relative;
+    z-index: 100;
+}
+
+.navbar-container,
+.navbar-container *,
+.navbar-container *::before,
+.navbar-container *::after {
+    box-sizing: border-box;
+}
+
+.meetdo-navbar {
+    width: 100%;
+    min-height: 76px;
+    background: #ffffff;
+    padding: 0;
+}
+
+.meetdo-navbar-inner {
+    width: 100%;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+}
+
+.meetdo-brand {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
 }
 
 #logo {
-    width: 8vh;
-    height: 8vh;
-    padding: 4px;
-    margin-left: 20px;
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    display: block;
 }
 
-.navbar-container a {
-    list-style: none;
-    width: 10rem;
-    height: 3rem;
-    padding-inline-start: 0;
-    display: flex;
+.meetdo-toggler {
+    display: none;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    border: 1px solid #cdd8e6;
+    border-radius: 8px;
+    background: #ffffff;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
-    color: black;
-}
-
-.navLinks li {
-    list-style-type: none;
-}
-
-.navbar-container a:hover {
-    color: white;
-}
-
-.navLinks li:hover {
-    background-color: #004AAD;
-    border-radius: 10px;
-    color: white;
-}
-
-.navbar-container ul {
-    display: flex;
     padding: 0;
-    margin-left: 50px;
+    cursor: pointer;
 }
 
-nav {
+.meetdo-toggler-icon,
+.meetdo-toggler-icon::before,
+.meetdo-toggler-icon::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #004aad;
+    border-radius: 999px;
+    content: "";
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.meetdo-toggler-icon {
+    position: relative;
+}
+
+.meetdo-toggler-icon::before,
+.meetdo-toggler-icon::after {
+    position: absolute;
+    left: 0;
+}
+
+.meetdo-toggler-icon::before {
+    top: -7px;
+}
+
+.meetdo-toggler-icon::after {
+    top: 7px;
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon {
+    background: transparent;
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon::before {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon::after {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.meetdo-collapse {
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
+    gap: 1rem;
+}
+
+.meetdo-main-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0;
     margin: 0;
+    list-style: none;
 }
 
-#navbarGrow {
-    flex-grow: 1;
+.meetdo-link {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    color: #004aad;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-#profilImg {
-    width: 5vh;
-    height: 5vh;
+.meetdo-link:hover,
+.meetdo-link:focus {
+    background: #eef5ff;
+    color: #003b8a;
 }
 
-.annonce a {
-    margin-left: 20px;
-    border :1px solid black;
-    border-radius: 10px;
-}
-
-.annonce a:hover {
-    background: #004AAD;
-    border: 1px solid #004AAD;
-}
-
-#profil {
-    margin-left: 1rem;
-    width: 7rem;
-    padding: 0px 6px;
-    margin-right: 20px;
-    border: 1px solid black;
+.meetdo-auth-actions {
     display: flex;
-    border-radius: 10px;
-    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
 }
 
-#profil:hover{
-    color: #004AAD;
-    border: 1px solid #004AAD;
+.meetdo-btn {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.05rem;
+    border: 1px solid #004aad;
+    border-radius: 8px;
+    background: #004aad;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.profil-container {
-  position: relative;
+.meetdo-btn:hover,
+.meetdo-btn:focus {
+    background: #003b8a;
+    border-color: #003b8a;
+    color: #ffffff;
+    transform: translateY(-1px);
 }
 
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  min-width: 180px;
-  z-index: 100;
+.meetdo-btn:active {
+    transform: translateY(0);
 }
 
-.dropdown-menu.open {
-  display: flex;
-  flex-direction: column;
-}
+@media (max-width: 991px) {
+    .meetdo-navbar-inner {
+        flex-wrap: wrap;
+        padding: 0.6rem 1rem;
+    }
 
-.dropdown-menu a {
-  padding: 12px 16px;
-  color: #333;
-  text-decoration: none;
-}
+    .meetdo-toggler {
+        display: inline-flex;
+    }
 
-.dropdown-menu a:hover {
-  background: #004AAD;;
-}
+    .meetdo-collapse {
+        display: none;
+        width: 100%;
+        flex-basis: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+        padding: 0.75rem 0 0.25rem;
+    }
 
-.dropdown-menu hr {
-  margin: 4px 0;
-  border: none;
-  border-top: 1px solid #e0e0e0;
+    .meetdo-collapse.show {
+        display: flex;
+    }
+
+    .meetdo-main-links,
+    .meetdo-auth-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
+    }
+
+    .meetdo-link,
+    .meetdo-btn {
+        width: 100%;
+    }
 }
