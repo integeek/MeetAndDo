@@ -580,6 +580,7 @@ function renderReservationEvents(events) {
               type="button"
               class="btn btn-outline-primary reservation-notify-button"
               data-event-id="${event.id}"
+              data-notify-enabled="false"
             >
               Notify me
             </button>
@@ -609,8 +610,18 @@ function renderReservationEvents(events) {
 function bindReservationNotifyButtons() {
   document.querySelectorAll(".reservation-notify-button").forEach((button) => {
     button.addEventListener("click", () => {
-      button.textContent = "Notification enabled";
-      button.disabled = true;
+      const isNotificationEnabled =
+        button.dataset.notifyEnabled === "true";
+
+      button.dataset.notifyEnabled = isNotificationEnabled ? "false" : "true";
+      button.textContent = isNotificationEnabled
+        ? "Notify me"
+        : "Cancel notification";
+      button.classList.toggle(
+        "btn-outline-primary",
+        isNotificationEnabled,
+      );
+      button.classList.toggle("btn-primary", !isNotificationEnabled);
     });
   });
 }
