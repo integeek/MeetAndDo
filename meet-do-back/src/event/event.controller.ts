@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -13,8 +23,20 @@ export class EventController {
   }
 
   @Get()
-  findAll() {
-    return this.eventService.findAll();
+  findAll(@Query('activityId') activityId?: string) {
+    const hasActivityId = activityId !== undefined && activityId !== '';
+    const parsedActivityId = hasActivityId ? Number(activityId) : undefined;
+
+    if (
+      hasActivityId &&
+      (!Number.isInteger(parsedActivityId) || (parsedActivityId ?? 0) <= 0)
+    ) {
+      throw new BadRequestException(
+        'The activityId query parameter must be a positive integer',
+      );
+    }
+
+    return this.eventService.findAll(parsedActivityId);
   }
 
   @Get(':id')
