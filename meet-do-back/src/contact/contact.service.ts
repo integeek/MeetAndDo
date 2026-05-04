@@ -45,14 +45,12 @@ export class ContactService {
     if (error) {
       this.logger.error(`contact.create error: ${error.message}`);
       throw new HttpException(
-        "Impossible d'envoyer le message. Réessayez plus tard.",
+        "Unable to send message. Please try again later.",
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    this.logger.log(
-      `Nouveau message de contact de ${dto.email} [${dto.categorie}]`,
-    );
+    this.logger.log(`New contact message from ${dto.email} [${dto.categorie}]`);
     await Promise.all([
       this.envoyerEmailNotificationAdmin(dto, data?.id),
       this.envoyerEmailConfirmationUser(dto),
@@ -125,8 +123,8 @@ export class ContactService {
       .single();
 
     if (error || !data) {
-      this.logger.warn(`contact.findOne: message ${id} introuvable`);
-      throw new HttpException('Message introuvable.', HttpStatus.NOT_FOUND);
+      this.logger.warn(`contact.findOne: message ${id} not found`);
+      throw new HttpException('Message not found.', HttpStatus.NOT_FOUND);
     }
 
     if (!data.lu) {
@@ -182,14 +180,12 @@ export class ContactService {
     if (error) {
       this.logger.error(`contact.reply error: ${error.message}`);
       throw new HttpException(
-        "Impossible d'enregistrer la réponse.",
+        "Unable to save the response.",
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    this.logger.log(
-      `Réponse enregistrée pour le message ${id} (${existing.email})`,
-    );
+    this.logger.log(`Recorded reply for the message ${id} (${existing.email})`);
     await this.envoyerEmailReponse(
       existing.email,
       existing.nom,
@@ -213,7 +209,7 @@ export class ContactService {
     if (error) {
       this.logger.error(`contact.remove error: ${error.message}`);
       throw new HttpException(
-        'Impossible de supprimer le message.',
+        'Unable to delete the message.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -309,7 +305,7 @@ export class ContactService {
     if (error) {
       this.logger.error(`contact.marquerTousLus error: ${error.message}`);
       throw new HttpException(
-        'Impossible de mettre à jour les messages.',
+        'Unable to update messages.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -363,9 +359,9 @@ export class ContactService {
         }),
       });
 
-      this.logger.log(`Email admin envoyé pour le message ${ref}`);
+      this.logger.log(`Email sent to admin for message ${ref}`);
     } catch (err) {
-      this.logger.warn(`Impossible d'envoyer l'email admin: ${err?.message}`);
+      this.logger.warn(`Unable to send admin email: ${err?.message}`);
     }
   }
 
