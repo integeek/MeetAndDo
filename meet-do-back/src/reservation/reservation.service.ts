@@ -68,6 +68,49 @@ export class ReservationService {
     if (!data) throw new NotFoundException('User not found');
   }
 
+  private async resolveEventId(createReservationDto: CreateReservationDto) {
+    const eventId = Number(createReservationDto.id_event);
+    if (Number.isInteger(eventId) && eventId > 0) {
+      return eventId;
+    }
+
+    const activityId = Number(createReservationDto.id_activity);
+    const eventDate = createReservationDto.event_date
+      ? new Date(createReservationDto.event_date)
+      : null;
+
+    if (
+      !Number.isInteger(activityId) ||
+      activityId <= 0 ||
+      !eventDate ||
+      Number.isNaN(eventDate.getTime())
+    ) {
+      throw new BadRequestException(
+        'A valid id_event or event_date with id_activity is required',
+      );
+    }
+
+    const { data: events, error } = await this.supabaseService
+      .getClient()
+      .from('event')
+      .select('id, date, id_activity')
+      .eq('id_activity', activityId);
+
+    if (error) throw new Error(error.message);
+
+    const matchingEvent = (events || []).find((event) => {
+      const storedEventDate = new Date(event.date);
+      return (
+        !Number.isNaN(storedEventDate.getTime()) &&
+        storedEventDate.toISOString().slice(0, 16) ===
+          eventDate.toISOString().slice(0, 16)
+      );
+    });
+
+    if (!matchingEvent) throw new NotFoundException('Event not found');
+    return Number(matchingEvent.id);
+  }
+
   async create(createReservationDto: CreateReservationDto) {
     if (createReservationDto.group_size <= 0) {
       throw new BadRequestException(
@@ -76,10 +119,9 @@ export class ReservationService {
     }
 
     await this.ensureUserExists(createReservationDto.id_user);
+    const eventId = await this.resolveEventId(createReservationDto);
 
-    const { availablePlaces } = await this.getEventCapacity(
-      createReservationDto.id_event,
-    );
+    const { availablePlaces } = await this.getEventCapacity(eventId);
 
     if (createReservationDto.group_size > availablePlaces) {
       throw new BadRequestException(
@@ -91,7 +133,7 @@ export class ReservationService {
       date: createReservationDto.date,
       group_size: createReservationDto.group_size,
       id_user: createReservationDto.id_user,
-      id_event: createReservationDto.id_event,
+      id_event: eventId,
     };
 
     const { data, error } = await this.supabaseService
