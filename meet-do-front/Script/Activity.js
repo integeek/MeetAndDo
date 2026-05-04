@@ -239,6 +239,9 @@ function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
       return {
         id: Number.isInteger(eventId) && eventId > 0 ? eventId : null,
         date,
+        reservationKey: Number.isInteger(eventId) && eventId > 0
+          ? `event-${eventId}`
+          : `slot-${activityId}-${date.toISOString()}`,
         availablePlaces: getEventAvailablePlaces(event, defaultActivityGroupSize),
         reservedPlaces: Number(
           event?.reserved_places || event?.reservedPlaces || 0,
@@ -571,10 +574,8 @@ function renderReservationEvents(events) {
   feedback.className = "mb-3 text-secondary";
   list.innerHTML = events
     .map((event) => {
-      const canReserveEvent = Boolean(event.id) && event.availablePlaces > 0;
-      const availabilityText = event.id
-        ? `${event.availablePlaces} places available`
-        : "Event id unavailable";
+      const canReserveEvent = event.availablePlaces > 0;
+      const availabilityText = `${event.availablePlaces} places available`;
 
       return `
         <div class="reservation-event-row" role="listitem">
@@ -587,7 +588,7 @@ function renderReservationEvents(events) {
           </div>
           <div
             class="reservation-quantity-control"
-            data-event-id="${event.id}"
+            data-event-key="${event.reservationKey}"
           >
             <button
               type="button"
@@ -631,7 +632,7 @@ function bindReservationQuantityControls() {
   document
     .querySelectorAll(".reservation-quantity-control")
     .forEach((control) => {
-      const eventId = control.dataset.eventId;
+      const eventKey = control.dataset.eventKey;
       const input = control.querySelector(".reservation-quantity-input");
 
       control
@@ -644,19 +645,19 @@ function bindReservationQuantityControls() {
                 ? currentValue + 1
                 : currentValue - 1;
 
-            setReservationQuantity(eventId, nextValue, input);
+            setReservationQuantity(eventKey, nextValue, input);
           });
         });
 
       input.addEventListener("input", () => {
-        setReservationQuantity(eventId, Number(input.value || 0), input);
+        setReservationQuantity(eventKey, Number(input.value || 0), input);
       });
     });
 }
 
-function setReservationQuantity(eventId, requestedQuantity, input) {
+function setReservationQuantity(eventKey, requestedQuantity, input) {
   const event = currentReservationEvents.find(
-    (reservationEvent) => String(reservationEvent.id) === String(eventId),
+    (reservationEvent) => reservationEvent.reservationKey === eventKey,
   );
   const maxQuantity = event?.availablePlaces || 0;
   const quantity = Math.min(
@@ -667,9 +668,9 @@ function setReservationQuantity(eventId, requestedQuantity, input) {
   input.value = quantity;
 
   if (quantity > 0) {
-    selectedReservationQuantities.set(String(eventId), quantity);
+    selectedReservationQuantities.set(eventKey, quantity);
   } else {
-    selectedReservationQuantities.delete(String(eventId));
+    selectedReservationQuantities.delete(eventKey);
   }
 
   document.getElementById("reservation-summary")?.classList.add("d-none");
@@ -693,9 +694,9 @@ function updateReservationFooterState() {
 
 function getSelectedReservationItems() {
   return [...selectedReservationQuantities.entries()]
-    .map(([eventId, quantity]) => {
+    .map(([eventKey, quantity]) => {
       const event = currentReservationEvents.find(
-        (reservationEvent) => String(reservationEvent.id) === String(eventId),
+        (reservationEvent) => reservationEvent.reservationKey === eventKey,
       );
 
       return event ? { event, quantity } : null;
@@ -742,19 +743,6 @@ async function submitReservations() {
 
   if (!selectedItems.length) return;
 
-  if (
-    selectedItems.some(
-      ({ event }) => !Number.isInteger(Number(event.id)) || Number(event.id) <= 0,
-    )
-  ) {
-    if (feedback) {
-      feedback.textContent =
-        "Unable to confirm this reservation because an event id is missing. Please refresh the page and try again.";
-      feedback.className = "mb-3 text-danger";
-    }
-    return;
-  }
-
   const currentUser = await getCurrentUser();
   const userId = getAuthenticatedUserId(currentUser);
 
@@ -784,7 +772,9 @@ async function submitReservations() {
             date: new Date().toISOString(),
             group_size: quantity,
             id_user: userId,
-            id_event: Number(event.id),
+            ...(event.id ? { id_event: Number(event.id) } : {}),
+            id_activity: Number(currentReservationActivity?.id),
+            event_date: event.date.toISOString(),
           }),
         }).then(async (response) => {
           if (!response.ok) {

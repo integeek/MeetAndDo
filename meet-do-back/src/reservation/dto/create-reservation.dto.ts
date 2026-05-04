@@ -1,4 +1,4 @@
-import { IsDateString, IsNumber } from "class-validator";
+import { IsDateString, IsNumber, IsOptional } from "class-validator";
 
 export class CreateReservationDto {
     @IsDateString()
@@ -10,6 +10,15 @@ export class CreateReservationDto {
     @IsNumber()
     id_user: number;
 
+    @IsOptional()
     @IsNumber()
-    id_event: number;
+    id_event?: number;
+
+    @IsOptional()
+    @IsNumber()
+    id_activity?: number;
+
+    @IsOptional()
+    @IsDateString()
+    event_date?: string;
 }
