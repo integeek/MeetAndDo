@@ -619,6 +619,7 @@ footer {
 .typing-dot:nth-child(3) { animation-delay: .4s; }
 
 /* =====================
+<<<<<<< Updated upstream
    ATTACHMENT PREVIEW
    ===================== */
 
@@ -731,6 +732,8 @@ footer {
 }
 
 /* =====================
+=======
+>>>>>>> Stashed changes
    INPUT AREA
    ===================== */
 

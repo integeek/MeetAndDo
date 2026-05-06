@@ -64,7 +64,7 @@ export class AuthenticationService {
                     </p>
 
                     <div style="text-align:center; margin:35px 0;">
-                        <a href="http://127.0.0.1:5500/meet-do-front/Page/PersonalInformation.html?token=${verificationToken}"
+                        <a href="http://localhost:5500/meet-do-front/Page/PersonalInformation.html?token=${verificationToken}"
                           style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
                                   text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
                             Activate my account →
@@ -163,7 +163,7 @@ export class AuthenticationService {
                     </p>
 
                     <div style="text-align:center; margin:35px 0;">
-                        <a href="http://127.0.0.1:5500/meet-do-front/Page/Home.html"
+                        <a href="http://localhost:5500/meet-do-front/Page/Home.html"
                           style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
                                   text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
                             Discover the activities →
@@ -281,7 +281,7 @@ export class AuthenticationService {
                   </p>
 
                   <div style="text-align:center; margin:35px 0;">
-                      <a href="http://127.0.0.1:5500/meet-do-front/Page/NewPassword.html?token=${resetToken}"
+                      <a href="http://localhost:5500/meet-do-front/Page/NewPassword.html?token=${resetToken}"
                         style="background-color:#004AAD; color:white; padding:14px 32px; border-radius:25px; 
                                 text-decoration:none; font-size:1rem; font-weight:bold; display:inline-block;">
                           Reset my password →

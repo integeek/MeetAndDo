@@ -62,14 +62,15 @@ export class MessagingGateway
 
   @SubscribeMessage('join_conversation')
   async handleJoinConversation(
-    @MessageBody() data: { conversationId: string },
+    @MessageBody() data: { conversationId: string; userId?: string },
     @ConnectedSocket() client: Socket,
   ) {
     await client.join(data.conversationId);
-    const messages = await this.messagingService.getMessages(
-      data.conversationId,
-    );
+    const messages = await this.messagingService.getMessages(data.conversationId);
     client.emit('messages_history', messages);
+    if (data.userId) {
+      await this.messagingService.markAsRead(data.conversationId, data.userId);
+    }
   }
 
   @SubscribeMessage('send_message')
