@@ -180,6 +180,67 @@ body {
 
 .meetdo-profile-btn {
     gap: 0.55rem;
+    vertical-align: middle;
+}
+
+.meetdo-profile-dropdown {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+}
+
+.meetdo-profile-dropdown::after {
+    content: "";
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 0.45rem;
+}
+
+.meetdo-profile-dropdown:hover::after,
+.meetdo-profile-dropdown:focus-within::after {
+    display: block;
+}
+
+.meetdo-profile-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 1000;
+    min-width: 180px;
+    margin: 0;
+    padding: 0.45rem;
+    border: 1px solid #d8e6f8;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(0, 74, 173, 0.16);
+    list-style: none;
+}
+
+.meetdo-profile-dropdown:hover .meetdo-profile-menu,
+.meetdo-profile-dropdown:focus-within .meetdo-profile-menu {
+    display: block;
+}
+
+.meetdo-profile-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border-radius: 6px;
+    color: #004aad;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.meetdo-profile-menu .dropdown-item:hover,
+.meetdo-profile-menu .dropdown-item:focus {
+    background: #eef5ff;
+    color: #003b8a;
 }
 
 #profilImg {
@@ -225,5 +286,16 @@ body {
     .meetdo-link,
     .meetdo-btn {
         width: 100%;
+    }
+
+    .meetdo-profile-dropdown,
+    .meetdo-profile-menu {
+        width: 100%;
+    }
+
+    .meetdo-profile-menu {
+        position: static;
+        margin-top: 0.45rem;
+        box-shadow: none;
     }
 }

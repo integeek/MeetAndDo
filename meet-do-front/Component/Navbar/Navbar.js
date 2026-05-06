@@ -83,6 +83,37 @@ function getCreateActivityHref(basePath) {
     return `${basePath}/Page/Login.html?${params.toString()}`;
 }
 
+function getAuthenticatedPageHref(basePath, targetPath, authMessage) {
+    const userId = getAuthenticatedUserId();
+
+    if (userId) {
+        const params = new URLSearchParams({ userId: String(userId) });
+        return `${basePath}/Page/${targetPath}?${params.toString()}`;
+    }
+
+    const params = new URLSearchParams({
+        authMessage,
+        redirect: targetPath,
+    });
+    return `${basePath}/Page/Login.html?${params.toString()}`;
+}
+
+function getMyReservationsHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "MyReservations.html",
+        "Vous devez etre connecte pour acceder a vos reservations.",
+    );
+}
+
+function getMyActivitiesHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "MyActivity.html",
+        "Vous devez etre connecte pour acceder a vos activites.",
+    );
+}
+
 function getPublisherNavbarActions(basePath, variant = "auto") {
     if (variant !== "publisher" && !isPublisherUser()) {
         return "";
@@ -133,6 +164,16 @@ function GuestNavbar(basePath) {
 function UserNavbar(basePath, variant = "auto") {
     const accountHref = getUserAccountHref(basePath);
     const publisherActions = getPublisherNavbarActions(basePath, variant);
+    const reservationsHref = getMyReservationsHref(basePath);
+    const activitiesHref = getMyActivitiesHref(basePath);
+    const isPublisher = variant === "publisher" || isPublisherUser();
+    const publisherMenuItem = isPublisher
+        ? `
+                                <li>
+                                    <a class="dropdown-item" href="${activitiesHref}">My activities</a>
+                                </li>
+        `
+        : "";
 
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
@@ -164,10 +205,27 @@ function UserNavbar(basePath, variant = "auto") {
 
                     <div class="meetdo-auth-actions">
                         ${publisherActions}
-                        <a class="btn btn-primary meetdo-btn meetdo-profile-btn" id="profil" href="${accountHref}">
-                            <div>Profil</div>
-                            <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
-                        </a>
+                        <div class="dropdown meetdo-profile-dropdown">
+                            <a
+                                class="btn btn-primary meetdo-btn meetdo-profile-btn dropdown-toggle"
+                                id="profil"
+                                href="${accountHref}"
+                                role="button"
+                                aria-expanded="false"
+                            >
+                                <div>Profil</div>
+                                <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end meetdo-profile-menu" aria-labelledby="profil">
+                                <li>
+                                    <a class="dropdown-item" href="${accountHref}">My account</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
+                                </li>
+                                ${publisherMenuItem}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
