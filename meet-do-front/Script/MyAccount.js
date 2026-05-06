@@ -1,4 +1,12 @@
- async function loadUserProfile() {
+function redirectToLogin() {
+  const params = new URLSearchParams({
+    authMessage: 'Vous devez etre connecte pour acceder a votre compte.',
+    redirect: 'MyAccount.html',
+  });
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
+async function loadUserProfile() {
   try {
     const response = await fetch('http://localhost:3000/authentication/me', {
       method: 'GET',
@@ -6,7 +14,7 @@
     });
 
     if (!response.ok) {
-      window.location.href = '/login.html';
+      redirectToLogin();
       return;
     }
 
@@ -20,6 +28,7 @@
 
   } catch (error) {
     console.error('Erreur lors du chargement du profil', error);
+    redirectToLogin();
   }
 }
 

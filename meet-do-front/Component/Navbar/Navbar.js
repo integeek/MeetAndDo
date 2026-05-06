@@ -42,6 +42,21 @@ function getAuthenticatedUserId() {
     }
 }
 
+function getUserAccountHref(basePath) {
+    const userId = getAuthenticatedUserId();
+
+    if (userId) {
+        const params = new URLSearchParams({ userId: String(userId) });
+        return `${basePath}/Page/MyAccount.html?${params.toString()}`;
+    }
+
+    const params = new URLSearchParams({
+        authMessage: "Vous devez etre connecte pour acceder a votre profil.",
+        redirect: "MyAccount.html",
+    });
+    return `${basePath}/Page/Login.html?${params.toString()}`;
+}
+
 function GuestNavbar(basePath) {
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
@@ -79,6 +94,8 @@ function GuestNavbar(basePath) {
 }
 
 function UserNavbar(basePath) {
+    const accountHref = getUserAccountHref(basePath);
+
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
             <div class="container-fluid meetdo-navbar-inner">
@@ -108,7 +125,7 @@ function UserNavbar(basePath) {
                     </ul>
 
                     <div class="meetdo-auth-actions">
-                        <a class="btn btn-primary meetdo-btn meetdo-profile-btn" id="profil" href="${basePath}/Page/PersonalInformation.html">
+                        <a class="btn btn-primary meetdo-btn meetdo-profile-btn" id="profil" href="${accountHref}">
                             <div>Profil</div>
                             <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
                         </a>
