@@ -27,7 +27,13 @@ function persistAuthenticatedUser(user) {
     }
 
     try {
-        localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(
+            AUTH_USER_STORAGE_KEY,
+            JSON.stringify({
+                ...user,
+                authenticatedAt: Date.now(),
+            }),
+        );
     } catch (error) {
         console.warn('Unable to persist authenticated user:', error);
     }

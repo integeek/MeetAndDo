@@ -46,7 +46,34 @@ const MOCK_ACTIVITY = {
         "Very nice, I just would have liked a little more time for decoration.",
     },
   ],
+  events: [
+    {
+      id: 1,
+      date: "2026-05-12T18:00:00.000Z",
+      id_activity: 42,
+    },
+    {
+      id: 2,
+      date: "2026-05-19T18:30:00.000Z",
+      id_activity: 42,
+    },
+    {
+      id: 3,
+      date: "2026-06-02T19:00:00.000Z",
+      id_activity: 42,
+    },
+  ],
 };
+
+const EVENT_API_URL = "http://localhost:3000/event";
+const RESERVATION_API_URL = "http://localhost:3000/reservation";
+const AUTH_API_URL = "http://localhost:3000/authentication";
+const AUTH_USER_STORAGE_KEY = "meetando_current_user";
+const AUTH_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
+let currentReservationEvents = [];
+let selectedReservationQuantities = new Map();
+let currentReservationActivity = null;
 
 async function getActivity(id) {
   try {
@@ -57,6 +84,176 @@ async function getActivity(id) {
     console.error("Error while fetching activity:", error);
     return MOCK_ACTIVITY; // Fallback sur le mock en cas d'erreur
   }
+}
+
+function getStoredAuthenticatedUser() {
+  try {
+    const rawUser = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    if (!rawUser) return null;
+
+    const parsedUser = JSON.parse(rawUser);
+    const authenticatedAt = Number(parsedUser?.authenticatedAt);
+    const isRecentAuthentication =
+      Number.isInteger(authenticatedAt) &&
+      Date.now() - authenticatedAt < AUTH_FALLBACK_MAX_AGE_MS;
+
+    return isRecentAuthentication ? parsedUser : null;
+  } catch (error) {
+    console.warn("Unable to read stored authenticated user:", error);
+    return null;
+  }
+}
+
+async function getCurrentUser() {
+  try {
+    const response = await fetch(AUTH_API_URL, {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      return getStoredAuthenticatedUser();
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.warn("Unable to fetch current user for reservation:", error);
+    return getStoredAuthenticatedUser();
+  }
+}
+
+function getAuthenticatedUserId(user) {
+  const userId = Number(
+    user?.id ?? user?.id_user ?? user?.userId ?? user?.user_id,
+  );
+  return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
+function redirectToLoginForReservation(activityId) {
+  const params = new URLSearchParams({
+    authMessage: "You must be logged in to reserve an event.",
+    redirect: `Activity.html?id=${activityId}`,
+  });
+
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
+async function getActivityEvents(activityId, activity) {
+  const activityGroupSize = Number(
+    activity?.group_size || activity?.groupSize || 0,
+  );
+  const embeddedEvents = normalizeEvents(
+    activity?.events || activity?.eventSlots,
+    activityId,
+    activityGroupSize,
+  );
+
+  try {
+    const response = await fetch(`${EVENT_API_URL}?activityId=${activityId}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const events = await response.json();
+    const backendEvents = normalizeEvents(events, activityId).filter(
+      (event) => event.id,
+    );
+
+    if (backendEvents.length) return backendEvents;
+
+    return embeddedEvents.filter((event) => event.id);
+  } catch (error) {
+    console.error("Error while fetching activity events:", error);
+    return embeddedEvents.filter((event) => event.id);
+  }
+}
+
+function getRawEventId(event) {
+  return event?.id ?? event?.id_event ?? event?.eventId ?? event?.idEvent;
+}
+
+function normalizeEvents(events, activityId, defaultActivityGroupSize = 0) {
+  if (!Array.isArray(events)) return [];
+
+  return events
+    .map((event, index) => {
+      const rawDate =
+        event?.date && event?.heure
+          ? `${event.date}T${event.heure}`
+          : event?.date || event?.datetime || event?.start_at;
+      if (!rawDate) return null;
+
+      const eventActivityId = Number(
+        event?.id_activity || event?.activityId || event?.idActivity,
+      );
+      const currentActivityId = Number(activityId);
+
+      if (
+        Number.isInteger(eventActivityId) &&
+        Number.isInteger(currentActivityId) &&
+        eventActivityId !== currentActivityId
+      ) {
+        return null;
+      }
+
+      const date = new Date(rawDate);
+      if (Number.isNaN(date.getTime())) return null;
+
+      const eventId = Number(getRawEventId(event));
+
+      return {
+        id: Number.isInteger(eventId) && eventId > 0 ? eventId : null,
+        date,
+        reservationKey:
+          Number.isInteger(eventId) && eventId > 0 ? `event-${eventId}` : null,
+        availablePlaces: getEventAvailablePlaces(event, defaultActivityGroupSize),
+        reservedPlaces: Number(
+          event?.reserved_places || event?.reservedPlaces || 0,
+        ),
+        activityGroupSize: Number(
+          event?.activity_group_size ||
+            event?.activityGroupSize ||
+            event?.group_size ||
+            0,
+        ),
+      };
+    })
+    .filter(Boolean)
+    .sort((firstEvent, secondEvent) => firstEvent.date - secondEvent.date);
+}
+
+function getEventAvailablePlaces(event, defaultActivityGroupSize = 0) {
+  const availablePlaces = Number(
+    event?.available_places ?? event?.availablePlaces,
+  );
+
+  if (Number.isInteger(availablePlaces) && availablePlaces >= 0) {
+    return availablePlaces;
+  }
+
+  const activityGroupSize = Number(
+    event?.activity_group_size ||
+      event?.activityGroupSize ||
+      event?.group_size ||
+      defaultActivityGroupSize,
+  );
+  const reservedPlaces = Number(
+    event?.reserved_places || event?.reservedPlaces || 0,
+  );
+
+  if (Number.isInteger(activityGroupSize) && activityGroupSize >= 0) {
+    return Math.max(activityGroupSize - reservedPlaces, 0);
+  }
+
+  return 0;
+}
+
+function formatEventDateTime(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function renderContactButton() {
@@ -195,13 +392,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const activityId = params.get("id") || 1; // Default to 1 if no ID is provided
   const activity = await getActivity(activityId);
+  const resolvedActivityId = activity?.id || activityId;
   renderActivity(activity);
 
   // Initialize the report modal
   initReportModal();
+  initReservationModal(resolvedActivityId, activity);
 });
 
 let reportModal = null;
+let reservationEventsModal = null;
 
 function initReportModal() {
   // Get the Report button and attach an event listener
@@ -254,5 +454,356 @@ function initReportModal() {
       //   })
       // });
     });
+  }
+}
+
+function initReservationModal(activityId, activity) {
+  const joinButton = document.querySelector(
+    "#activity-participate-button .buttonCo",
+  );
+  const modalElement = document.getElementById("reservationEventsModal");
+
+  if (modalElement) {
+    reservationEventsModal = new bootstrap.Modal(modalElement);
+  }
+
+  if (!joinButton || !modalElement) return;
+
+  joinButton.addEventListener("click", async () => {
+    const currentUser = await getCurrentUser();
+
+    if (!getAuthenticatedUserId(currentUser)) {
+      redirectToLoginForReservation(activityId);
+      return;
+    }
+
+    currentReservationActivity = activity;
+    selectedReservationQuantities = new Map();
+    currentReservationEvents = [];
+    reservationEventsModal?.show();
+    renderReservationEventsLoading();
+
+    const events = await getActivityEvents(activityId, activity);
+    currentReservationEvents = events;
+    renderReservationEvents(events);
+  });
+
+  document
+    .getElementById("reservation-review-button")
+    ?.addEventListener("click", renderReservationSummary);
+
+  document
+    .getElementById("reservation-confirm-button")
+    ?.addEventListener("click", submitReservations);
+}
+
+function renderReservationEventsLoading() {
+  const list = document.getElementById("reservation-events-list");
+  const feedback = document.getElementById("reservation-events-feedback");
+
+  if (feedback) {
+    feedback.textContent = "Loading available events...";
+    feedback.className = "mb-3 text-secondary";
+  }
+
+  if (list) {
+    list.innerHTML = `
+      <div class="reservation-empty-state" role="status">
+        Loading...
+      </div>
+    `;
+  }
+
+  document.getElementById("reservation-summary")?.classList.add("d-none");
+  updateReservationFooterState();
+}
+
+function renderReservationEvents(events) {
+  const list = document.getElementById("reservation-events-list");
+  const feedback = document.getElementById("reservation-events-feedback");
+  if (!list || !feedback) return;
+
+  if (!events.length) {
+    feedback.textContent =
+      "No reservable events are available for this activity yet.";
+    feedback.className = "mb-3 text-secondary";
+    list.innerHTML = "";
+    updateReservationFooterState();
+    return;
+  }
+
+  feedback.textContent = "Choose an event to reserve your spot.";
+  feedback.className = "mb-3 text-secondary";
+  list.innerHTML = events
+    .map((event) => {
+      const canReserveEvent = event.availablePlaces > 0;
+      const availabilityText = canReserveEvent
+        ? `${event.availablePlaces} places available`
+        : "Event full";
+      const eventAction = canReserveEvent
+        ? `
+          <div
+            class="reservation-quantity-control"
+            data-event-key="${event.reservationKey}"
+          >
+            <button
+              type="button"
+              class="btn btn-outline-primary reservation-quantity-button"
+              data-reservation-action="decrease"
+              aria-label="Decrease reserved places"
+            >
+              -
+            </button>
+            <input
+              type="number"
+              class="form-control reservation-quantity-input"
+              value="0"
+              min="0"
+              max="${event.availablePlaces}"
+              inputmode="numeric"
+              aria-label="Reserved places"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-primary reservation-quantity-button"
+              data-reservation-action="increase"
+              aria-label="Increase reserved places"
+            >
+              +
+            </button>
+          </div>
+        `
+        : `
+          <div class="reservation-full-state">
+            <p class="reservation-full-text mb-2">Event full</p>
+            <button
+              type="button"
+              class="btn btn-outline-primary reservation-notify-button"
+              data-event-id="${event.id}"
+              data-notify-enabled="false"
+            >
+              Notify me
+            </button>
+          </div>
+        `;
+
+      return `
+        <div class="reservation-event-row" role="listitem">
+          <div>
+            <p class="reservation-event-title mb-1">Event</p>
+            <p class="reservation-event-date mb-0">${formatEventDateTime(event.date)}</p>
+            <p class="reservation-event-availability mb-0">
+              ${availabilityText}
+            </p>
+          </div>
+          ${eventAction}
+        </div>
+      `;
+    })
+    .join("");
+
+  bindReservationQuantityControls();
+  bindReservationNotifyButtons();
+  updateReservationFooterState();
+}
+
+function bindReservationNotifyButtons() {
+  document.querySelectorAll(".reservation-notify-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const isNotificationEnabled =
+        button.dataset.notifyEnabled === "true";
+
+      button.dataset.notifyEnabled = isNotificationEnabled ? "false" : "true";
+      button.textContent = isNotificationEnabled
+        ? "Notify me"
+        : "Cancel notification";
+      button.classList.toggle(
+        "btn-outline-primary",
+        isNotificationEnabled,
+      );
+      button.classList.toggle("btn-primary", !isNotificationEnabled);
+    });
+  });
+}
+
+function bindReservationQuantityControls() {
+  document
+    .querySelectorAll(".reservation-quantity-control")
+    .forEach((control) => {
+      const eventKey = control.dataset.eventKey;
+      const input = control.querySelector(".reservation-quantity-input");
+
+      control
+        .querySelectorAll(".reservation-quantity-button")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            const currentValue = Number(input.value || 0);
+            const nextValue =
+              button.dataset.reservationAction === "increase"
+                ? currentValue + 1
+                : currentValue - 1;
+
+            setReservationQuantity(eventKey, nextValue, input);
+          });
+        });
+
+      input.addEventListener("input", () => {
+        setReservationQuantity(eventKey, Number(input.value || 0), input);
+      });
+    });
+}
+
+function setReservationQuantity(eventKey, requestedQuantity, input) {
+  const event = currentReservationEvents.find(
+    (reservationEvent) => reservationEvent.reservationKey === eventKey,
+  );
+  const maxQuantity = event?.availablePlaces || 0;
+  const quantity = Math.min(
+    Math.max(Math.floor(Number(requestedQuantity) || 0), 0),
+    maxQuantity,
+  );
+
+  input.value = quantity;
+
+  if (quantity > 0) {
+    selectedReservationQuantities.set(eventKey, quantity);
+  } else {
+    selectedReservationQuantities.delete(eventKey);
+  }
+
+  document.getElementById("reservation-summary")?.classList.add("d-none");
+  updateReservationFooterState();
+}
+
+function updateReservationFooterState() {
+  const reviewButton = document.getElementById("reservation-review-button");
+  const confirmButton = document.getElementById("reservation-confirm-button");
+  const hasSelection = selectedReservationQuantities.size > 0;
+
+  if (reviewButton) {
+    reviewButton.disabled = !hasSelection;
+    reviewButton.classList.remove("d-none");
+  }
+
+  if (confirmButton) {
+    confirmButton.classList.add("d-none");
+  }
+}
+
+function getSelectedReservationItems() {
+  return [...selectedReservationQuantities.entries()]
+    .map(([eventKey, quantity]) => {
+      const event = currentReservationEvents.find(
+        (reservationEvent) => reservationEvent.reservationKey === eventKey,
+      );
+
+      return event ? { event, quantity } : null;
+    })
+    .filter(Boolean);
+}
+
+function renderReservationSummary() {
+  const summary = document.getElementById("reservation-summary");
+  const feedback = document.getElementById("reservation-events-feedback");
+  const reviewButton = document.getElementById("reservation-review-button");
+  const confirmButton = document.getElementById("reservation-confirm-button");
+  const selectedItems = getSelectedReservationItems();
+
+  if (!summary || !feedback || !selectedItems.length) return;
+
+  feedback.textContent = "Review your reservation before confirming.";
+  feedback.className = "mb-3 text-secondary";
+  summary.classList.remove("d-none");
+  summary.innerHTML = `
+    <h3 class="reservation-summary-title">Reservation summary</h3>
+    <ul class="reservation-summary-list mb-0">
+      ${selectedItems
+        .map(
+          ({ event, quantity }) => `
+            <li>
+              <span>${formatEventDateTime(event.date)}</span>
+              <strong>${quantity} ${quantity === 1 ? "place" : "places"}</strong>
+            </li>
+          `,
+        )
+        .join("")}
+    </ul>
+  `;
+
+  reviewButton?.classList.add("d-none");
+  confirmButton?.classList.remove("d-none");
+}
+
+async function submitReservations() {
+  const confirmButton = document.getElementById("reservation-confirm-button");
+  const feedback = document.getElementById("reservation-events-feedback");
+  const selectedItems = getSelectedReservationItems();
+
+  if (!selectedItems.length) return;
+
+  const currentUser = await getCurrentUser();
+  const userId = getAuthenticatedUserId(currentUser);
+
+  if (!userId) {
+    redirectToLoginForReservation(currentReservationActivity?.id || "");
+    return;
+  }
+
+  if (confirmButton) {
+    confirmButton.disabled = true;
+    confirmButton.textContent = "Confirming...";
+  }
+
+  if (feedback) {
+    feedback.textContent = "Sending your reservation...";
+    feedback.className = "mb-3 text-secondary";
+  }
+
+  try {
+    await Promise.all(
+      selectedItems.map(({ event, quantity }) =>
+        fetch(RESERVATION_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            date: new Date().toISOString(),
+            group_size: quantity,
+            id_user: userId,
+            id_event: Number(event.id),
+          }),
+        }).then(async (response) => {
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || `HTTP ${response.status}`);
+          }
+        }),
+      ),
+    );
+
+    selectedReservationQuantities = new Map();
+    document.getElementById("reservation-summary")?.classList.add("d-none");
+    if (feedback) {
+      feedback.textContent = "Your reservation has been confirmed.";
+      feedback.className = "mb-3 text-success";
+    }
+    const refreshedEvents = await getActivityEvents(
+      currentReservationActivity.id,
+      currentReservationActivity,
+    );
+    currentReservationEvents = refreshedEvents;
+    renderReservationEvents(refreshedEvents);
+  } catch (error) {
+    console.error("Error while creating reservation:", error);
+    if (feedback) {
+      feedback.textContent =
+        error.message || "Unable to confirm your reservation.";
+      feedback.className = "mb-3 text-danger";
+    }
+  } finally {
+    if (confirmButton) {
+      confirmButton.disabled = false;
+      confirmButton.textContent = "Confirm reservation";
+    }
   }
 }
