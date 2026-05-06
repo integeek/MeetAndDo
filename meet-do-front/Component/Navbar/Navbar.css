@@ -1,99 +1,301 @@
-
-@font-face {
-    font-family: "Inter";
-    src: url(../assets/font/Inter-VariableFont_opsz\,wght.ttf);
-}
-
-.navbar-container {
-    background-color: rgb(255, 255, 255);
-    width: 100%;
-    box-shadow: 0px 1px 5px 0px;
-}
-
 body {
     padding: 0;
     margin: 0;
-    font-family: "Inter";
+    font-family: Inter, Arial, sans-serif;
+}
+
+.navbar-container {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e7edf5;
+    position: relative;
+    z-index: 100;
+}
+
+.navbar-container,
+.navbar-container *,
+.navbar-container *::before,
+.navbar-container *::after {
+    box-sizing: border-box;
+}
+
+.meetdo-navbar {
+    width: 100%;
+    min-height: 76px;
+    background: #ffffff;
+    padding: 0;
+}
+
+.meetdo-navbar-inner {
+    width: 100%;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+}
+
+.meetdo-brand {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
 }
 
 #logo {
-    width: 8vh;
-    height: 8vh;
-    padding: 4px;
-    margin-left: 20px;
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    display: block;
 }
 
-.navbar-container a {
-    list-style: none;
-    width: 10rem;
-    height: 3rem;
-    padding-inline-start: 0;
-    display: flex;
+.meetdo-toggler {
+    display: none;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    border: 1px solid #cdd8e6;
+    border-radius: 8px;
+    background: #ffffff;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
-    color: black;
-}
-
-.navLinks li {
-    list-style-type: none;
-}
-
-.navbar-container a:hover {
-    color: white;
-}
-
-.navLinks li:hover {
-    background-color: #004AAD;
-    border-radius: 10px;
-    color: white;
-}
-
-.navbar-container ul {
-    display: flex;
     padding: 0;
-    margin-left: 50px;
+    cursor: pointer;
 }
 
-nav {
+.meetdo-toggler-icon,
+.meetdo-toggler-icon::before,
+.meetdo-toggler-icon::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #004aad;
+    border-radius: 999px;
+    content: "";
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.meetdo-toggler-icon {
+    position: relative;
+}
+
+.meetdo-toggler-icon::before,
+.meetdo-toggler-icon::after {
+    position: absolute;
+    left: 0;
+}
+
+.meetdo-toggler-icon::before {
+    top: -7px;
+}
+
+.meetdo-toggler-icon::after {
+    top: 7px;
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon {
+    background: transparent;
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon::before {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.meetdo-toggler[aria-expanded="true"] .meetdo-toggler-icon::after {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.meetdo-collapse {
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
-    padding: 0;
-    margin: 0;
+    gap: 1rem;
 }
 
-#navbarGrow {
-    flex-grow: 1;
+.meetdo-main-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.meetdo-link {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    color: #004aad;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.meetdo-link:hover,
+.meetdo-link:focus {
+    background: #eef5ff;
+    color: #003b8a;
+}
+
+.meetdo-auth-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+
+.meetdo-btn {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.05rem;
+    border: 1px solid #004aad;
+    border-radius: 8px;
+    background: #004aad;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.meetdo-btn:hover,
+.meetdo-btn:focus {
+    background: #003b8a;
+    border-color: #003b8a;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.meetdo-btn:active {
+    transform: translateY(0);
+}
+
+.meetdo-profile-btn {
+    gap: 0.55rem;
+    vertical-align: middle;
+}
+
+.meetdo-profile-dropdown {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+}
+
+.meetdo-profile-dropdown::after {
+    content: "";
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 0.45rem;
+}
+
+.meetdo-profile-dropdown:hover::after,
+.meetdo-profile-dropdown:focus-within::after {
+    display: block;
+}
+
+.meetdo-profile-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 1000;
+    min-width: 180px;
+    margin: 0;
+    padding: 0.45rem;
+    border: 1px solid #d8e6f8;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(0, 74, 173, 0.16);
+    list-style: none;
+}
+
+.meetdo-profile-dropdown:hover .meetdo-profile-menu,
+.meetdo-profile-dropdown:focus-within .meetdo-profile-menu {
+    display: block;
+}
+
+.meetdo-profile-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border-radius: 6px;
+    color: #004aad;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.meetdo-profile-menu .dropdown-item:hover,
+.meetdo-profile-menu .dropdown-item:focus {
+    background: #eef5ff;
+    color: #003b8a;
 }
 
 #profilImg {
-    width: 5vh;
-    height: 5vh;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+    filter: brightness(0) invert(1);
 }
 
-.annonce a {
-    margin-left: 20px;
-    border :1px solid black;
-    border-radius: 10px;
-}
+@media (max-width: 991px) {
+    .meetdo-navbar-inner {
+        flex-wrap: wrap;
+        padding: 0.6rem 1rem;
+    }
 
-.annonce a:hover {
-    background: #004AAD;
-    border: 1px solid #004AAD;
-}
+    .meetdo-toggler {
+        display: inline-flex;
+    }
 
-#profil {
-    margin-left: 1rem;
-    width: 7rem;
-    padding: 0px 6px;
-    margin-right: 20px;
-    border: 1px solid black;
-    display: flex;
-    border-radius: 10px;
-    justify-content: space-between;
-}
+    .meetdo-collapse {
+        display: none;
+        width: 100%;
+        flex-basis: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+        padding: 0.75rem 0 0.25rem;
+    }
 
-#profil:hover{
-    color: #004AAD;
-    border: 1px solid #004AAD;
+    .meetdo-collapse.show {
+        display: flex;
+    }
+
+    .meetdo-main-links,
+    .meetdo-auth-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
+    }
+
+    .meetdo-link,
+    .meetdo-btn {
+        width: 100%;
+    }
+
+    .meetdo-profile-dropdown,
+    .meetdo-profile-menu {
+        width: 100%;
+    }
+
+    .meetdo-profile-menu {
+        position: static;
+        margin-top: 0.45rem;
+        box-shadow: none;
+    }
 }

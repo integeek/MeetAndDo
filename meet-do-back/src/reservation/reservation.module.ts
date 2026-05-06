@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
-import { SupabaseModule } from '../supabase/supabase.module';
+import { SupabaseModule } from 'src/supabase/supabase.module';
 
 @Module({
   imports: [SupabaseModule],

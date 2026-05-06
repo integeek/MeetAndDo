@@ -1,26 +1,25 @@
 function initializeNavbar() {
-  const toggler = document.querySelector(".hamburger");
-  const navLinksContainer = document.querySelector(".nav-links");
+  const toggler = document.querySelector(".meetdo-toggler");
+  const navLinksContainer = document.querySelector(".meetdo-collapse");
 
   if (toggler && navLinksContainer) {
     const oldToggler = toggler.cloneNode(true);
+    oldToggler.removeAttribute("onclick");
     toggler.parentNode.replaceChild(oldToggler, toggler);
 
     const toggleNav = () => {
-      oldToggler.classList.toggle("open");
       const ariaToggle =
         oldToggler.getAttribute("aria-expanded") === "true" ? "false" : "true";
       oldToggler.setAttribute("aria-expanded", ariaToggle);
-      navLinksContainer.classList.toggle("open");
+      navLinksContainer.classList.toggle("show");
     };
 
     oldToggler.addEventListener("click", toggleNav);
 
     new ResizeObserver((entries) => {
-      if (entries[0].contentRect.width <= 900) {
-        navLinksContainer.style.transition = "transform 0.4s ease-out";
-      } else {
-        navLinksContainer.style.transition = "none";
+      if (entries[0].contentRect.width > 991) {
+        navLinksContainer.classList.remove("show");
+        oldToggler.setAttribute("aria-expanded", "false");
       }
     }).observe(document.body);
   }
