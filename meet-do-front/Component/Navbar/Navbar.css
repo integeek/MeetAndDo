@@ -178,6 +178,18 @@ body {
     transform: translateY(0);
 }
 
+.meetdo-profile-btn {
+    gap: 0.55rem;
+}
+
+#profilImg {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+    filter: brightness(0) invert(1);
+}
+
 @media (max-width: 991px) {
     .meetdo-navbar-inner {
         flex-wrap: wrap;
