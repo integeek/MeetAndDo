@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../Style/MyReservations.css">
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+    <link rel="stylesheet" href="../Component/Button/RedButton.css" />
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Button/RedButton.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Script/MyReservation.js" defer></script>
+
+    <title>My reservations</title>
+</head>
+<body>
+    <header>
+        <div class="navbar-container" id="navbar-container"></div>
+        <script>
+            document.getElementById("navbar-container").innerHTML = Navbar();
+        </script>
+        <h1>My reservations</h1>
+    </header>
+    <main>
+        <div class="reservation-list" id="reservation-list">
+        </div>
+        <div class="popup-container" id="cancel-popup">
+            <div class="edit-content">
+                <div class="edit-header">
+                    <h3>Confirm the cancellation</h3>
+                </div>
+                <div class="edit-main">
+                    <p>Write <strong>CANCEL</strong> to confirm</p>
+                    <input type="text" id="cancel-input" placeholder="CANCEL" />
+                </div>
+                <div class="edit-footer">
+                    <button type="button" onclick="closePopUp('cancel-popup')" class="buttonRo">Close</button>
+                    <div id="bouton-confirmer"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer id="footer-container" class="footer-container">
+        <script>
+            document.getElementById("footer-container").innerHTML = Footer("..");
+        </script>
+    </footer>
+  </div>
+
+</body>
+</html>

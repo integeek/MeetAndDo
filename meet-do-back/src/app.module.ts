@@ -42,15 +42,12 @@ import { ContactModule } from './contact/contact.module';
       },
     }),
     MessagingModule,
-<<<<<<< HEAD
     DashboardModule,
-=======
     FaqModule,
     ActivityModule,
     ReservationModule,
     EventModule,
     ContactModule,
->>>>>>> origin/main
   ],
   controllers: [AppController],
   providers: [AppService],
