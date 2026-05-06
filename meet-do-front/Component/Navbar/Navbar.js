@@ -3,7 +3,7 @@ function Navbar(options = {}) {
     let variant = "auto";
 
     if (typeof options === "string") {
-        if (["auto", "guest", "user", "creator"].includes(options)) {
+        if (["auto", "guest", "user", "publisher", "creator"].includes(options)) {
             variant = options;
         } else {
             basePath = options;
@@ -14,32 +14,42 @@ function Navbar(options = {}) {
     }
 
     if (variant === "auto") {
-        variant = getAuthenticatedUserId() ? "user" : "guest";
+        variant = getAuthenticatedUserId() ? (isPublisherUser() ? "publisher" : "user") : "guest";
     }
 
     if (variant === "guest") {
         return GuestNavbar(basePath);
     }
 
-    if (variant === "user") {
-        return UserNavbar(basePath);
+    if (variant === "user" || variant === "publisher") {
+        return UserNavbar(basePath, variant);
     }
 
     return GuestNavbar(basePath);
 }
 
 function getAuthenticatedUserId() {
+    const user = getStoredAuthenticatedUser();
+    const userId = Number(user?.id);
+
+    return Number.isInteger(userId) && userId > 0 ? userId : null;
+}
+
+function getStoredAuthenticatedUser() {
     try {
         const rawUser = localStorage.getItem("meetando_current_user");
         if (!rawUser) return null;
 
         const user = JSON.parse(rawUser);
-        const userId = Number(user?.id);
-
-        return Number.isInteger(userId) && userId > 0 ? userId : null;
+        return user && typeof user === "object" ? user : null;
     } catch (error) {
         return null;
     }
+}
+
+function isPublisherUser() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "publisher";
 }
 
 function getUserAccountHref(basePath) {
@@ -55,6 +65,33 @@ function getUserAccountHref(basePath) {
         redirect: "MyAccount.html",
     });
     return `${basePath}/Page/Login.html?${params.toString()}`;
+}
+
+function getCreateActivityHref(basePath) {
+    const userId = getAuthenticatedUserId();
+    const targetPath = "ActivityBuilder.html";
+
+    if (userId) {
+        const params = new URLSearchParams({ userId: String(userId) });
+        return `${basePath}/Page/${targetPath}?${params.toString()}`;
+    }
+
+    const params = new URLSearchParams({
+        authMessage: "Vous devez etre connecte pour creer une activite.",
+        redirect: targetPath,
+    });
+    return `${basePath}/Page/Login.html?${params.toString()}`;
+}
+
+function getPublisherNavbarActions(basePath, variant = "auto") {
+    if (variant !== "publisher" && !isPublisherUser()) {
+        return "";
+    }
+
+    return `
+        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Dashboard.html">Dashboard</a>
+        <a class="btn btn-primary meetdo-btn" href="${getCreateActivityHref(basePath)}">Create an activity</a>
+    `;
 }
 
 function GuestNavbar(basePath) {
@@ -93,8 +130,9 @@ function GuestNavbar(basePath) {
     `;
 }
 
-function UserNavbar(basePath) {
+function UserNavbar(basePath, variant = "auto") {
     const accountHref = getUserAccountHref(basePath);
+    const publisherActions = getPublisherNavbarActions(basePath, variant);
 
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
@@ -125,6 +163,7 @@ function UserNavbar(basePath) {
                     </ul>
 
                     <div class="meetdo-auth-actions">
+                        ${publisherActions}
                         <a class="btn btn-primary meetdo-btn meetdo-profile-btn" id="profil" href="${accountHref}">
                             <div>Profil</div>
                             <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
@@ -144,3 +183,26 @@ function toggleMeetDoNavbar(button) {
     const isOpen = target.classList.toggle("show");
     button.setAttribute("aria-expanded", String(isOpen));
 }
+
+async function refreshNavbarAuthenticatedUser() {
+    const navbarContainer = document.querySelector(".navbar-container");
+    if (!navbarContainer) return;
+
+    try {
+        const response = await fetch("http://localhost:3000/authentication/me", {
+            credentials: "include",
+        });
+
+        if (!response.ok) return;
+
+        const user = await response.json();
+        if (!user || typeof user !== "object") return;
+
+        localStorage.setItem("meetando_current_user", JSON.stringify(user));
+        navbarContainer.innerHTML = Navbar();
+    } catch (error) {
+        console.warn("Unable to refresh navbar user:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", refreshNavbarAuthenticatedUser);
