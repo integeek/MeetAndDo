@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Messagerie — Meet&amp;Do</title>
+  <title>Messaging — Meet&amp;Do</title>
 
   <!-- Bootstrap 5 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
@@ -27,17 +27,9 @@
     <aside class="conv-sidebar" id="conv-sidebar">
       <div class="conv-sidebar-header">
         <h2 class="conv-sidebar-title">Messages</h2>
-        <button type="button" class="btn-icon" id="btn-new-conv" title="Nouvelle conversation">
+        <button type="button" class="btn-icon" id="btn-new-conv" title="New conversation">
           <i class="bi bi-pencil-square"></i>
         </button>
-      </div>
-
-      <!-- Bandeau Mon ID (pour les tests) -->
-      <div class="my-id-bar" id="my-id-bar" title="Cliquer pour copier votre ID">
-        <i class="bi bi-person-badge"></i>
-        <span class="my-id-label">Mon ID :</span>
-        <span class="my-id-value" id="my-id-value">…</span>
-        <i class="bi bi-clipboard my-id-copy" id="my-id-copy"></i>
       </div>
 
       <div class="conv-search-wrapper">
@@ -46,8 +38,8 @@
           type="text"
           id="conv-search"
           class="conv-search"
-          placeholder="Rechercher une conversation…"
-          aria-label="Rechercher une conversation"
+          placeholder="Search conversations…"
+          aria-label="Search conversations"
         />
       </div>
 
@@ -62,7 +54,7 @@
       <!-- État vide -->
       <div class="chat-empty" id="chat-empty">
         <i class="bi bi-chat-dots chat-empty-icon"></i>
-        <p class="chat-empty-text">Sélectionnez une conversation<br/>pour commencer à échanger</p>
+        <p class="chat-empty-text">Select a conversation<br/>to start chatting</p>
       </div>
 
       <!-- Vue conversation active -->
@@ -70,13 +62,13 @@
 
         <!-- En-tête de la conversation -->
         <div class="chat-header" id="chat-header">
-          <button type="button" class="btn-icon btn-back" id="btn-back" title="Retour aux conversations">
+          <button type="button" class="btn-icon btn-back" id="btn-back" title="Back to conversations">
             <i class="bi bi-arrow-left"></i>
           </button>
           <div class="chat-header-avatar" id="chat-header-avatar">A</div>
           <div class="chat-header-info">
             <span class="chat-header-name" id="chat-header-name">Contact</span>
-            <span class="chat-header-status" id="chat-header-status">En ligne</span>
+            <span class="chat-header-status" id="chat-header-status">Online</span>
           </div>
         </div>
 
@@ -85,35 +77,29 @@
           <!-- Messages injectés par JS -->
         </div>
 
-<<<<<<< Updated upstream
-        <!-- Preview pièce jointe -->
+        <!-- Attachment preview -->
         <div class="attachment-preview" id="attachment-preview" hidden>
           <div class="attachment-preview-inner" id="attachment-preview-inner"></div>
-          <button type="button" class="attachment-remove" id="attachment-remove" title="Supprimer">
+          <button type="button" class="attachment-remove" id="attachment-remove" title="Remove">
             <i class="bi bi-x-circle-fill"></i>
           </button>
         </div>
 
-        <!-- Zone de saisie -->
+        <!-- Input area -->
         <div class="chat-input-area">
           <input type="file" id="file-input" accept="image/*,.pdf,.txt" hidden aria-hidden="true" />
-          <button type="button" class="btn-icon" id="btn-attach" title="Joindre un fichier">
-=======
-        <!-- Zone de saisie -->
-        <div class="chat-input-area">
-          <button type="button" class="btn-icon" title="Joindre un fichier">
->>>>>>> Stashed changes
+          <button type="button" class="btn-icon" id="btn-attach" title="Attach a file">
             <i class="bi bi-paperclip"></i>
           </button>
           <input
             type="text"
             id="msg-input"
             class="chat-input"
-            placeholder="Écrire un message…"
-            aria-label="Écrire un message"
+            placeholder="Type a message…"
+            aria-label="Type a message"
             autocomplete="off"
           />
-          <button type="button" class="btn-send" id="btn-send" title="Envoyer le message">
+          <button type="button" class="btn-send" id="btn-send" title="Send message">
             <i class="bi bi-send-fill"></i>
           </button>
         </div>

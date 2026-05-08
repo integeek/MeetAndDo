@@ -2,56 +2,60 @@
    Meet&Do — Messagerie
    ============================================= */
 
-const SOCKET_URL = 'http://localhost:3000/messaging';
+const API_URL    = 'http://localhost:3000';
+const SOCKET_URL = `${API_URL}/messaging`;
 
 // ---- État local ---- //
 const state = {
-  currentUserId: null,
+  currentUser:          null,   // { id, firstname, lastname, email }
+  currentUserId:        null,   // UUID calculé depuis l'id entier
   activeConversationId: null,
-  conversations: [],
-  socket: null,
+  conversations:        [],
+  socket:               null,
+  userCache:            {},     // uuid → { name, email }
 };
+
+// ---- Pièce jointe ---- //
+const attach = { file: null };
 
 // ---- DOM ---- //
 const DOM = {
-  navbar:       document.getElementById('navbar-root'),
-  footer:       document.getElementById('footer-root'),
-  convList:     document.getElementById('conv-list'),
-  convSearch:   document.getElementById('conv-search'),
-  chatEmpty:    document.getElementById('chat-empty'),
-  chatView:     document.getElementById('chat-view'),
-  chatMessages: document.getElementById('chat-messages'),
+  navbar:              document.getElementById('navbar-root'),
+  footer:              document.getElementById('footer-root'),
+  convList:            document.getElementById('conv-list'),
+  convSearch:          document.getElementById('conv-search'),
+  chatEmpty:           document.getElementById('chat-empty'),
+  chatView:            document.getElementById('chat-view'),
+  chatMessages:        document.getElementById('chat-messages'),
   chatHeader: {
     name:   document.getElementById('chat-header-name'),
     avatar: document.getElementById('chat-header-avatar'),
     status: document.getElementById('chat-header-status'),
   },
-<<<<<<< Updated upstream
-  msgInput:          document.getElementById('msg-input'),
-  btnSend:           document.getElementById('btn-send'),
-  btnNewConv:        document.getElementById('btn-new-conv'),
-  btnBack:           document.getElementById('btn-back'),
-  sidebar:           document.getElementById('conv-sidebar'),
-  fileInput:         document.getElementById('file-input'),
-  btnAttach:         document.getElementById('btn-attach'),
-  attachPreview:     document.getElementById('attachment-preview'),
-  attachPreviewInner:document.getElementById('attachment-preview-inner'),
-  btnAttachRemove:   document.getElementById('attachment-remove'),
+  msgInput:            document.getElementById('msg-input'),
+  btnSend:             document.getElementById('btn-send'),
+  btnNewConv:          document.getElementById('btn-new-conv'),
+  btnBack:             document.getElementById('btn-back'),
+  sidebar:             document.getElementById('conv-sidebar'),
+  fileInput:           document.getElementById('file-input'),
+  btnAttach:           document.getElementById('btn-attach'),
+  attachPreview:       document.getElementById('attachment-preview'),
+  attachPreviewInner:  document.getElementById('attachment-preview-inner'),
+  btnAttachRemove:     document.getElementById('attachment-remove'),
 };
 
-// ---- État pièce jointe ---- //
-const attach = { file: null };
+// ================================================================
+//  UTILITAIRES UUID
+// ================================================================
 
-=======
-  msgInput:   document.getElementById('msg-input'),
-  btnSend:    document.getElementById('btn-send'),
-  btnNewConv: document.getElementById('btn-new-conv'),
-  btnBack:    document.getElementById('btn-back'),
-  sidebar:    document.getElementById('conv-sidebar'),
-};
+function intToUUID(id) {
+  return `00000000-0000-0000-0000-${String(id).padStart(12, '0')}`;
+}
 
->>>>>>> Stashed changes
-// ---- Init composants ---- //
+// ================================================================
+//  INIT COMPOSANTS NAVBAR / FOOTER
+// ================================================================
+
 function initComponents() {
   if (typeof Navbar === 'function') {
     DOM.navbar.innerHTML = Navbar();
@@ -62,17 +66,15 @@ function initComponents() {
   }
 }
 
-// ---- Burger menu (injecté dans le nav existant) ---- //
 function injectBurgerMenu() {
   const nav = DOM.navbar.querySelector('nav');
   if (!nav) return;
 
-  // Bouton burger
   const burger = document.createElement('button');
   burger.type = 'button';
   burger.id = 'burger-btn';
   burger.className = 'burger-btn';
-  burger.title = 'Ouvrir le menu';
+  burger.title = 'Open menu';
   burger.setAttribute('aria-label', 'Menu');
   burger.setAttribute('aria-expanded', 'false');
   burger.innerHTML = `
@@ -81,54 +83,44 @@ function injectBurgerMenu() {
     <span class="burger-line"></span>`;
   nav.appendChild(burger);
 
-  // Lire les liens nav depuis le DOM
-  const navItems = Array.from(
-    nav.querySelectorAll('.navLinks li a'),
-  ).map((a) => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#' }));
+  const navItems = Array.from(nav.querySelectorAll('.navLinks li a'))
+    .map(a => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#' }));
 
   const annonceEl = nav.querySelector('.annonce a');
   const profilEl  = nav.querySelector('#profil');
-  const profilLabel = profilEl ? profilEl.querySelector('div')?.textContent?.trim() || 'Profil' : 'Profil';
+  const profilLabel = profilEl ? profilEl.querySelector('div')?.textContent?.trim() || 'Profile' : 'Profile';
 
-  // Construire le drawer manuellement (ordre logique)
   const drawer = document.createElement('div');
   drawer.id = 'nav-drawer';
   drawer.className = 'nav-drawer';
   drawer.innerHTML = `
     <nav class="drawer-nav-links">
-      ${navItems.map((item) => `
-        <a href="${item.href}" class="drawer-link">${item.label}</a>
-      `).join('')}
+      ${navItems.map(item => `<a href="${item.href}" class="drawer-link">${item.label}</a>`).join('')}
     </nav>
     <div class="drawer-divider"></div>
     <div class="drawer-actions">
-      ${annonceEl ? `<a href="${annonceEl.getAttribute('href') || '#'}" class="drawer-btn-primary">Poster une annonce</a>` : ''}
+      ${annonceEl ? `<a href="${annonceEl.getAttribute('href') || '#'}" class="drawer-btn-primary">Post a listing</a>` : ''}
       <a href="${profilEl ? profilEl.getAttribute('href') || '#' : '#'}" class="drawer-btn-secondary">
         <i class="bi bi-person-circle"></i> ${profilLabel}
       </a>
     </div>`;
-
   nav.insertAdjacentElement('afterend', drawer);
 
-  // Toggle
   const toggle = () => {
     const isOpen = drawer.classList.toggle('open');
     burger.classList.toggle('active', isOpen);
     burger.setAttribute('aria-expanded', String(isOpen));
   };
 
-  burger.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
-
-  document.addEventListener('click', (e) => {
+  burger.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+  document.addEventListener('click', e => {
     if (drawer.classList.contains('open') && !drawer.contains(e.target) && !burger.contains(e.target)) {
       drawer.classList.remove('open');
       burger.classList.remove('active');
       burger.setAttribute('aria-expanded', 'false');
     }
   });
-
-  // Fermer après clic sur un lien
-  drawer.querySelectorAll('a').forEach((a) => {
+  drawer.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
       drawer.classList.remove('open');
       burger.classList.remove('active');
@@ -136,123 +128,144 @@ function injectBurgerMenu() {
   });
 }
 
-// ---- Faux utilisateur courant (remplacer par auth réelle) ---- //
-function initUser() {
-  // sessionStorage = propre à chaque onglet → chaque onglet a son propre UUID
-  const stored = sessionStorage.getItem('meetando_user_id');
-  if (stored) {
-    state.currentUserId = stored;
-  } else {
-    state.currentUserId = crypto.randomUUID();
-    sessionStorage.setItem('meetando_user_id', state.currentUserId);
-  }
+// ================================================================
+//  INIT UTILISATEUR — appel API réel
+// ================================================================
 
-  // Affiche l'UUID dans le bandeau
-  const el = document.getElementById('my-id-value');
-  if (el) el.textContent = state.currentUserId;
+async function initUser() {
+  try {
+    const res = await fetch(`${API_URL}/user/me`, { credentials: 'include' });
+    if (res.status === 401) { window.location.href = 'Login.html'; return; }
+    const user = await res.json();
 
-  // Copier au clic
-  const bar = document.getElementById('my-id-bar');
-  if (bar) {
-    bar.addEventListener('click', () => {
-      navigator.clipboard.writeText(state.currentUserId).then(() => {
-        bar.classList.add('copied');
-        const icon = document.getElementById('my-id-copy');
-        if (icon) { icon.className = 'bi bi-clipboard-check my-id-copy'; }
-        setTimeout(() => {
-          bar.classList.remove('copied');
-          if (icon) { icon.className = 'bi bi-clipboard my-id-copy'; }
-        }, 1800);
-      });
-    });
+    state.currentUser   = user;
+    state.currentUserId = intToUUID(user.id);
+
+    // Mettre en cache le nom de l'utilisateur courant
+    const name = [user.firstname, user.lastname].filter(Boolean).join(' ') || user.email;
+    state.userCache[state.currentUserId] = { name, email: user.email };
+
+  } catch {
+    window.location.href = 'Login.html';
   }
 }
 
-// ---- Connexion Socket.IO ---- //
+// ================================================================
+//  CACHE DES NOMS D'UTILISATEURS
+// ================================================================
+
+async function loadUserName(uuid) {
+  if (state.userCache[uuid]) return state.userCache[uuid].name;
+  try {
+    const res = await fetch(`${API_URL}/messaging/users/${uuid}`, { credentials: 'include' });
+    if (res.ok) {
+      const u = await res.json();
+      if (u) {
+        const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || uuid.slice(0, 8);
+        state.userCache[uuid] = { name, email: u.email };
+        renderConversationList(state.conversations);
+        updateHeaderIfNeeded(uuid, name);
+        return name;
+      }
+    }
+  } catch { /* silencieux */ }
+  return uuid.slice(0, 8) + '…';
+}
+
+function updateHeaderIfNeeded(uuid, name) {
+  if (!state.activeConversationId) return;
+  const conv = state.conversations.find(c => c.id === state.activeConversationId);
+  if (!conv || conv.is_group) return;
+  const otherId = conv.participant_1 === state.currentUserId ? conv.participant_2 : conv.participant_1;
+  if (otherId === uuid) {
+    DOM.chatHeader.name.textContent   = name;
+    DOM.chatHeader.avatar.textContent = name.slice(0, 2).toUpperCase();
+  }
+}
+
+function getCachedName(uuid) {
+  if (!uuid) return '?';
+  if (state.userCache[uuid]) return state.userCache[uuid].name;
+  loadUserName(uuid); // chargement asynchrone
+  return uuid.slice(0, 8) + '…';
+}
+
+// ================================================================
+//  SOCKET.IO
+// ================================================================
+
 function initSocket() {
   state.socket = io(SOCKET_URL, { transports: ['websocket'] });
 
   state.socket.on('connect', () => {
-    // S'enregistrer dans la room perso pour recevoir les notifications
     state.socket.emit('register', { userId: state.currentUserId });
     loadConversations();
   });
 
   state.socket.on('disconnect', () => {
-    console.log('[Socket] Déconnecté');
+    console.log('[Socket] Disconnected');
   });
 
-  state.socket.on('conversations_list', (data) => {
+  state.socket.on('conversations_list', data => {
     state.conversations = data;
     renderConversationList(data);
 
-    // Restaurer la conversation active après un refresh
     const savedId = localStorage.getItem('meetando_active_conv');
     if (savedId && !state.activeConversationId) {
-      const conv = data.find((c) => c.id === savedId);
+      const conv = data.find(c => c.id === savedId);
       if (conv) selectConversation(conv);
     }
   });
 
-  // Notification reçue sur la room perso (nouveau message ou nouvelle conv)
-  state.socket.on('new_conversation_notification', (conv) => {
-    const exists = state.conversations.find((c) => c.id === conv.id);
-    if (exists) {
-      // Mettre à jour le dernier message
-      Object.assign(exists, conv);
-    } else {
-      state.conversations.unshift(conv);
-    }
+  state.socket.on('new_conversation_notification', conv => {
+    const exists = state.conversations.find(c => c.id === conv.id);
+    if (exists) Object.assign(exists, conv);
+    else state.conversations.unshift(conv);
     renderConversationList(state.conversations);
   });
 
-  state.socket.on('messages_history', (messages) => {
-    renderMessages(messages);
-  });
+  state.socket.on('messages_history', messages => renderMessages(messages));
 
-  state.socket.on('new_message', (message) => {
+  state.socket.on('new_message', message => {
     appendMessage(message);
     updateConvLastMsg(message.conversation_id, message.content, message.created_at);
   });
 
-  state.socket.on('conversation_opened', (conv) => {
-    openConversation(conv);
-  });
+  state.socket.on('conversation_opened', conv => openConversation(conv));
 
-  state.socket.on('error', (err) => {
-    console.error('[Socket] Erreur :', err);
-  });
+  state.socket.on('error', err => console.error('[Socket] Error:', err));
 }
 
-// ---- Charger les conversations ---- //
 function loadConversations() {
   state.socket.emit('get_conversations', { userId: state.currentUserId });
 }
 
-// ---- Rendu liste de conversations ---- //
+// ================================================================
+//  LISTE DES CONVERSATIONS
+// ================================================================
+
 function renderConversationList(conversations) {
   const filtered = filterConversations(conversations, DOM.convSearch.value);
 
-  if (filtered.length === 0) {
-    DOM.convList.innerHTML = '<li class="conv-empty-state">Aucune conversation pour le moment</li>';
+  if (!filtered.length) {
+    DOM.convList.innerHTML = '<li class="conv-empty-state">No conversations yet</li>';
     return;
   }
 
-  DOM.convList.innerHTML = filtered.map((conv) => {
-    const otherId = conv.participant_1 === state.currentUserId
-      ? conv.participant_2
-      : conv.participant_1;
-    const name = shortenId(otherId);
-    const initials = name.slice(0, 2).toUpperCase();
-    const lastMsg = conv.last_message || 'Nouvelle conversation';
-    const time = conv.last_message_at ? formatTime(conv.last_message_at) : '';
+  DOM.convList.innerHTML = filtered.map(conv => {
+    const { displayName, initials } = getConvDisplay(conv);
+    const lastMsg  = conv.last_message || 'New conversation';
+    const time     = conv.last_message_at ? formatTime(conv.last_message_at) : '';
     const isActive = conv.id === state.activeConversationId ? 'active' : '';
+    const isGroup  = conv.is_group;
 
     return `
-      <li class="conv-item ${isActive}" role="listitem" data-id="${conv.id}" data-other-id="${otherId}">
-        <div class="conv-avatar">${initials}</div>
+      <li class="conv-item ${isActive}" role="listitem" data-id="${conv.id}">
+        <div class="conv-avatar ${isGroup ? 'conv-avatar-group' : ''}">
+          ${isGroup ? '<i class="bi bi-people-fill"></i>' : initials}
+        </div>
         <div class="conv-info">
-          <div class="conv-name">${escapeHtml(name)}</div>
+          <div class="conv-name">${escapeHtml(displayName)}</div>
           <div class="conv-last-msg">${escapeHtml(truncate(lastMsg, 40))}</div>
         </div>
         <div class="conv-meta">
@@ -261,49 +274,70 @@ function renderConversationList(conversations) {
       </li>`;
   }).join('');
 
-  DOM.convList.querySelectorAll('.conv-item').forEach((item) => {
+  DOM.convList.querySelectorAll('.conv-item').forEach(item => {
     item.addEventListener('click', () => {
-      const convId = item.dataset.id;
-      const conv = state.conversations.find((c) => c.id === convId);
+      const conv = state.conversations.find(c => c.id === item.dataset.id);
       if (conv) selectConversation(conv);
     });
   });
 }
 
-// ---- Sélectionner une conversation ---- //
-function selectConversation(conv) {
-  state.activeConversationId = conv.id;
-  localStorage.setItem('meetando_active_conv', conv.id);
-
+function getConvDisplay(conv) {
+  if (conv.is_group) {
+    return { displayName: conv.group_name || 'Group', initials: 'G' };
+  }
   const otherId = conv.participant_1 === state.currentUserId
     ? conv.participant_2
     : conv.participant_1;
-  const name = shortenId(otherId);
+  const name = getCachedName(otherId);
   const initials = name.slice(0, 2).toUpperCase();
+  return { displayName: name, initials };
+}
 
-  DOM.chatHeader.name.textContent = name;
-  DOM.chatHeader.avatar.textContent = initials;
-  DOM.chatHeader.status.textContent = 'En ligne';
+// ================================================================
+//  SÉLECTIONNER UNE CONVERSATION
+// ================================================================
+
+async function selectConversation(conv) {
+  state.activeConversationId = conv.id;
+  localStorage.setItem('meetando_active_conv', conv.id);
+
+  // Pre-load the other participant's name so the header shows it immediately
+  if (!conv.is_group) {
+    const otherId = conv.participant_1 === state.currentUserId ? conv.participant_2 : conv.participant_1;
+    if (otherId && !state.userCache[otherId]) await loadUserName(otherId);
+  }
+
+  const { displayName, initials } = getConvDisplay(conv);
+  DOM.chatHeader.name.textContent   = displayName;
+  DOM.chatHeader.avatar.textContent = conv.is_group ? '' : initials;
+  if (conv.is_group) DOM.chatHeader.avatar.innerHTML = '<i class="bi bi-people-fill"></i>';
+  DOM.chatHeader.status.textContent = conv.is_group ? 'Group' : 'Active';
 
   showChatView();
   DOM.chatMessages.innerHTML = '';
 
-  state.socket.emit('join_conversation', { conversationId: conv.id });
+  state.socket.emit('join_conversation', {
+    conversationId: conv.id,
+    userId: state.currentUserId,
+  });
   renderConversationList(state.conversations);
 
-  // Mobile (< 768px) : cacher la sidebar pour afficher uniquement le chat
   if (window.innerWidth <= 768) {
     DOM.sidebar.classList.add('hidden-mobile');
   }
 }
 
-// ---- Rendu des messages ---- //
+// ================================================================
+//  MESSAGES
+// ================================================================
+
 function renderMessages(messages) {
   DOM.chatMessages.innerHTML = '';
   let lastDate = null;
 
-  messages.forEach((msg) => {
-    const msgDate = new Date(msg.created_at).toLocaleDateString('fr-FR', {
+  messages.forEach(msg => {
+    const msgDate = new Date(msg.created_at).toLocaleDateString('en-US', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
     if (msgDate !== lastDate) {
@@ -319,28 +353,26 @@ function renderMessages(messages) {
   scrollToBottom();
 }
 
-// ---- Ajouter un message ---- //
 function appendMessage(msg, doScroll = true) {
-  const isSent = msg.sender_id === state.currentUserId;
-  const row = document.createElement('div');
-  row.className = `msg-row ${isSent ? 'sent' : 'recv'}`;
+  const isSent    = msg.sender_id === state.currentUserId;
+  const row       = document.createElement('div');
+  row.className   = `msg-row ${isSent ? 'sent' : 'recv'}`;
   row.dataset.msgId = msg.id;
 
-  const time = formatTime(msg.created_at);
-  const initials = shortenId(msg.sender_id).slice(0, 2).toUpperCase();
-
-<<<<<<< Updated upstream
+  const time     = formatTime(msg.created_at);
+  const senderName = isSent ? '' : getCachedName(msg.sender_id);
+  const initials = senderName.slice(0, 2).toUpperCase() || '?';
   const bubbleContent = renderBubbleContent(msg.content);
+
+  // Dans un groupe, on affiche le nom de l'expéditeur au-dessus de la bulle
+  const conv = state.conversations.find(c => c.id === msg.conversation_id);
+  const showSenderName = !isSent && conv?.is_group;
+
   row.innerHTML = `
     ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
     <div class="msg-bubble">
+      ${showSenderName ? `<div class="msg-sender-name">${escapeHtml(senderName)}</div>` : ''}
       ${bubbleContent}
-=======
-  row.innerHTML = `
-    ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
-    <div class="msg-bubble">
-      ${escapeHtml(msg.content)}
->>>>>>> Stashed changes
       <span class="msg-time">${time}</span>
     </div>`;
 
@@ -348,34 +380,33 @@ function appendMessage(msg, doScroll = true) {
   if (doScroll) scrollToBottom();
 }
 
-// ---- Mettre à jour le dernier message dans la liste ---- //
 function updateConvLastMsg(convId, content, timestamp) {
-  const conv = state.conversations.find((c) => c.id === convId);
+  const conv = state.conversations.find(c => c.id === convId);
   if (conv) {
-    conv.last_message = content;
+    conv.last_message    = content;
     conv.last_message_at = timestamp;
     renderConversationList(state.conversations);
   }
 }
 
-// ---- Envoyer un message ---- //
-<<<<<<< Updated upstream
+// ================================================================
+//  ENVOI
+// ================================================================
+
 async function sendMessage() {
-  const content = DOM.msgInput.value.trim();
-  const hasFile = !!attach.file;
+  const content  = DOM.msgInput.value.trim();
+  const hasFile  = !!attach.file;
 
   if (!content && !hasFile) return;
   if (!state.activeConversationId) return;
 
   triggerSendRipple();
 
-  // Upload du fichier d'abord si présent
   if (hasFile) {
     await uploadAttachment(attach.file);
     clearAttachment();
   }
 
-  // Envoi du texte si présent
   if (content) {
     state.socket.emit('send_message', {
       conversationId: state.activeConversationId,
@@ -385,64 +416,56 @@ async function sendMessage() {
     DOM.msgInput.value = '';
   }
 
-=======
-function sendMessage() {
-  const content = DOM.msgInput.value.trim();
-  if (!content || !state.activeConversationId) return;
-
-  triggerSendRipple();
-
-  state.socket.emit('send_message', {
-    conversationId: state.activeConversationId,
-    senderId: state.currentUserId,
-    content,
-  });
-
-  DOM.msgInput.value = '';
->>>>>>> Stashed changes
   DOM.msgInput.focus();
   updateSendButton();
 }
 
-<<<<<<< Updated upstream
-// ---- Upload pièce jointe ---- //
+// ================================================================
+//  PIÈCES JOINTES
+// ================================================================
+
 async function uploadAttachment(file) {
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('conversationId', state.activeConversationId);
-  formData.append('senderId', state.currentUserId);
 
-  // Barre de progression
   const prog = document.createElement('div');
   prog.className = 'upload-progress';
   DOM.attachPreview.appendChild(prog);
 
   try {
-    const res = await fetch('http://localhost:3000/messaging/upload', {
-      method: 'POST',
-      body: formData,
+    const res = await fetch(`${API_URL}/messaging/upload`, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const msg = body?.message || res.statusText || 'Unknown error';
+      console.error('[Upload] Server error:', res.status, msg);
+      alert(`Error sending the file: ${msg}`);
+      return;
+    }
+    const { url } = await res.json();
+    // Send the URL as a regular message through the socket so everyone sees it in real-time
+    state.socket.emit('send_message', {
+      conversationId: state.activeConversationId,
+      senderId: state.currentUserId,
+      content: url,
     });
-    if (!res.ok) throw new Error('Upload échoué');
-    // Le message arrive via socket (new_message), pas besoin de traitement ici
   } catch (err) {
     console.error('[Upload]', err);
-    alert('Erreur lors de l\'envoi du fichier.');
+    alert(`Error sending the file: ${err.message}`);
   } finally {
     prog.remove();
   }
 }
 
-// ---- Afficher la preview du fichier sélectionné ---- //
 function showAttachPreview(file) {
   attach.file = file;
   const isImage = file.type.startsWith('image/');
   const sizeStr = file.size < 1024 * 1024
-    ? `${(file.size / 1024).toFixed(0)} Ko`
-    : `${(file.size / 1024 / 1024).toFixed(1)} Mo`;
+    ? `${(file.size / 1024).toFixed(0)} KB`
+    : `${(file.size / 1024 / 1024).toFixed(1)} MB`;
 
   if (isImage) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       DOM.attachPreviewInner.innerHTML = `
         <img src="${e.target.result}" alt="preview">
         <div>
@@ -465,115 +488,18 @@ function showAttachPreview(file) {
   updateSendButton();
 }
 
-// ---- Supprimer la pièce jointe ---- //
 function clearAttachment() {
   attach.file = null;
   DOM.attachPreview.hidden = true;
   DOM.attachPreviewInner.innerHTML = '';
-  DOM.fileInput.value = '';
+  if (DOM.fileInput) DOM.fileInput.value = '';
   updateSendButton();
 }
 
-=======
->>>>>>> Stashed changes
-// ---- Ripple sur le bouton envoi ---- //
-function triggerSendRipple() {
-  const ripple = document.createElement('span');
-  ripple.className = 'ripple';
-  DOM.btnSend.appendChild(ripple);
-  ripple.addEventListener('animationend', () => ripple.remove());
-}
+// ================================================================
+//  RENDU CONTENU BULLE (texte, image, fichier)
+// ================================================================
 
-// ---- Activer/désactiver le bouton selon le contenu ---- //
-function updateSendButton() {
-<<<<<<< Updated upstream
-  DOM.btnSend.disabled = !DOM.msgInput.value.trim() && !attach.file;
-=======
-  DOM.btnSend.disabled = !DOM.msgInput.value.trim();
->>>>>>> Stashed changes
-}
-
-// ---- Indicateur de frappe ---- //
-let typingTimeout = null;
-
-function showTypingIndicator() {
-  if (document.getElementById('typing-indicator')) return;
-  const el = document.createElement('div');
-  el.id = 'typing-indicator';
-  el.className = 'typing-indicator';
-  el.innerHTML = `
-    <div class="msg-bubble-avatar" style="width:28px;height:28px;font-size:.65rem">?</div>
-    <div class="typing-dots">
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
-    </div>`;
-  DOM.chatMessages.appendChild(el);
-  scrollToBottom();
-}
-
-function hideTypingIndicator() {
-  const el = document.getElementById('typing-indicator');
-  if (el) el.remove();
-}
-
-// ---- Afficher / cacher la vue chat ---- //
-function showChatView() {
-  DOM.chatEmpty.style.display = 'none';
-  DOM.chatView.hidden = false;
-}
-
-// ---- Nouvelle conversation (modal) ---- //
-function openNewConvModal() {
-  const modal = document.createElement('div');
-  modal.className = 'modal-new-conv';
-  modal.innerHTML = `
-    <div class="modal-card">
-      <h3><i class="bi bi-pencil-square me-2"></i>Nouvelle conversation</h3>
-      <input type="text" class="modal-input" id="modal-contact-id"
-             placeholder="ID du contact…" autocomplete="off" />
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary-outline" id="modal-cancel">Annuler</button>
-        <button type="button" class="btn-primary-blue" id="modal-confirm">Démarrer</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-
-  const input = modal.querySelector('#modal-contact-id');
-  input.focus();
-
-  modal.querySelector('#modal-cancel').addEventListener('click', () => modal.remove());
-  modal.querySelector('#modal-confirm').addEventListener('click', () => {
-    const contactId = input.value.trim();
-    if (!contactId) return;
-    state.socket.emit('open_conversation', {
-      userId1: state.currentUserId,
-      userId2: contactId,
-    });
-    modal.remove();
-  });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
-  });
-}
-
-function openConversation(conv) {
-  state.conversations = [conv, ...state.conversations.filter((c) => c.id !== conv.id)];
-  renderConversationList(state.conversations);
-  selectConversation(conv);
-}
-
-// ---- Recherche ---- //
-function filterConversations(conversations, query) {
-  if (!query) return conversations;
-  return conversations.filter((c) => {
-    const otherId = c.participant_1 === state.currentUserId ? c.participant_2 : c.participant_1;
-    return otherId.toLowerCase().includes(query.toLowerCase());
-  });
-}
-
-<<<<<<< Updated upstream
-// ---- Rendu du contenu d'une bulle (texte, image, fichier) ---- //
 function renderBubbleContent(content) {
   const imageExts = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
   const pdfExt    = /\.pdf(\?.*)?$/i;
@@ -587,7 +513,6 @@ function renderBubbleContent(content) {
       <i class="bi bi-file-earmark-pdf-fill"></i> ${escapeHtml(name)}
     </a>`;
   }
-  // Lien générique fichier
   if (content.startsWith('http') && content.includes('/chat-attachments/')) {
     const name = decodeURIComponent(content.split('/').pop().split('?')[0]);
     return `<a href="${content}" target="_blank" rel="noopener" class="msg-file-link">
@@ -597,18 +522,220 @@ function renderBubbleContent(content) {
   return escapeHtml(content);
 }
 
-// ---- Lightbox image ---- //
 function openLightbox(src) {
   const lb = document.createElement('div');
   lb.className = 'img-lightbox';
-  lb.innerHTML = `<img src="${src}" alt="image agrandie" />`;
+  lb.innerHTML = `<img src="${src}" alt="enlarged image" />`;
   lb.addEventListener('click', () => lb.remove());
   document.body.appendChild(lb);
 }
 
-=======
->>>>>>> Stashed changes
-// ---- Helpers ---- //
+// ================================================================
+//  NOUVELLE CONVERSATION (1-1 ou groupe)
+// ================================================================
+
+function openNewConvModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-new-conv';
+  modal.innerHTML = `
+    <div class="modal-card">
+      <h3><i class="bi bi-pencil-square me-2"></i>New conversation</h3>
+
+      <!-- Onglets 1-1 / Groupe -->
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active" data-tab="direct">
+          <i class="bi bi-person-fill"></i> Direct
+        </button>
+        <button type="button" class="modal-tab" data-tab="group">
+          <i class="bi bi-people-fill"></i> Group
+        </button>
+      </div>
+
+      <!-- Panneau Direct -->
+      <div id="tab-direct" class="modal-tab-panel active">
+        <input type="text" class="modal-input" id="modal-search-direct"
+               placeholder="Search by name or email…" autocomplete="off" />
+        <div id="modal-direct-results" class="modal-results"></div>
+      </div>
+
+      <!-- Panneau Groupe -->
+      <div id="tab-group" class="modal-tab-panel" style="display:none">
+        <input type="text" class="modal-input" id="modal-group-name"
+               placeholder="Group name…" autocomplete="off" />
+        <input type="text" class="modal-input" id="modal-search-group"
+               placeholder="Add members (name or email)…" autocomplete="off" />
+        <div id="modal-group-results" class="modal-results"></div>
+        <div id="modal-group-members" class="modal-group-members"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary-outline" id="modal-cancel">Cancel</button>
+        <button type="button" class="btn-primary-blue" id="modal-confirm">Start</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+
+  let currentTab     = 'direct';
+  let selectedDirect = null;      // { uuid, name }
+  let groupMembers   = [];         // [{ uuid, name }]
+
+  // ----- Onglets -----
+  modal.querySelectorAll('.modal-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentTab = btn.dataset.tab;
+      modal.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      modal.querySelector('#tab-direct').style.display = currentTab === 'direct' ? '' : 'none';
+      modal.querySelector('#tab-group').style.display  = currentTab === 'group'  ? '' : 'none';
+    });
+  });
+
+  // ----- Recherche direct -----
+  let searchTimer = null;
+  modal.querySelector('#modal-search-direct').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    const q = e.target.value.trim();
+    if (q.length < 2) { modal.querySelector('#modal-direct-results').innerHTML = ''; return; }
+    searchTimer = setTimeout(() => searchAndRender(q, 'direct', modal, result => {
+      selectedDirect = result;
+      modal.querySelector('#modal-search-direct').value = result.name;
+      modal.querySelector('#modal-direct-results').innerHTML = '';
+    }), 300);
+  });
+
+  // ----- Recherche groupe -----
+  let searchTimer2 = null;
+  modal.querySelector('#modal-search-group').addEventListener('input', e => {
+    clearTimeout(searchTimer2);
+    const q = e.target.value.trim();
+    if (q.length < 2) { modal.querySelector('#modal-group-results').innerHTML = ''; return; }
+    searchTimer2 = setTimeout(() => searchAndRender(q, 'group', modal, result => {
+      if (!groupMembers.find(m => m.uuid === result.uuid)) {
+        groupMembers.push(result);
+        renderGroupMembers(groupMembers, modal, m => {
+          groupMembers = groupMembers.filter(x => x.uuid !== m.uuid);
+          renderGroupMembers(groupMembers, modal, () => {});
+        });
+      }
+      modal.querySelector('#modal-search-group').value = '';
+      modal.querySelector('#modal-group-results').innerHTML = '';
+    }), 300);
+  });
+
+  // ----- Fermer -----
+  modal.querySelector('#modal-cancel').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // ----- Confirmer -----
+  modal.querySelector('#modal-confirm').addEventListener('click', () => {
+    if (currentTab === 'direct') {
+      if (!selectedDirect) { alert('Please select a contact.'); return; }
+      state.socket.emit('open_conversation', {
+        userId1: state.currentUserId,
+        userId2: selectedDirect.uuid,
+      });
+      modal.remove();
+    } else {
+      const groupName = modal.querySelector('#modal-group-name').value.trim();
+      if (!groupName) { alert('Please enter a group name.'); return; }
+      if (groupMembers.length === 0) { alert('Please add at least one member.'); return; }
+      state.socket.emit('create_group', {
+        name: groupName,
+        creatorId: state.currentUserId,
+        memberIds: groupMembers.map(m => m.uuid),
+      });
+      modal.remove();
+    }
+  });
+}
+
+async function searchAndRender(query, panel, modal, onSelect) {
+  try {
+    const res = await fetch(
+      `${API_URL}/messaging/users/search?q=${encodeURIComponent(query)}`,
+      { credentials: 'include' },
+    );
+    if (!res.ok) return;
+    const users = await res.json();
+    const container = modal.querySelector(panel === 'direct' ? '#modal-direct-results' : '#modal-group-results');
+    if (!users.length) {
+      container.innerHTML = '<div class="modal-no-result">No results</div>';
+      return;
+    }
+    container.innerHTML = users.map(u => {
+      const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email;
+      return `<div class="modal-result-item" data-uuid="${u.uuid}" data-name="${escapeHtml(name)}">
+        <div class="modal-result-avatar">${name.slice(0, 2).toUpperCase()}</div>
+        <div>
+          <div class="modal-result-name">${escapeHtml(name)}</div>
+          <div class="modal-result-email">${escapeHtml(u.email)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    container.querySelectorAll('.modal-result-item').forEach(item => {
+      item.addEventListener('click', () => {
+        onSelect({ uuid: item.dataset.uuid, name: item.dataset.name });
+      });
+    });
+  } catch { /* silencieux */ }
+}
+
+function renderGroupMembers(members, modal, onRemove) {
+  const container = modal.querySelector('#modal-group-members');
+  if (!members.length) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <div class="modal-members-label">Members (${members.length}):</div>
+    ${members.map(m => `
+      <span class="modal-member-chip">
+        ${escapeHtml(m.name)}
+        <button type="button" data-uuid="${m.uuid}" class="chip-remove">×</button>
+      </span>`).join('')}`;
+  container.querySelectorAll('.chip-remove').forEach(btn => {
+    btn.addEventListener('click', () => onRemove({ uuid: btn.dataset.uuid }));
+  });
+}
+
+function openConversation(conv) {
+  state.conversations = [conv, ...state.conversations.filter(c => c.id !== conv.id)];
+  renderConversationList(state.conversations);
+  selectConversation(conv);
+}
+
+// ================================================================
+//  FILTRE DE RECHERCHE CONVERSATIONS
+// ================================================================
+
+function filterConversations(conversations, query) {
+  if (!query) return conversations;
+  return conversations.filter(c => {
+    if (c.is_group) return (c.group_name || '').toLowerCase().includes(query.toLowerCase());
+    const otherId = c.participant_1 === state.currentUserId ? c.participant_2 : c.participant_1;
+    const name = state.userCache[otherId]?.name || otherId;
+    return name.toLowerCase().includes(query.toLowerCase());
+  });
+}
+
+// ================================================================
+//  HELPERS
+// ================================================================
+
+function triggerSendRipple() {
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  DOM.btnSend.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+}
+
+function updateSendButton() {
+  DOM.btnSend.disabled = !DOM.msgInput.value.trim() && !attach.file;
+}
+
+function showChatView() {
+  DOM.chatEmpty.style.display = 'none';
+  DOM.chatView.hidden = false;
+}
+
 function scrollToBottom() {
   requestAnimationFrame(() => {
     DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
@@ -616,18 +743,12 @@ function scrollToBottom() {
 }
 
 function formatTime(iso) {
-  const d = new Date(iso);
+  const d   = new Date(iso);
   const now = new Date();
-  const sameDay = d.toDateString() === now.toDateString();
-  if (sameDay) {
-    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-}
-
-function shortenId(id) {
-  if (!id) return '?';
-  return id.length > 12 ? id.slice(0, 8) + '…' : id;
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 }
 
 function truncate(str, max) {
@@ -642,47 +763,44 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ---- Événements ---- //
+// ================================================================
+//  ÉVÉNEMENTS
+// ================================================================
+
 function initEvents() {
   DOM.btnSend.addEventListener('click', sendMessage);
   DOM.btnSend.disabled = true;
 
   DOM.msgInput.addEventListener('input', updateSendButton);
-
-  DOM.msgInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  DOM.msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
-<<<<<<< Updated upstream
   // Pièce jointe
-  DOM.btnAttach.addEventListener('click', () => DOM.fileInput.click());
-  DOM.fileInput.addEventListener('change', () => {
-    const file = DOM.fileInput.files[0];
-    if (file) showAttachPreview(file);
-  });
-  DOM.btnAttachRemove.addEventListener('click', clearAttachment);
+  if (DOM.btnAttach) {
+    DOM.btnAttach.addEventListener('click', () => DOM.fileInput?.click());
+  }
+  if (DOM.fileInput) {
+    DOM.fileInput.addEventListener('change', () => {
+      const file = DOM.fileInput.files[0];
+      if (file) showAttachPreview(file);
+    });
+  }
+  if (DOM.btnAttachRemove) {
+    DOM.btnAttachRemove.addEventListener('click', clearAttachment);
+  }
 
-  // Lightbox sur clic image dans le chat
-  DOM.chatMessages.addEventListener('click', (e) => {
-    if (e.target.classList.contains('msg-image')) {
-      openLightbox(e.target.src);
-    }
+  // Lightbox
+  DOM.chatMessages.addEventListener('click', e => {
+    if (e.target.classList.contains('msg-image')) openLightbox(e.target.src);
   });
 
-=======
->>>>>>> Stashed changes
   DOM.btnNewConv.addEventListener('click', openNewConvModal);
 
-  DOM.convSearch.addEventListener('input', () => {
-    renderConversationList(state.conversations);
-  });
+  DOM.convSearch.addEventListener('input', () => renderConversationList(state.conversations));
 
   DOM.btnBack.addEventListener('click', () => {
     DOM.sidebar.classList.remove('hidden-mobile');
-    // Sur mobile : cacher le chat et afficher l'état vide
     if (window.innerWidth <= 768) {
       DOM.chatView.hidden = true;
       DOM.chatEmpty.style.display = '';
@@ -693,10 +811,14 @@ function initEvents() {
   });
 }
 
-// ---- Bootstrap ---- //
-document.addEventListener('DOMContentLoaded', () => {
+// ================================================================
+//  BOOTSTRAP
+// ================================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
   initComponents();
-  initUser();
+  await initUser();
+  if (!state.currentUserId) return; // redirection login en cours
   initEvents();
   initSocket();
 });
