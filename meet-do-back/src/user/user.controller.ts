@@ -16,7 +16,15 @@ import JwtAuthenticationGuard from 'src/authentication/guard/jwt-authentication.
 import type RequestWithUser from 'src/authentication/requestWithUser.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import type { Express } from 'express';
+
+interface UploadedMulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
 
 @Controller('user')
 export class UserController {
@@ -75,7 +83,7 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar', { storage: memoryStorage() }))
   uploadAvatar(
     @Req() req: RequestWithUser,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: UploadedMulterFile,
   ) {
     return this.userService.uploadAvatar(req.user.id, file);
   }
