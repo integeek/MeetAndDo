@@ -7,12 +7,12 @@ const SOCKET_URL = `${API_URL}/messaging`;
 
 // ---- Local state ---- //
 const state = {
-  currentUser:          null,   // { id, firstname, lastname, email }
-  currentUserId:        null,   // UUID derived from integer id
+  currentUser:          null,   
+  currentUserId:        null,   
   activeConversationId: null,
   conversations:        [],
   socket:               null,
-  userCache:            {},     // uuid → { name, email }
+  userCache:            {},     
 };
 
 // ---- Attachment ---- //
@@ -577,8 +577,8 @@ function openNewConvModal() {
   document.body.appendChild(modal);
 
   let currentTab     = 'direct';
-  let selectedDirect = null;      // { uuid, name }
-  let groupMembers   = [];         // [{ uuid, name }]
+  let selectedDirect = null;      
+  let groupMembers   = [];         
 
   // ----- Onglets -----
   modal.querySelectorAll('.modal-tab').forEach(btn => {
@@ -818,7 +818,7 @@ function initEvents() {
 document.addEventListener('DOMContentLoaded', async () => {
   initComponents();
   await initUser();
-  if (!state.currentUserId) return; // redirection login en cours
+  if (!state.currentUserId) return; 
   initEvents();
   initSocket();
 });
