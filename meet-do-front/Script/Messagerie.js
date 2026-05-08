@@ -1,8 +1,13 @@
+/* =============================================
+   Meet&Do — Messaging
+   ============================================= */
+
 const API_URL    = 'http://localhost:3000';
 const SOCKET_URL = `${API_URL}/messaging`;
 
+// ---- Local state ---- //
 const state = {
-  currentUser:          null,
+  currentUser:          null,   // { id, firstname, lastname, email }
   currentUserId:        null,   // UUID derived from integer id
   activeConversationId: null,
   conversations:        [],
@@ -10,8 +15,10 @@ const state = {
   userCache:            {},     // uuid → { name, email }
 };
 
+// ---- Attachment ---- //
 const attach = { file: null };
 
+// ---- DOM ---- //
 const DOM = {
   navbar:              document.getElementById('navbar-root'),
   footer:              document.getElementById('footer-root'),
@@ -37,9 +44,17 @@ const DOM = {
   btnAttachRemove:     document.getElementById('attachment-remove'),
 };
 
+// ================================================================
+//  UTILITAIRES UUID
+// ================================================================
+
 function intToUUID(id) {
   return `00000000-0000-0000-0000-${String(id).padStart(12, '0')}`;
 }
+
+// ================================================================
+//  INIT COMPOSANTS NAVBAR / FOOTER
+// ================================================================
 
 function initComponents() {
   if (typeof Navbar === 'function') {
@@ -71,8 +86,8 @@ function injectBurgerMenu() {
   const navItems = Array.from(nav.querySelectorAll('.navLinks li a'))
     .map(a => ({ label: a.textContent.trim(), href: a.getAttribute('href') || '#' }));
 
-  const annonceEl   = nav.querySelector('.annonce a');
-  const profilEl    = nav.querySelector('#profil');
+  const annonceEl = nav.querySelector('.annonce a');
+  const profilEl  = nav.querySelector('#profil');
   const profilLabel = profilEl ? profilEl.querySelector('div')?.textContent?.trim() || 'Profile' : 'Profile';
 
   const drawer = document.createElement('div');
@@ -113,6 +128,10 @@ function injectBurgerMenu() {
   });
 }
 
+// ================================================================
+//  INIT USER — real API call
+// ================================================================
+
 async function initUser() {
   try {
     const res = await fetch(`${API_URL}/user/me`, { credentials: 'include' });
@@ -122,12 +141,18 @@ async function initUser() {
     state.currentUser   = user;
     state.currentUserId = intToUUID(user.id);
 
+    // Mettre en cache le nom de l'utilisateur courant
     const name = [user.firstname, user.lastname].filter(Boolean).join(' ') || user.email;
     state.userCache[state.currentUserId] = { name, email: user.email };
+
   } catch {
     window.location.href = 'Login.html';
   }
 }
+
+// ================================================================
+//  CACHE DES NOMS D'UTILISATEURS
+// ================================================================
 
 async function loadUserName(uuid) {
   if (state.userCache[uuid]) return state.userCache[uuid].name;
@@ -143,7 +168,7 @@ async function loadUserName(uuid) {
         return name;
       }
     }
-  } catch {}
+  } catch { /* silencieux */ }
   return uuid.slice(0, 8) + '…';
 }
 
@@ -161,9 +186,13 @@ function updateHeaderIfNeeded(uuid, name) {
 function getCachedName(uuid) {
   if (!uuid) return '?';
   if (state.userCache[uuid]) return state.userCache[uuid].name;
-  loadUserName(uuid);
+  loadUserName(uuid); // chargement asynchrone
   return uuid.slice(0, 8) + '…';
 }
+
+// ================================================================
+//  SOCKET.IO
+// ================================================================
 
 function initSocket() {
   state.socket = io(SOCKET_URL, { transports: ['websocket'] });
@@ -173,7 +202,9 @@ function initSocket() {
     loadConversations();
   });
 
-  state.socket.on('disconnect', () => console.log('[Socket] Disconnected'));
+  state.socket.on('disconnect', () => {
+    console.log('[Socket] Disconnected');
+  });
 
   state.socket.on('conversations_list', data => {
     state.conversations = data;
@@ -208,6 +239,10 @@ function initSocket() {
 function loadConversations() {
   state.socket.emit('get_conversations', { userId: state.currentUserId });
 }
+
+// ================================================================
+//  LISTE DES CONVERSATIONS
+// ================================================================
 
 function renderConversationList(conversations) {
   const filtered = filterConversations(conversations, DOM.convSearch.value);
@@ -255,8 +290,13 @@ function getConvDisplay(conv) {
     ? conv.participant_2
     : conv.participant_1;
   const name = getCachedName(otherId);
-  return { displayName: name, initials: name.slice(0, 2).toUpperCase() };
+  const initials = name.slice(0, 2).toUpperCase();
+  return { displayName: name, initials };
 }
+
+// ================================================================
+//  SELECT A CONVERSATION
+// ================================================================
 
 async function selectConversation(conv) {
   state.activeConversationId = conv.id;
@@ -277,11 +317,20 @@ async function selectConversation(conv) {
   showChatView();
   DOM.chatMessages.innerHTML = '';
 
-  state.socket.emit('join_conversation', { conversationId: conv.id, userId: state.currentUserId });
+  state.socket.emit('join_conversation', {
+    conversationId: conv.id,
+    userId: state.currentUserId,
+  });
   renderConversationList(state.conversations);
 
-  if (window.innerWidth <= 768) DOM.sidebar.classList.add('hidden-mobile');
+  if (window.innerWidth <= 768) {
+    DOM.sidebar.classList.add('hidden-mobile');
+  }
 }
+
+// ================================================================
+//  MESSAGES
+// ================================================================
 
 function renderMessages(messages) {
   DOM.chatMessages.innerHTML = '';
@@ -305,17 +354,18 @@ function renderMessages(messages) {
 }
 
 function appendMessage(msg, doScroll = true) {
-  const isSent       = msg.sender_id === state.currentUserId;
-  const row          = document.createElement('div');
-  row.className      = `msg-row ${isSent ? 'sent' : 'recv'}`;
-  row.dataset.msgId  = msg.id;
+  const isSent    = msg.sender_id === state.currentUserId;
+  const row       = document.createElement('div');
+  row.className   = `msg-row ${isSent ? 'sent' : 'recv'}`;
+  row.dataset.msgId = msg.id;
 
-  const senderName    = isSent ? '' : getCachedName(msg.sender_id);
-  const initials      = senderName.slice(0, 2).toUpperCase() || '?';
+  const time     = formatTime(msg.created_at);
+  const senderName = isSent ? '' : getCachedName(msg.sender_id);
+  const initials = senderName.slice(0, 2).toUpperCase() || '?';
   const bubbleContent = renderBubbleContent(msg.content);
 
   // In a group, show the sender name above the bubble
-  const conv           = state.conversations.find(c => c.id === msg.conversation_id);
+  const conv = state.conversations.find(c => c.id === msg.conversation_id);
   const showSenderName = !isSent && conv?.is_group;
 
   row.innerHTML = `
@@ -323,7 +373,7 @@ function appendMessage(msg, doScroll = true) {
     <div class="msg-bubble">
       ${showSenderName ? `<div class="msg-sender-name">${escapeHtml(senderName)}</div>` : ''}
       ${bubbleContent}
-      <span class="msg-time">${formatTime(msg.created_at)}</span>
+      <span class="msg-time">${time}</span>
     </div>`;
 
   DOM.chatMessages.appendChild(row);
@@ -339,9 +389,13 @@ function updateConvLastMsg(convId, content, timestamp) {
   }
 }
 
+// ================================================================
+//  ENVOI
+// ================================================================
+
 async function sendMessage() {
-  const content = DOM.msgInput.value.trim();
-  const hasFile = !!attach.file;
+  const content  = DOM.msgInput.value.trim();
+  const hasFile  = !!attach.file;
 
   if (!content && !hasFile) return;
   if (!state.activeConversationId) return;
@@ -366,6 +420,10 @@ async function sendMessage() {
   updateSendButton();
 }
 
+// ================================================================
+//  ATTACHMENTS
+// ================================================================
+
 async function uploadAttachment(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -378,13 +436,13 @@ async function uploadAttachment(file) {
     const res = await fetch(`${API_URL}/messaging/upload`, { method: 'POST', body: formData });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      const msg  = body?.message || res.statusText || 'Unknown error';
+      const msg = body?.message || res.statusText || 'Unknown error';
       console.error('[Upload] Server error:', res.status, msg);
       alert(`Error sending the file: ${msg}`);
       return;
     }
     const { url } = await res.json();
-    // Send URL via socket so all participants see it in real-time
+    // Send the URL as a regular message through the socket so everyone sees it in real-time
     state.socket.emit('send_message', {
       conversationId: state.activeConversationId,
       senderId: state.currentUserId,
@@ -438,6 +496,10 @@ function clearAttachment() {
   updateSendButton();
 }
 
+// ================================================================
+//  RENDU CONTENU BULLE (texte, image, fichier)
+// ================================================================
+
 function renderBubbleContent(content) {
   const imageExts = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i;
   const pdfExt    = /\.pdf(\?.*)?$/i;
@@ -468,12 +530,18 @@ function openLightbox(src) {
   document.body.appendChild(lb);
 }
 
+// ================================================================
+//  NOUVELLE CONVERSATION (1-1 ou groupe)
+// ================================================================
+
 function openNewConvModal() {
   const modal = document.createElement('div');
   modal.className = 'modal-new-conv';
   modal.innerHTML = `
     <div class="modal-card">
       <h3><i class="bi bi-pencil-square me-2"></i>New conversation</h3>
+
+      <!-- Onglets 1-1 / Groupe -->
       <div class="modal-tabs">
         <button type="button" class="modal-tab active" data-tab="direct">
           <i class="bi bi-person-fill"></i> Direct
@@ -482,11 +550,15 @@ function openNewConvModal() {
           <i class="bi bi-people-fill"></i> Group
         </button>
       </div>
+
+      <!-- Panneau Direct -->
       <div id="tab-direct" class="modal-tab-panel active">
         <input type="text" class="modal-input" id="modal-search-direct"
                placeholder="Search by name or email…" autocomplete="off" />
         <div id="modal-direct-results" class="modal-results"></div>
       </div>
+
+      <!-- Panneau Groupe -->
       <div id="tab-group" class="modal-tab-panel" style="display:none">
         <input type="text" class="modal-input" id="modal-group-name"
                placeholder="Group name…" autocomplete="off" />
@@ -495,6 +567,7 @@ function openNewConvModal() {
         <div id="modal-group-results" class="modal-results"></div>
         <div id="modal-group-members" class="modal-group-members"></div>
       </div>
+
       <div class="modal-actions">
         <button type="button" class="btn-secondary-outline" id="modal-cancel">Cancel</button>
         <button type="button" class="btn-primary-blue" id="modal-confirm">Start</button>
@@ -504,9 +577,10 @@ function openNewConvModal() {
   document.body.appendChild(modal);
 
   let currentTab     = 'direct';
-  let selectedDirect = null;  // { uuid, name }
-  let groupMembers   = [];    // [{ uuid, name }]
+  let selectedDirect = null;      // { uuid, name }
+  let groupMembers   = [];         // [{ uuid, name }]
 
+  // ----- Onglets -----
   modal.querySelectorAll('.modal-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       currentTab = btn.dataset.tab;
@@ -517,6 +591,7 @@ function openNewConvModal() {
     });
   });
 
+  // ----- Recherche direct -----
   let searchTimer = null;
   modal.querySelector('#modal-search-direct').addEventListener('input', e => {
     clearTimeout(searchTimer);
@@ -529,6 +604,7 @@ function openNewConvModal() {
     }), 300);
   });
 
+  // ----- Recherche groupe -----
   let searchTimer2 = null;
   modal.querySelector('#modal-search-group').addEventListener('input', e => {
     clearTimeout(searchTimer2);
@@ -547,13 +623,18 @@ function openNewConvModal() {
     }), 300);
   });
 
+  // ----- Fermer -----
   modal.querySelector('#modal-cancel').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 
+  // ----- Confirmer -----
   modal.querySelector('#modal-confirm').addEventListener('click', () => {
     if (currentTab === 'direct') {
       if (!selectedDirect) { alert('Please select a contact.'); return; }
-      state.socket.emit('open_conversation', { userId1: state.currentUserId, userId2: selectedDirect.uuid });
+      state.socket.emit('open_conversation', {
+        userId1: state.currentUserId,
+        userId2: selectedDirect.uuid,
+      });
       modal.remove();
     } else {
       const groupName = modal.querySelector('#modal-group-name').value.trim();
@@ -593,9 +674,11 @@ async function searchAndRender(query, panel, modal, onSelect) {
       </div>`;
     }).join('');
     container.querySelectorAll('.modal-result-item').forEach(item => {
-      item.addEventListener('click', () => onSelect({ uuid: item.dataset.uuid, name: item.dataset.name }));
+      item.addEventListener('click', () => {
+        onSelect({ uuid: item.dataset.uuid, name: item.dataset.name });
+      });
     });
-  } catch {}
+  } catch { /* silencieux */ }
 }
 
 function renderGroupMembers(members, modal, onRemove) {
@@ -619,6 +702,10 @@ function openConversation(conv) {
   selectConversation(conv);
 }
 
+// ================================================================
+//  FILTRE DE RECHERCHE CONVERSATIONS
+// ================================================================
+
 function filterConversations(conversations, query) {
   if (!query) return conversations;
   return conversations.filter(c => {
@@ -628,6 +715,10 @@ function filterConversations(conversations, query) {
     return name.toLowerCase().includes(query.toLowerCase());
   });
 }
+
+// ================================================================
+//  HELPERS
+// ================================================================
 
 function triggerSendRipple() {
   const ripple = document.createElement('span');
@@ -646,7 +737,9 @@ function showChatView() {
 }
 
 function scrollToBottom() {
-  requestAnimationFrame(() => { DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight; });
+  requestAnimationFrame(() => {
+    DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+  });
 }
 
 function formatTime(iso) {
@@ -670,6 +763,10 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// ================================================================
+//  EVENTS
+// ================================================================
+
 function initEvents() {
   DOM.btnSend.addEventListener('click', sendMessage);
   DOM.btnSend.disabled = true;
@@ -679,15 +776,27 @@ function initEvents() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
-  if (DOM.btnAttach)     DOM.btnAttach.addEventListener('click', () => DOM.fileInput?.click());
-  if (DOM.fileInput)     DOM.fileInput.addEventListener('change', () => { const f = DOM.fileInput.files[0]; if (f) showAttachPreview(f); });
-  if (DOM.btnAttachRemove) DOM.btnAttachRemove.addEventListener('click', clearAttachment);
+  // Attachment
+  if (DOM.btnAttach) {
+    DOM.btnAttach.addEventListener('click', () => DOM.fileInput?.click());
+  }
+  if (DOM.fileInput) {
+    DOM.fileInput.addEventListener('change', () => {
+      const file = DOM.fileInput.files[0];
+      if (file) showAttachPreview(file);
+    });
+  }
+  if (DOM.btnAttachRemove) {
+    DOM.btnAttachRemove.addEventListener('click', clearAttachment);
+  }
 
+  // Lightbox
   DOM.chatMessages.addEventListener('click', e => {
     if (e.target.classList.contains('msg-image')) openLightbox(e.target.src);
   });
 
   DOM.btnNewConv.addEventListener('click', openNewConvModal);
+
   DOM.convSearch.addEventListener('input', () => renderConversationList(state.conversations));
 
   DOM.btnBack.addEventListener('click', () => {
@@ -702,10 +811,14 @@ function initEvents() {
   });
 }
 
+// ================================================================
+//  BOOTSTRAP
+// ================================================================
+
 document.addEventListener('DOMContentLoaded', async () => {
   initComponents();
   await initUser();
-  if (!state.currentUserId) return;
+  if (!state.currentUserId) return; // redirection login en cours
   initEvents();
   initSocket();
 });
