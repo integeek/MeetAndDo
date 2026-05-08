@@ -10,7 +10,7 @@
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-  <!-- Styles du projet -->
+  <!-- Project styles -->
   <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
   <link rel="stylesheet" href="../Component/Footer/Footer.css" />
   <link rel="stylesheet" href="../Style/Messagerie.css" />
@@ -20,10 +20,10 @@
   <!-- Navbar -->
   <div class="navbar-container" id="navbar-root"></div>
 
-  <!-- Page principale -->
+  <!-- Main page -->
   <main id="messagerie-app">
 
-    <!-- Sidebar gauche : liste des conversations -->
+    <!-- Left sidebar: conversation list -->
     <aside class="conv-sidebar" id="conv-sidebar">
       <div class="conv-sidebar-header">
         <h2 class="conv-sidebar-title">Messages</h2>
@@ -44,23 +44,23 @@
       </div>
 
       <ul class="conv-list" id="conv-list" role="list">
-        <!-- Conversations injectées par JS -->
+        <!-- Conversations injected by JS -->
       </ul>
     </aside>
 
-    <!-- Panneau droit : conversation active -->
+    <!-- Right panel: active conversation -->
     <section class="chat-panel" id="chat-panel">
 
-      <!-- État vide -->
+      <!-- Empty state -->
       <div class="chat-empty" id="chat-empty">
         <i class="bi bi-chat-dots chat-empty-icon"></i>
         <p class="chat-empty-text">Select a conversation<br/>to start chatting</p>
       </div>
 
-      <!-- Vue conversation active -->
+      <!-- Active conversation view -->
       <div class="chat-view" id="chat-view" hidden>
 
-        <!-- En-tête de la conversation -->
+        <!-- Conversation header -->
         <div class="chat-header" id="chat-header">
           <button type="button" class="btn-icon btn-back" id="btn-back" title="Back to conversations">
             <i class="bi bi-arrow-left"></i>
@@ -72,9 +72,9 @@
           </div>
         </div>
 
-        <!-- Zone des messages -->
+        <!-- Message area -->
         <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
-          <!-- Messages injectés par JS -->
+          <!-- Messages injected by JS -->
         </div>
 
         <!-- Attachment preview -->
@@ -114,14 +114,14 @@
     <div class="footer-container" id="footer-root"></div>
   </footer>
 
-  <!-- Composants -->
+  <!-- Components -->
   <script src="../Component/Navbar/Navbar.js"></script>
   <script src="../Component/Footer/Footer.js"></script>
 
   <!-- Socket.IO client -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-  <!-- Logique de la messagerie -->
+  <!-- Messaging logic -->
   <script src="../Script/Messagerie.js"></script>
 </body>
 </html>

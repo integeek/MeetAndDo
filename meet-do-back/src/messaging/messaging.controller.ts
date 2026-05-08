@@ -8,7 +8,6 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
-  Body,
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -31,10 +30,6 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 export class MessagingController {
   constructor(private readonly messagingService: MessagingService) {}
 
-  // ----------------------------------------------------------------
-  //  Upload pièce jointe
-  // ----------------------------------------------------------------
-
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
@@ -50,24 +45,13 @@ export class MessagingController {
     return { url };
   }
 
-  // ----------------------------------------------------------------
-  //  Recherche d'utilisateurs (pour nouvelle conversation / groupe)
-  // ----------------------------------------------------------------
-
   @Get('users/search')
   @UseGuards(JwtAuthenticationGuard)
-  async searchUsers(
-    @Query('q') query: string,
-    @Req() req: RequestWithUser,
-  ) {
+  async searchUsers(@Query('q') query: string, @Req() req: RequestWithUser) {
     if (!query || query.trim().length < 2) return [];
     const currentUUID = this.messagingService.intToUUID(req.user.id);
     return this.messagingService.searchUsers(query.trim(), currentUUID);
   }
-
-  // ----------------------------------------------------------------
-  //  Récupérer un utilisateur par UUID (pour afficher son nom)
-  // ----------------------------------------------------------------
 
   @Get('users/:uuid')
   @UseGuards(JwtAuthenticationGuard)
