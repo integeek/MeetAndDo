@@ -51,7 +51,7 @@ const MENUS = {
     { id: 'bookings',       icone: 'bi-calendar-check-fill', label: 'Bookings' },
     { id: 'messaging',      icone: 'bi-chat-dots-fill',      label: 'Messaging' },
     { id: 'stats',          icone: 'bi-bar-chart-fill',      label: 'Statistics' },
-    { id: 'pub_activites',  icone: 'bi-calendar3',           label: 'My Activities' },
+    { id: 'pub_activites',  icone: 'bi-star-fill',           label: 'Reviews' },
     { id: 'pub_historique', icone: 'bi-clock-history',       label: 'History' },
     { id: 'parrainage',     icone: 'bi-people-fill',         label: 'Referral' },
   ],
@@ -612,7 +612,8 @@ function renderPublisherView() {
           <td><span class="badge-status ${a.is_visible ? 'badge-actif' : 'badge-inactif'}">${a.is_visible ? 'Visible' : 'Hidden'}</span></td>
           <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
           <td>
-            <button type="button" class="btn-outline" style="padding:.3rem .7rem;font-size:.72rem">
+            <button type="button" class="btn-outline" style="padding:.3rem .7rem;font-size:.72rem"
+                    onclick="window.location.href='EditActivity.html?id=${a.id}'">
               <i class="bi bi-pencil"></i>
             </button>
           </td>
@@ -634,7 +635,8 @@ function renderPublisherView() {
         <h1 class="view-title">Hello ${profil.firstname || ''} 👋</h1>
         <p class="view-subtitle">Manage your listings and track your performance.</p>
       </div>
-      <button type="button" class="btn-primary">
+      <button type="button" class="btn-primary"
+              onclick="window.location.href='ActivityBuilder.html'">
         <i class="bi bi-plus-lg"></i> New listing
       </button>
     </header>
@@ -1400,6 +1402,8 @@ async function renderParrainageTab() {
   const main = document.getElementById('dash-main');
   if (!main) return;
 
+  renderSidebar();
+
   const profil = state.profil || {};
   const userId = profil.id;
   const code = `MEET${userId}`;
@@ -1673,322 +1677,149 @@ function renderMonCompte() {
 }
 
 // ============================================================
-//  PUBLISHER — MES ACTIVITÉS CRÉÉES
+//  PUBLISHER — REVIEWS & RATINGS
 // ============================================================
-
-// Vue active pour l'onglet Mes Activités publisher ('grid' | 'calendar')
-let _pubActVue = 'grid';
-let _pubActData = [];
-let _pubCalMois  = new Date().getMonth();
-let _pubCalAnnee = new Date().getFullYear();
-let _pubCalJourSel = null;
 
 async function renderPublisherActivitesTab() {
   const main = document.getElementById('dash-main');
   if (!main) return;
   main.innerHTML = `
     <header class="view-header animate-in">
-      <div><h1 class="view-title">My Activities</h1><p class="view-subtitle">Loading…</p></div>
+      <div><h1 class="view-title">Reviews</h1><p class="view-subtitle">Loading…</p></div>
     </header>
     <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
-    const activites = await appelApi('/dashboard/publisher/activites');
-    _pubActData = activites;
+    const historique = await appelApi('/dashboard/publisher/historique');
     renderSidebar();
-    afficherPublisherActivites(activites);
+    afficherPublisherReviews(historique);
   } catch (e) {
     main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${escapeHtml(e.message)}</p></div>`;
   }
 }
 
-function afficherPublisherActivites(activites) {
+function afficherPublisherReviews(historique) {
   const main = document.getElementById('dash-main');
   if (!main) return;
 
-  const toolbar = `
-    <div class="pub-act-toolbar animate-in">
-      <div class="pub-act-vue-toggle">
-        <button type="button" class="pub-vue-btn ${_pubActVue === 'grid' ? 'active' : ''}"
-          onclick="changerVuePubAct('grid')">
-          <i class="bi bi-grid-3x3-gap-fill"></i> Cards
-        </button>
-        <button type="button" class="pub-vue-btn ${_pubActVue === 'calendar' ? 'active' : ''}"
-          onclick="changerVuePubAct('calendar')">
-          <i class="bi bi-calendar3"></i> Calendar
-        </button>
+  // Only keep entries that have a user_rating
+  const avecNote = historique.filter((r) => r.user_rating != null);
+
+  // Global stats
+  const total    = avecNote.length;
+  const moyenne  = total ? (avecNote.reduce((s, r) => s + Number(r.user_rating), 0) / total) : 0;
+  const positifs = avecNote.filter((r) => Number(r.user_rating) >= 4).length;
+  const dist     = [5, 4, 3, 2, 1].map((n) => ({
+    n, count: avecNote.filter((r) => Number(r.user_rating) === n).length,
+  }));
+  const maxDist = Math.max(1, ...dist.map((d) => d.count));
+
+  // Group reviews by activity
+  const parActivite = {};
+  avecNote.forEach((r) => {
+    const actId    = r.event?.id_activity ?? 'unknown';
+    const actTitle = r.event?.activity?.title ?? '—';
+    const actImg   = r.event?.activity?.images;
+    const actTheme = r.event?.activity?.theme;
+    if (!parActivite[actId]) {
+      parActivite[actId] = { actId, actTitle, actImg, actTheme, reviews: [] };
+    }
+    parActivite[actId].reviews.push(r);
+  });
+
+  const groupes = Object.values(parActivite).sort((a, b) => b.reviews.length - a.reviews.length);
+
+  // Star rendering helper
+  const renderStars = (n) => {
+    const full = Math.round(Number(n));
+    return Array.from({ length: 5 }, (_, i) =>
+      `<i class="bi bi-star${i < full ? '-fill' : ''}" style="color:${i < full ? '#f59e0b' : '#d1d5db'};font-size:.8rem"></i>`
+    ).join('');
+  };
+
+  const barreDistrib = dist.map((d) => `
+    <div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem">
+      <span style="width:14px;color:var(--text-muted);text-align:right">${d.n}</span>
+      <i class="bi bi-star-fill" style="color:#f59e0b;font-size:.7rem"></i>
+      <div style="flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${Math.round((d.count / maxDist) * 100)}%;background:#f59e0b;border-radius:4px;transition:width .4s"></div>
       </div>
-      <button type="button" class="btn-primary" style="margin-left:auto">
-        <i class="bi bi-plus-lg"></i> New activity
-      </button>
-    </div>`;
+      <span style="width:20px;color:var(--text-muted)">${d.count}</span>
+    </div>`).join('');
+
+  const carteGroupes = groupes.length
+    ? groupes.map((g) => {
+        const img      = Array.isArray(g.actImg) && g.actImg[0] ? g.actImg[0] : null;
+        const avgAct   = g.reviews.reduce((s, r) => s + Number(r.user_rating), 0) / g.reviews.length;
+        const lignes   = g.reviews
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .map((r) => `
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;
+                        border-bottom:1px solid var(--border)">
+              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
+                          background:var(--accent-soft);display:flex;align-items:center;
+                          justify-content:center;font-size:.75rem;font-weight:600;color:var(--accent)">
+                U${r.id_user ?? '?'}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;gap:.25rem;margin-bottom:.2rem">
+                  ${renderStars(r.user_rating)}
+                </div>
+                <div style="font-size:.72rem;color:var(--text-muted)">
+                  ${formatDate(r.date)} · Group of ${r.group_size ?? 1}
+                </div>
+              </div>
+              <span style="font-weight:700;font-size:1rem;color:#f59e0b">${Number(r.user_rating).toFixed(1)}</span>
+            </div>`).join('');
+
+        return `
+          <div class="glass-card animate-in" style="padding:1.25rem 1.5rem;margin-bottom:1rem">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+              <div style="width:48px;height:48px;border-radius:12px;overflow:hidden;flex-shrink:0;
+                          background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.5rem">
+                ${img ? `<img src="${escapeHtml(img)}" style="width:100%;height:100%;object-fit:cover" alt="">` : emojiTheme(g.actTheme)}
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:.95rem;margin-bottom:.2rem">${escapeHtml(g.actTitle)}</div>
+                <div style="display:flex;align-items:center;gap:.5rem">
+                  ${renderStars(avgAct)}
+                  <span style="font-size:.78rem;color:var(--text-muted)">${avgAct.toFixed(1)} · ${g.reviews.length} review(s)</span>
+                </div>
+              </div>
+            </div>
+            <div style="max-height:260px;overflow-y:auto">${lignes}</div>
+          </div>`;
+      }).join('')
+    : `<div class="explorer-empty">
+        <span style="font-size:3rem">⭐</span>
+        <p style="color:var(--text-muted)">No ratings yet.<br>Participants can rate activities after attending.</p>
+      </div>`;
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
-        <h1 class="view-title">My Activities</h1>
-        <p class="view-subtitle">${activites.length} created activity(ies).</p>
+        <h1 class="view-title">Reviews &amp; Ratings</h1>
+        <p class="view-subtitle">${total} rating(s) received across all your activities.</p>
       </div>
     </header>
-    ${toolbar}
-    <div id="pub-act-contenu"></div>`;
 
-  rendrePubActContenu(activites);
-}
+    <div class="kpi-grid mb-6 animate-in">
+      ${KpiCard({ icone: '⭐', titre: 'Average rating',   valeur: total ? moyenne.toFixed(2) + ' / 5' : '—',        couleur: '#fef3c7', couleurIcone: '#d97706' })}
+      ${KpiCard({ icone: '💬', titre: 'Total reviews',    valeur: total,                                             couleur: '#dbeafe', couleurIcone: '#2563eb' })}
+      ${KpiCard({ icone: '👍', titre: 'Positive (4-5★)',  valeur: total ? Math.round((positifs / total) * 100) + '%' : '—', couleur: '#d1fae5', couleurIcone: '#059669' })}
+      ${KpiCard({ icone: '📊', titre: 'Rated activities', valeur: groupes.length,                                    couleur: '#ede9fe', couleurIcone: '#7c3aed' })}
+    </div>
 
-function changerVuePubAct(vue) {
-  _pubActVue = vue;
-  // Mettre à jour les boutons toggle
-  document.querySelectorAll('.pub-vue-btn').forEach((btn) => {
-    btn.classList.toggle('active', btn.textContent.trim().toLowerCase().includes(vue === 'grid' ? 'card' : 'calendar'));
-  });
-  rendrePubActContenu(_pubActData);
-}
-
-function rendrePubActContenu(activites) {
-  const contenu = document.getElementById('pub-act-contenu');
-  if (!contenu) return;
-  if (_pubActVue === 'calendar') {
-    rendrePubCalendrier(activites, contenu);
-  } else {
-    rendrePubGrille(activites, contenu);
-  }
-}
-
-/* ---- VUE GRILLE ---- */
-function rendrePubGrille(activites, contenu) {
-  const MOIS = ['January','February','March','April','May','June',
-                'July','August','September','October','November','December'];
-
-  const cartes = activites.length
-    ? activites.map((a, i) => {
-        const img   = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
-        const emoji = emojiTheme(a.theme);
-        const prix  = a.price != null ? formatPrix(a.price) : 'Free';
-        const note  = (a.average_rating || 0).toFixed(1);
-        const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif">Disabled</span>'
-          : a.is_visible
-            ? '<span class="badge-status badge-actif">Visible</span>'
-            : '<span class="badge-status badge-attente">Hidden</span>';
-
-        const prochaineDate = a.prochaine_date
-          ? (() => {
-              const d = new Date(a.prochaine_date);
-              return `${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
-            })()
-          : null;
-
-        return `
-          <div class="pub-act-card glass-card" style="animation:fadeUp .35s ${0.05 * i}s ease both">
-            <div class="pub-act-img">
-              ${img
-                ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(a.title || '')}" loading="lazy">`
-                : `<div class="pub-act-img-placeholder">${emoji}</div>`}
-              <div class="pub-act-badges">${statut}</div>
-            </div>
-            <div class="pub-act-body">
-              <h3 class="pub-act-title">${escapeHtml(a.title || '—')}</h3>
-              <div class="pub-act-meta">
-                <span><i class="bi bi-geo-alt-fill" style="color:var(--accent)"></i> ${escapeHtml(a.address || '—')}</span>
-                <span><i class="bi bi-tag-fill" style="color:var(--accent)"></i> ${prix}</span>
-                <span><i class="bi bi-star-fill" style="color:#f59e0b"></i> ${note}</span>
-                <span><i class="bi bi-calendar3" style="color:var(--accent)"></i> ${formatDate(a.created_at)}</span>
-                ${a.nb_evenements ? `<span><i class="bi bi-calendar-event" style="color:var(--accent)"></i> ${a.nb_evenements} event(s)</span>` : ''}
-                ${prochaineDate ? `<span><i class="bi bi-clock-fill" style="color:#059669"></i> Next: ${prochaineDate}</span>` : ''}
-              </div>
-              ${a.description ? `<p class="pub-act-desc">${escapeHtml(truncate(a.description, 120))}</p>` : ''}
-              <div class="pub-act-actions">
-                <button type="button" class="btn-primary" style="font-size:.78rem;padding:.4rem .9rem">
-                  <i class="bi bi-pencil-fill"></i> Edit
-                </button>
-                <button type="button" class="btn-outline" style="font-size:.78rem;padding:.4rem .9rem">
-                  <i class="bi bi-eye-fill"></i> Bookings
-                </button>
-              </div>
-            </div>
-          </div>`;
-      }).join('')
-    : `<div class="explorer-empty" style="grid-column:1/-1">
-        <span style="font-size:3rem">📋</span>
-        <p style="color:var(--text-muted)">You haven't created any activity yet.</p>
-        <button type="button" class="btn-primary"><i class="bi bi-plus-lg"></i> Create an activity</button>
-      </div>`;
-
-  contenu.innerHTML = `<div class="pub-act-grid">${cartes}</div>`;
-}
-
-/* ---- VUE CALENDRIER ---- */
-function rendrePubCalendrier(activites, contenu) {
-  // Construire l'index parJour → liste d'activités
-  const parJour = {};
-  activites.forEach((a) => {
-    (a.events || []).forEach((ev) => {
-      if (!ev.date) return;
-      const cle = ev.date.slice(0, 10);
-      if (!parJour[cle]) parJour[cle] = [];
-      parJour[cle].push({ ...a, eventDate: ev.date });
-    });
-  });
-
-  contenu.innerHTML = `
-    <div class="cal-layout animate-in">
-      <div class="glass-card" style="flex:1;min-width:0">
-        <div id="pub-cal-root"></div>
+    ${total ? `
+    <div class="glass-card animate-in mb-6" style="padding:1.25rem 1.5rem;max-width:380px">
+      <div style="font-weight:600;font-size:.88rem;margin-bottom:.85rem;color:var(--text)">
+        <i class="bi bi-bar-chart-fill" style="color:var(--accent);margin-right:.4rem"></i>Rating distribution
       </div>
-      <div class="glass-card cal-detail-panel" id="pub-cal-detail">
-        ${renduPubCalDetailVide()}
-      </div>
-    </div>`;
+      <div style="display:flex;flex-direction:column;gap:.45rem">${barreDistrib}</div>
+    </div>` : ''}
 
-  _pubCalJourSel = null;
-  rendrePubCalMois(parJour);
-}
-
-function rendrePubCalMois(parJour) {
-  const root = document.getElementById('pub-cal-root');
-  if (!root) return;
-
-  const JOURS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const MOIS_NOM = ['January','February','March','April','May','June',
-                    'July','August','September','October','November','December'];
-
-  const premier  = new Date(_pubCalAnnee, _pubCalMois, 1);
-  const dernier  = new Date(_pubCalAnnee, _pubCalMois + 1, 0);
-  let   debutCol = (premier.getDay() + 6) % 7;
-
-  const cellules = [];
-  for (let i = 0; i < debutCol; i++) cellules.push(null);
-  for (let j = 1; j <= dernier.getDate(); j++) cellules.push(j);
-  while (cellules.length % 7 !== 0) cellules.push(null);
-
-  const ajd = new Date();
-  const ajdStr = `${ajd.getFullYear()}-${String(ajd.getMonth()+1).padStart(2,'0')}-${String(ajd.getDate()).padStart(2,'0')}`;
-
-  const cases = cellules.map((j) => {
-    if (!j) return `<div class="cal-cell cal-cell-vide"></div>`;
-    const cle    = `${_pubCalAnnee}-${String(_pubCalMois+1).padStart(2,'0')}-${String(j).padStart(2,'0')}`;
-    const evts   = parJour[cle] || [];
-    const isAjd  = cle === ajdStr;
-    const isSel  = cle === _pubCalJourSel;
-    return `
-      <div class="cal-cell ${evts.length ? 'cal-has-event' : ''} ${isAjd ? 'cal-today' : ''} ${isSel ? 'cal-selected' : ''}"
-           data-date="${cle}" onclick="selJourPubCal('${cle}', ${JSON.stringify(parJour).replace(/"/g,'&quot;')})">
-        <span class="cal-jour-num">${j}</span>
-        ${evts.length
-          ? `<div class="cal-dots">${evts.slice(0,3).map(() => '<span class="cal-dot"></span>').join('')}</div>`
-          : ''}
-      </div>`;
-  }).join('');
-
-  root.innerHTML = `
-    <div class="cal-header">
-      <button type="button" class="cal-nav-btn" onclick="changerMoisPubCal(-1)">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-      <span class="cal-titre">${MOIS_NOM[_pubCalMois]} ${_pubCalAnnee}</span>
-      <button type="button" class="cal-nav-btn" onclick="changerMoisPubCal(1)">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-    <div class="cal-grid-header">
-      ${JOURS.map((j) => `<div class="cal-label-jour">${j}</div>`).join('')}
-    </div>
-    <div class="cal-grid">${cases}</div>`;
-}
-
-function changerMoisPubCal(delta) {
-  _pubCalMois += delta;
-  if (_pubCalMois > 11) { _pubCalMois = 0;  _pubCalAnnee++; }
-  if (_pubCalMois < 0)  { _pubCalMois = 11; _pubCalAnnee--; }
-  _pubCalJourSel = null;
-
-  const parJour = {};
-  _pubActData.forEach((a) => {
-    (a.events || []).forEach((ev) => {
-      if (!ev.date) return;
-      const cle = ev.date.slice(0, 10);
-      if (!parJour[cle]) parJour[cle] = [];
-      parJour[cle].push({ ...a, eventDate: ev.date });
-    });
-  });
-
-  rendrePubCalMois(parJour);
-  const detail = document.getElementById('pub-cal-detail');
-  if (detail) detail.innerHTML = renduPubCalDetailVide();
-}
-
-function selJourPubCal(cle, parJourStr) {
-  _pubCalJourSel = cle;
-  document.querySelectorAll('#pub-cal-root .cal-cell').forEach((c) => {
-    c.classList.toggle('cal-selected', c.dataset.date === cle);
-  });
-
-  // Reconstruire parJour depuis _pubActData (plus fiable que passer via onclick)
-  const parJour = {};
-  _pubActData.forEach((a) => {
-    (a.events || []).forEach((ev) => {
-      if (!ev.date) return;
-      const k = ev.date.slice(0, 10);
-      if (!parJour[k]) parJour[k] = [];
-      parJour[k].push({ ...a, eventDate: ev.date });
-    });
-  });
-
-  const evts  = parJour[cle] || [];
-  const panel = document.getElementById('pub-cal-detail');
-  if (!panel) return;
-
-  if (!evts.length) {
-    panel.innerHTML = renduPubCalDetailVide();
-    return;
-  }
-
-  const MOIS_COMPLET = ['January','February','March','April','May','June',
-                        'July','August','September','October','November','December'];
-  const [annee, mois, jour] = cle.split('-');
-  const labelDate = `${parseInt(jour)} ${MOIS_COMPLET[parseInt(mois)-1]} ${annee}`;
-
-  panel.innerHTML = `
-    <div class="cal-detail-titre">${labelDate}</div>
-    <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">
-      ${evts.length} event(s) this day
-    </div>
-    <div class="cal-detail-liste">
-      ${evts.map((a) => {
-        const img    = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
-        const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif" style="font-size:.65rem">Disabled</span>'
-          : a.is_visible
-            ? '<span class="badge-status badge-actif" style="font-size:.65rem">Visible</span>'
-            : '<span class="badge-status badge-attente" style="font-size:.65rem">Hidden</span>';
-        return `
-          <div class="cal-detail-item">
-            <div class="cal-detail-img">
-              ${img
-                ? `<img src="${escapeHtml(img)}" alt="">`
-                : `<span style="font-size:1.5rem">${emojiTheme(a.theme)}</span>`}
-            </div>
-            <div style="flex:1;min-width:0">
-              <div class="cal-detail-name">${escapeHtml(a.title || 'Activity')}</div>
-              ${a.address ? `<div class="cal-detail-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
-              <div style="display:flex;gap:.4rem;margin-top:.35rem;flex-wrap:wrap;align-items:center">
-                ${statut}
-                <span style="font-size:.7rem;color:var(--text-muted)">${formatPrix(a.price)}</span>
-                <span style="font-size:.7rem;color:#f59e0b">${(a.average_rating||0).toFixed(1)} ★</span>
-              </div>
-            </div>
-          </div>`;
-      }).join('')}
-    </div>`;
-}
-
-function renduPubCalDetailVide() {
-  return `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                height:100%;gap:.75rem;color:var(--text-muted);padding:2rem;text-align:center">
-      <i class="bi bi-calendar3" style="font-size:2.5rem;opacity:.35"></i>
-      <p style="font-size:.85rem">Select a day<br>to view your events</p>
+    <div style="display:flex;flex-direction:column;gap:0">
+      ${carteGroupes}
     </div>`;
 }
 
@@ -2219,6 +2050,12 @@ function afficherPublisherStats(stats) {
 //  PUBLISHER — MES ANNONCES (gestion complète)
 // ============================================================
 
+let _listingsData   = [];
+let _listingsVue    = 'table';
+let _listingsCalMois  = new Date().getMonth();
+let _listingsCalAnnee = new Date().getFullYear();
+let _listingsCalJour  = null;
+
 async function renderPublisherListingsTab() {
   const main = document.getElementById('dash-main');
   if (!main) return;
@@ -2231,6 +2068,7 @@ async function renderPublisherListingsTab() {
   try {
     const annonces = await appelApi('/dashboard/publisher/activites');
     renderSidebar();
+    _listingsData = annonces;
     afficherPublisherListings(annonces);
   } catch (e) {
     main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${escapeHtml(e.message)}</p></div>`;
@@ -2245,30 +2083,27 @@ function afficherPublisherListings(annonces) {
   const masquees = annonces.filter((a) => !a.is_disabled && !a.is_visible).length;
   const desact   = annonces.filter((a) => a.is_disabled).length;
 
-  const lignes = annonces.length
-    ? annonces.map((a) => {
-        const statut = a.is_disabled
-          ? '<span class="badge-status badge-inactif">Disabled</span>'
-          : a.is_visible
-            ? '<span class="badge-status badge-actif">Visible</span>'
-            : '<span class="badge-status badge-attente">Hidden</span>';
-        return `
-          <tr>
-            <td style="font-weight:600;font-size:.85rem">${escapeHtml(a.title || '—')}</td>
-            <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
-            <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
-            <td>${statut}</td>
-            <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
-            <td style="font-size:.78rem;color:var(--text-muted)">${a.nb_evenements || 0} event(s)</td>
-            <td>
-              <div style="display:flex;gap:.4rem">
-                <button type="button" class="icon-btn" title="Edit"><i class="bi bi-pencil-fill"></i></button>
-                <button type="button" class="icon-btn" title="View"><i class="bi bi-eye-fill"></i></button>
-              </div>
-            </td>
-          </tr>`;
-      }).join('')
-    : '<tr><td colspan="7" style="color:var(--text-muted);padding:2rem;text-align:center">No listings published.</td></tr>';
+  const toolbar = `
+    <div class="pub-act-toolbar animate-in">
+      <div class="pub-act-vue-toggle">
+        <button type="button" class="pub-vue-btn ${_listingsVue === 'table' ? 'active' : ''}"
+                onclick="changerVueListings('table')">
+          <i class="bi bi-list-ul"></i> Table
+        </button>
+        <button type="button" class="pub-vue-btn ${_listingsVue === 'grid' ? 'active' : ''}"
+                onclick="changerVueListings('grid')">
+          <i class="bi bi-grid-3x3-gap-fill"></i> Grid
+        </button>
+        <button type="button" class="pub-vue-btn ${_listingsVue === 'calendar' ? 'active' : ''}"
+                onclick="changerVueListings('calendar')">
+          <i class="bi bi-calendar3"></i> Calendar
+        </button>
+      </div>
+      <button type="button" class="btn-primary"
+              onclick="window.location.href='ActivityBuilder.html'">
+        <i class="bi bi-plus-lg"></i> New listing
+      </button>
+    </div>`;
 
   main.innerHTML = `
     <header class="view-header animate-in">
@@ -2276,9 +2111,6 @@ function afficherPublisherListings(annonces) {
         <h1 class="view-title">My Listings</h1>
         <p class="view-subtitle">${annonces.length} total listing(s).</p>
       </div>
-      <button type="button" class="btn-primary">
-        <i class="bi bi-plus-lg"></i> New listing
-      </button>
     </header>
 
     <div class="kpi-grid mb-6 animate-in" style="grid-template-columns:repeat(3,1fr)">
@@ -2287,21 +2119,426 @@ function afficherPublisherListings(annonces) {
       ${KpiCard({ icone: '🚫', titre: 'Disabled', valeur: desact,   couleur: '#fee2e2', couleurIcone: '#dc2626' })}
     </div>
 
-    ${Card({
-      classes: 'table-card animate-in',
-      contenu: `
-        <div class="dash-table-wrap">
-          <table class="dash-table">
-            <thead><tr><th>Title</th><th>Price</th><th>Rating</th><th>Status</th><th>Created on</th><th>Events</th><th></th></tr></thead>
-            <tbody>${lignes}</tbody>
-          </table>
-        </div>`,
-    })}`;
+    ${toolbar}
+    <div id="listings-contenu"></div>`;
+
+  rendreListingsContenu(annonces);
+}
+
+function changerVueListings(vue) {
+  _listingsVue = vue;
+  document.querySelectorAll('.pub-act-vue-toggle .pub-vue-btn').forEach((btn) => {
+    btn.classList.toggle('active',
+      (vue === 'table'    && btn.textContent.includes('Table'))    ||
+      (vue === 'grid'     && btn.textContent.includes('Grid'))     ||
+      (vue === 'calendar' && btn.textContent.includes('Calendar'))
+    );
+  });
+  rendreListingsContenu(_listingsData);
+}
+
+function rendreListingsContenu(annonces) {
+  const contenu = document.getElementById('listings-contenu');
+  if (!contenu) return;
+  if (_listingsVue === 'grid')     rendreListingsGrille(annonces, contenu);
+  else if (_listingsVue === 'calendar') rendreListingsCalendrier(annonces, contenu);
+  else                             rendreListingsTable(annonces, contenu);
+}
+
+/* ---- Vue table ---- */
+function rendreListingsTable(annonces, contenu) {
+  const lignes = annonces.length
+    ? annonces.map((a) => {
+        const isVisible = !!a.is_visible && !a.is_disabled;
+        const toggleIcon  = isVisible ? 'bi-eye-slash-fill' : 'bi-eye-fill';
+        const toggleStyle = isVisible
+          ? 'background:#fef3c7;color:#d97706;border:none'
+          : 'background:#d1fae5;color:#059669;border:none';
+        const statut = a.is_disabled
+          ? '<span class="badge-status badge-inactif">Disabled</span>'
+          : a.is_visible
+            ? '<span class="badge-status badge-actif">Visible</span>'
+            : '<span class="badge-status badge-attente">Hidden</span>';
+        return `
+          <tr id="listing-row-${a.id}" style="transition:opacity .3s,transform .3s">
+            <td style="font-weight:600;font-size:.85rem">${escapeHtml(a.title || '—')}</td>
+            <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
+            <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
+            <td>${statut}</td>
+            <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
+            <td style="font-size:.78rem;color:var(--text-muted)">${a.nb_evenements || 0} event(s)</td>
+            <td>
+              <div style="display:flex;gap:.4rem">
+                <button type="button" class="icon-btn" title="Edit"
+                        onclick="window.location.href='EditActivity.html?id=${a.id}'">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button type="button" class="icon-btn" title="View bookings"
+                        onclick="ouvrirBookingsActivite(${a.id})">
+                  <i class="bi bi-calendar-check-fill"></i>
+                </button>
+                ${!a.is_disabled ? `
+                <button type="button" class="icon-btn" title="${isVisible ? 'Hide' : 'Show'}"
+                        id="toggle-btn-${a.id}"
+                        style="${toggleStyle};border-radius:8px;padding:.35rem .5rem"
+                        onclick="toggleVisibiliteActivite(${a.id}, ${isVisible})">
+                  <i class="bi ${toggleIcon}"></i>
+                <\/button>` : ''}
+                <button type="button" class="icon-btn danger" title="Delete activity"
+                        onclick="supprimerActivite(${a.id}, '${escapeHtml((a.title || '').replace(/'/g, ''))}')">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('')
+    : '<tr><td colspan="7" style="color:var(--text-muted);padding:2rem;text-align:center">No listings published.</td></tr>';
+
+  contenu.innerHTML = Card({
+    classes: 'table-card animate-in',
+    contenu: `
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead><tr><th>Title</th><th>Price</th><th>Rating</th><th>Status</th><th>Created on</th><th>Events</th><th></th></tr></thead>
+          <tbody>${lignes}</tbody>
+        </table>
+      </div>`,
+  });
+}
+
+/* ---- Vue grille ---- */
+function rendreListingsGrille(annonces, contenu) {
+  const MOIS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+  const cartes = annonces.length
+    ? annonces.map((a, i) => {
+        const img      = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
+        const emoji    = emojiTheme(a.theme);
+        const prix     = a.price != null ? formatPrix(a.price) : 'Free';
+        const note     = (a.average_rating || 0).toFixed(1);
+        const isVisible = !!a.is_visible && !a.is_disabled;
+        const statut   = a.is_disabled
+          ? '<span class="badge-status badge-inactif">Disabled</span>'
+          : a.is_visible
+            ? '<span class="badge-status badge-actif">Visible</span>'
+            : '<span class="badge-status badge-attente">Hidden</span>';
+        const toggleIcon  = isVisible ? 'bi-eye-slash-fill' : 'bi-eye-fill';
+        const toggleTitle = isVisible ? 'Hide' : 'Show';
+        const toggleStyle = isVisible
+          ? 'background:#fef3c7;color:#d97706;border:1px solid #fde68a'
+          : 'background:#d1fae5;color:#059669;border:1px solid #a7f3d0';
+
+        const prochaineDate = a.prochaine_date
+          ? (() => {
+              const d = new Date(a.prochaine_date);
+              return `${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
+            })()
+          : null;
+
+        return `
+          <div class="pub-act-card glass-card" id="listing-row-${a.id}"
+               style="animation:fadeUp .35s ${0.05 * i}s ease both;transition:opacity .3s,transform .3s">
+            <div class="pub-act-img">
+              ${img
+                ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(a.title || '')}" loading="lazy">`
+                : `<div class="pub-act-img-placeholder">${emoji}</div>`}
+              <div class="pub-act-badges">${statut}</div>
+            </div>
+            <div class="pub-act-body">
+              <h3 class="pub-act-title">${escapeHtml(a.title || '—')}</h3>
+              <div class="pub-act-meta">
+                <span><i class="bi bi-tag-fill" style="color:var(--accent)"></i> ${prix}</span>
+                <span><i class="bi bi-star-fill" style="color:#f59e0b"></i> ${note}</span>
+                <span><i class="bi bi-calendar3" style="color:var(--accent)"></i> ${formatDate(a.created_at)}</span>
+                ${a.nb_evenements ? `<span><i class="bi bi-calendar-event" style="color:var(--accent)"></i> ${a.nb_evenements} event(s)</span>` : ''}
+                ${prochaineDate ? `<span><i class="bi bi-clock-fill" style="color:#059669"></i> Next: ${prochaineDate}</span>` : ''}
+              </div>
+              <div class="pub-act-actions" style="flex-wrap:wrap;gap:.4rem">
+                <button type="button" class="btn-primary" style="font-size:.75rem;padding:.35rem .8rem"
+                        onclick="window.location.href='EditActivity.html?id=${a.id}'">
+                  <i class="bi bi-pencil-fill"></i> Edit
+                </button>
+                <button type="button" class="btn-outline" style="font-size:.75rem;padding:.35rem .8rem"
+                        onclick="ouvrirBookingsActivite(${a.id})">
+                  <i class="bi bi-calendar-check-fill"></i> Bookings
+                </button>
+                ${!a.is_disabled ? `
+                <button type="button" class="btn-outline" id="toggle-btn-${a.id}"
+                        style="${toggleStyle};font-size:.75rem;padding:.35rem .8rem;border-radius:8px"
+                        title="${toggleTitle}"
+                        onclick="toggleVisibiliteActivite(${a.id}, ${isVisible})">
+                  <i class="bi ${toggleIcon}"></i> ${toggleTitle}
+                </button>` : ''}
+                <button type="button" class="btn-outline"
+                        style="font-size:.75rem;padding:.35rem .8rem;color:#dc2626;border-color:#fca5a5"
+                        onclick="supprimerActivite(${a.id}, '${escapeHtml((a.title || '').replace(/'/g, ''))}')">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join('')
+    : `<div class="explorer-empty" style="grid-column:1/-1">
+        <span style="font-size:3rem">📋</span>
+        <p style="color:var(--text-muted)">No listings yet.</p>
+        <button type="button" class="btn-primary" onclick="window.location.href='ActivityBuilder.html'">
+          <i class="bi bi-plus-lg"></i> New listing
+        </button>
+      </div>`;
+
+  contenu.innerHTML = `<div class="pub-act-grid">${cartes}</div>`;
+}
+
+/* ---- Vue calendrier ---- */
+function rendreListingsCalendrier(annonces, contenu) {
+  const parJour = {};
+  annonces.forEach((a) => {
+    (a.events || []).forEach((ev) => {
+      if (!ev.date) return;
+      const cle = ev.date.slice(0, 10);
+      if (!parJour[cle]) parJour[cle] = [];
+      parJour[cle].push({ ...a, eventDate: ev.date });
+    });
+  });
+
+  contenu.innerHTML = `
+    <div class="cal-layout animate-in">
+      <div class="glass-card" style="flex:1;min-width:0">
+        <div id="listings-cal-root"></div>
+      </div>
+      <div class="glass-card cal-detail-panel" id="listings-cal-detail">
+        ${rendreListingsCalDetailVide()}
+      </div>
+    </div>`;
+
+  _listingsCalJour = null;
+  rendreListingsCalMois(parJour);
+}
+
+function rendreListingsCalMois(parJour) {
+  const root = document.getElementById('listings-cal-root');
+  if (!root) return;
+
+  const JOURS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MOIS_NOM = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+
+  const premier  = new Date(_listingsCalAnnee, _listingsCalMois, 1);
+  const dernier  = new Date(_listingsCalAnnee, _listingsCalMois + 1, 0);
+  const debutCol = (premier.getDay() + 6) % 7;
+
+  const cellules = [];
+  for (let i = 0; i < debutCol; i++) cellules.push(null);
+  for (let j = 1; j <= dernier.getDate(); j++) cellules.push(j);
+  while (cellules.length % 7 !== 0) cellules.push(null);
+
+  const ajd    = new Date();
+  const ajdStr = `${ajd.getFullYear()}-${String(ajd.getMonth()+1).padStart(2,'0')}-${String(ajd.getDate()).padStart(2,'0')}`;
+
+  const cases = cellules.map((j) => {
+    if (!j) return `<div class="cal-cell cal-cell-vide"></div>`;
+    const cle   = `${_listingsCalAnnee}-${String(_listingsCalMois+1).padStart(2,'0')}-${String(j).padStart(2,'0')}`;
+    const evts  = parJour[cle] || [];
+    const isAjd = cle === ajdStr;
+    const isSel = cle === _listingsCalJour;
+    return `
+      <div class="cal-cell ${evts.length ? 'cal-has-event' : ''} ${isAjd ? 'cal-today' : ''} ${isSel ? 'cal-selected' : ''}"
+           data-date="${cle}" onclick="selJourListingsCal('${cle}')">
+        <span class="cal-jour-num">${j}</span>
+        ${evts.length
+          ? `<div class="cal-dots">${evts.slice(0,3).map(() => '<span class="cal-dot"></span>').join('')}</div>`
+          : ''}
+      </div>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="cal-header">
+      <button type="button" class="cal-nav-btn" onclick="changerMoisListingsCal(-1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="cal-titre">${MOIS_NOM[_listingsCalMois]} ${_listingsCalAnnee}</span>
+      <button type="button" class="cal-nav-btn" onclick="changerMoisListingsCal(1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+    <div class="cal-grid-header">
+      ${JOURS.map((j) => `<div class="cal-label-jour">${j}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${cases}</div>`;
+}
+
+function changerMoisListingsCal(delta) {
+  _listingsCalMois += delta;
+  if (_listingsCalMois > 11) { _listingsCalMois = 0;  _listingsCalAnnee++; }
+  if (_listingsCalMois < 0)  { _listingsCalMois = 11; _listingsCalAnnee--; }
+  _listingsCalJour = null;
+
+  const parJour = {};
+  _listingsData.forEach((a) => {
+    (a.events || []).forEach((ev) => {
+      if (!ev.date) return;
+      const cle = ev.date.slice(0, 10);
+      if (!parJour[cle]) parJour[cle] = [];
+      parJour[cle].push({ ...a, eventDate: ev.date });
+    });
+  });
+
+  rendreListingsCalMois(parJour);
+  const detail = document.getElementById('listings-cal-detail');
+  if (detail) detail.innerHTML = rendreListingsCalDetailVide();
+}
+
+function selJourListingsCal(cle) {
+  _listingsCalJour = cle;
+  document.querySelectorAll('#listings-cal-root .cal-cell').forEach((c) => {
+    c.classList.toggle('cal-selected', c.dataset.date === cle);
+  });
+
+  const parJour = {};
+  _listingsData.forEach((a) => {
+    (a.events || []).forEach((ev) => {
+      if (!ev.date) return;
+      const k = ev.date.slice(0, 10);
+      if (!parJour[k]) parJour[k] = [];
+      parJour[k].push({ ...a, eventDate: ev.date });
+    });
+  });
+
+  const evts  = parJour[cle] || [];
+  const panel = document.getElementById('listings-cal-detail');
+  if (!panel) return;
+
+  if (!evts.length) { panel.innerHTML = rendreListingsCalDetailVide(); return; }
+
+  const MOIS_COMPLET = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+  const [annee, mois, jour] = cle.split('-');
+  const labelDate = `${parseInt(jour)} ${MOIS_COMPLET[parseInt(mois)-1]} ${annee}`;
+
+  panel.innerHTML = `
+    <div class="cal-detail-titre">${labelDate}</div>
+    <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">
+      ${evts.length} event(s) this day
+    </div>
+    <div class="cal-detail-liste">
+      ${evts.map((a) => {
+        const img      = Array.isArray(a.images) && a.images[0] ? a.images[0] : null;
+        const isVisible = !!a.is_visible && !a.is_disabled;
+        const statut   = a.is_disabled
+          ? '<span class="badge-status badge-inactif" style="font-size:.65rem">Disabled</span>'
+          : a.is_visible
+            ? '<span class="badge-status badge-actif" style="font-size:.65rem">Visible</span>'
+            : '<span class="badge-status badge-attente" style="font-size:.65rem">Hidden</span>';
+        return `
+          <div class="cal-detail-item">
+            <div class="cal-detail-img">
+              ${img
+                ? `<img src="${escapeHtml(img)}" alt="">`
+                : `<span style="font-size:1.5rem">${emojiTheme(a.theme)}</span>`}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="cal-detail-name">${escapeHtml(a.title || 'Activity')}</div>
+              ${a.address ? `<div class="cal-detail-addr"><i class="bi bi-geo-alt-fill"></i> ${escapeHtml(a.address)}</div>` : ''}
+              <div style="display:flex;gap:.4rem;margin-top:.4rem;flex-wrap:wrap">
+                ${statut}
+                <span style="font-size:.7rem;color:var(--text-muted)">${formatPrix(a.price)}</span>
+                <span style="font-size:.7rem;color:#f59e0b">${(a.average_rating||0).toFixed(1)} ★</span>
+              </div>
+              <div style="display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap">
+                <button type="button" class="btn-primary" style="font-size:.68rem;padding:.25rem .6rem"
+                        onclick="window.location.href='EditActivity.html?id=${a.id}'">
+                  <i class="bi bi-pencil-fill"></i> Edit
+                </button>
+                <button type="button" class="btn-outline" style="font-size:.68rem;padding:.25rem .6rem"
+                        onclick="ouvrirBookingsActivite(${a.id})">
+                  <i class="bi bi-calendar-check-fill"></i>
+                </button>
+                ${!a.is_disabled ? `
+                <button type="button" class="btn-outline" id="toggle-btn-${a.id}"
+                        style="font-size:.68rem;padding:.25rem .6rem"
+                        onclick="toggleVisibiliteActivite(${a.id}, ${isVisible})">
+                  <i class="bi bi-eye${isVisible ? '-slash' : ''}-fill"></i>
+                </button>` : ''}
+                <button type="button" class="btn-outline"
+                        style="font-size:.68rem;padding:.25rem .6rem;color:#dc2626;border-color:#fca5a5"
+                        onclick="supprimerActivite(${a.id}, '${escapeHtml((a.title || '').replace(/'/g, ''))}')">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function rendreListingsCalDetailVide() {
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                height:100%;gap:.75rem;color:var(--text-muted);padding:2rem;text-align:center">
+      <i class="bi bi-calendar3" style="font-size:2.5rem;opacity:.35"></i>
+      <p style="font-size:.85rem">Select a day<br>to view your events</p>
+    </div>`;
+}
+
+async function toggleVisibiliteActivite(actId, isCurrentlyVisible) {
+  const btn = document.getElementById(`toggle-btn-${actId}`);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i>'; }
+
+  try {
+    const token = JSON.parse(localStorage.getItem('meetando_current_user') || '{}')?.token || '';
+    const res = await fetch(`${API}/activity/${actId}`, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ is_visible: !isCurrentlyVisible }),
+    });
+    if (!res.ok) throw new Error('Failed to update visibility');
+
+    _listingsData = _listingsData.map((a) =>
+      a.id === actId ? { ...a, is_visible: !isCurrentlyVisible } : a,
+    );
+    afficherPublisherListings(_listingsData);
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="bi bi-${isCurrentlyVisible ? 'eye-slash' : 'eye'}-fill"></i>`;
+    }
+    alert('Error updating visibility: ' + e.message);
+  }
+}
+
+async function supprimerActivite(actId, titre) {
+  if (!confirm(`Delete "${titre}"? This action cannot be undone.`)) return;
+
+  try {
+    const token = JSON.parse(localStorage.getItem('meetando_current_user') || '{}')?.token || '';
+    const res = await fetch(`${API}/activity/${actId}`, {
+      method:  'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Failed to delete activity');
+
+    _listingsData = _listingsData.filter((a) => a.id !== actId);
+    const row = document.getElementById(`listing-row-${actId}`);
+    if (row) {
+      row.style.transition = 'opacity .3s, transform .3s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(20px)';
+      setTimeout(() => afficherPublisherListings(_listingsData), 320);
+    } else {
+      afficherPublisherListings(_listingsData);
+    }
+  } catch (e) {
+    alert('Error deleting activity: ' + e.message);
+  }
 }
 
 // ============================================================
 //  PUBLISHER — RÉSERVATIONS REÇUES (futures)
 // ============================================================
+
+let _pendingBookingsActivity = null;
+let _bookingsDataByActivity = {};
 
 async function renderPublisherBookingsTab() {
   const main = document.getElementById('dash-main');
@@ -2313,9 +2550,8 @@ async function renderPublisherBookingsTab() {
     <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
-    const data = state.dashboardData || await appelApi('/dashboard/publisher');
+    const reservations = await appelApi('/dashboard/publisher/historique');
     renderSidebar();
-    const reservations = data.dernieresReservations || [];
     afficherPublisherBookings(reservations);
   } catch (e) {
     main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${escapeHtml(e.message)}</p></div>`;
@@ -2326,40 +2562,147 @@ function afficherPublisherBookings(reservations) {
   const main = document.getElementById('dash-main');
   if (!main) return;
 
-  const totalPersonnes = reservations.reduce((s, r) => s + (r.group_size ?? 1), 0);
+  // Group reservations by activity
+  const byActivity = {};
+  reservations.forEach((r) => {
+    const act = r.event?.activity;
+    if (!act) return;
+    const key = act.id;
+    if (!byActivity[key]) byActivity[key] = { activity: act, reservations: [] };
+    byActivity[key].reservations.push(r);
+  });
 
-  const lignes = reservations.length
-    ? reservations.map((r, i) => `
-        <tr style="animation:fadeUp .3s ${0.04 * i}s ease both">
-          <td style="font-weight:600;font-size:.82rem">#${r.id}</td>
-          <td style="font-size:.82rem">${formatDate(r.date)}</td>
-          <td>
-            <span class="badge-status badge-user">
-              <i class="bi bi-people-fill" style="font-size:.55rem"></i>
-              ${r.group_size ?? 1} ppl.
-            </span>
-          </td>
-          <td>${badgeStatut('confirme')}</td>
-        </tr>`).join('')
-    : '<tr><td colspan="4" style="color:var(--text-muted);padding:2rem;text-align:center">No bookings received.</td></tr>';
+  _bookingsDataByActivity = byActivity;
+
+  const groups = Object.values(byActivity);
+  const totalBookings = reservations.length;
+  const totalParticipants = reservations.reduce((s, r) => s + (r.group_size ?? 1), 0);
+  const activitiesCount = groups.length;
+
+  const cartes = groups.length
+    ? groups.map((g, gi) => {
+        const act = g.activity;
+        const resas = g.reservations;
+        const img = act.images?.[0] ?? '';
+        const totalPax = resas.reduce((s, r) => s + (r.group_size ?? 1), 0);
+        const lignes = resas.map((r, ri) => `
+          <tr style="animation:fadeUp .2s ${0.03 * ri}s ease both">
+            <td style="font-size:.78rem;color:var(--text-muted)">#${r.id}</td>
+            <td style="font-size:.8rem">${formatDate(r.date)}</td>
+            <td>
+              <span class="badge-status badge-user" style="font-size:.72rem">
+                <i class="bi bi-people-fill" style="font-size:.5rem"></i>
+                ${r.group_size ?? 1} ppl
+              </span>
+            </td>
+            <td style="font-size:.78rem;color:var(--text-muted)">User #${r.id_user}</td>
+            <td>${badgeStatut('confirme')}</td>
+          </tr>`).join('');
+
+        return `
+          <div class="glass-card animate-in" style="animation:fadeUp .3s ${0.08 * gi}s ease both;margin-bottom:1.25rem">
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.25rem 0">
+              <div style="display:flex;align-items:center;gap:1rem;flex:1;min-width:0;cursor:pointer"
+                   onclick="toggleBookingAct(${act.id})">
+                ${img
+                  ? `<img src="${escapeHtml(img)}" alt="" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0">`
+                  : `<div style="width:52px;height:52px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="bi bi-image" style="font-size:1.2rem;color:var(--accent)"></i></div>`}
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(act.title ?? '—')}</div>
+                  <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem">
+                    ${resas.length} booking(s) &middot; ${totalPax} participant(s)
+                  </div>
+                </div>
+                <i class="bi bi-chevron-down" id="chevron-act-${act.id}"
+                   style="color:var(--text-muted);transition:transform .2s;flex-shrink:0"></i>
+              </div>
+              <button type="button" class="btn-outline"
+                      style="font-size:.72rem;padding:.35rem .75rem;white-space:nowrap;flex-shrink:0"
+                      onclick="exportBookingsActivite(${act.id})"
+                      title="Export participant list as CSV">
+                <i class="bi bi-download"></i> Export
+              </button>
+            </div>
+            <div id="participants-act-${act.id}" style="display:none;margin-top:1rem">
+              <div class="dash-table-wrap">
+                <table class="dash-table" style="font-size:.82rem">
+                  <thead>
+                    <tr><th>#</th><th>Date</th><th>Group</th><th>User</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>${lignes}</tbody>
+                </table>
+              </div>
+            </div>
+          </div>`;
+      }).join('')
+    : `<div class="explorer-empty" style="padding:3rem;text-align:center">
+         <span style="font-size:3rem">📋</span>
+         <p style="color:var(--text-muted);margin-top:.75rem">No bookings received yet.</p>
+       </div>`;
 
   main.innerHTML = `
     <header class="view-header animate-in">
       <div>
         <h1 class="view-title">Bookings</h1>
-        <p class="view-subtitle">${reservations.length} booking(s) — ${totalPersonnes} total participant(s).</p>
+        <p class="view-subtitle">
+          ${totalBookings} booking(s) &mdash; ${totalParticipants} total participant(s) across ${activitiesCount} activit${activitiesCount !== 1 ? 'ies' : 'y'}.
+        </p>
       </div>
     </header>
-    ${Card({
-      classes: 'table-card animate-in',
-      contenu: `
-        <div class="dash-table-wrap">
-          <table class="dash-table">
-            <thead><tr><th>#</th><th>Date</th><th>Group</th><th>Status</th></tr></thead>
-            <tbody>${lignes}</tbody>
-          </table>
-        </div>`,
-    })}`;
+    <div id="bookings-list">${cartes}</div>`;
+
+  if (_pendingBookingsActivity !== null) {
+    const targetId = _pendingBookingsActivity;
+    _pendingBookingsActivity = null;
+    setTimeout(() => {
+      const panel = document.getElementById(`participants-act-${targetId}`);
+      if (panel && panel.style.display === 'none') toggleBookingAct(targetId);
+      panel?.closest('.glass-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+}
+
+function toggleBookingAct(actId) {
+  const panel = document.getElementById(`participants-act-${actId}`);
+  const chevron = document.getElementById(`chevron-act-${actId}`);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : '';
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function ouvrirBookingsActivite(actId) {
+  _pendingBookingsActivity = actId;
+  setOnglet('bookings');
+}
+
+function exportBookingsActivite(actId) {
+  const group = _bookingsDataByActivity[actId];
+  if (!group) return;
+
+  const titre = group.activity.title || `activity-${actId}`;
+  const entetes = ['Booking #', 'Date', 'Group Size', 'User ID', 'Status'];
+  const lignes = group.reservations.map((r) => [
+    `#${r.id}`,
+    r.date ? new Date(r.date).toLocaleDateString('en-GB') : '—',
+    r.group_size ?? 1,
+    `User #${r.id_user}`,
+    'Confirmed',
+  ]);
+
+  const csvContent = [entetes, ...lignes]
+    .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const lien = document.createElement('a');
+  lien.href = url;
+  lien.download = `bookings-${titre.replace(/[^a-z0-9]/gi, '_')}.csv`;
+  document.body.appendChild(lien);
+  lien.click();
+  document.body.removeChild(lien);
+  URL.revokeObjectURL(url);
 }
 
 // ============================================================
@@ -2644,8 +2987,8 @@ function afficherAdminMessages(msgs, page) {
   const q = _adminMsgSearch.toLowerCase();
   const filtered = q
     ? msgs.filter((m) =>
-        `${m.firstname || ''} ${m.lastname || ''}`.toLowerCase().includes(q) ||
-        (m.subject || '').toLowerCase().includes(q))
+        (m.nom || '').toLowerCase().includes(q) ||
+        (m.sujet || '').toLowerCase().includes(q))
     : msgs;
 
   const total = filtered.length;
@@ -2656,9 +2999,8 @@ function afficherAdminMessages(msgs, page) {
   const lignes = slice.length
     ? slice.map((m) => `
         <tr>
-          <td>${escapeHtml(m.lastname || '—')}</td>
-          <td>${escapeHtml(m.firstname || '—')}</td>
-          <td style="font-size:.82rem">${escapeHtml(m.subject || '—')}</td>
+          <td>${escapeHtml(m.nom || '—')}</td>
+          <td style="font-size:.82rem">${escapeHtml(m.sujet || '—')}</td>
           <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(m.created_at)}</td>
           <td>
             <button class="icon-btn" title="View" data-action="view-msg" data-id="${m.id}"><i class="bi bi-eye-fill"></i></button>
@@ -2666,7 +3008,7 @@ function afficherAdminMessages(msgs, page) {
             <button class="icon-btn danger" title="Delete" data-action="delete-msg" data-id="${m.id}"><i class="bi bi-trash-fill"></i></button>
           </td>
         </tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--text-muted);padding:1.5rem;text-align:center">No messages.</td></tr>';
+    : '<tr><td colspan="4" style="color:var(--text-muted);padding:1.5rem;text-align:center">No messages.</td></tr>';
 
   main.innerHTML = `
     <header class="view-header animate-in">
@@ -2683,7 +3025,7 @@ function afficherAdminMessages(msgs, page) {
       </div>
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Last name</th><th>First name</th><th>Subject</th><th>Date</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Subject</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody>${lignes}</tbody>
         </table>
       </div>
@@ -2728,14 +3070,13 @@ function ouvrirModalMessage(m, showReply) {
         <span><i class="bi bi-envelope-fill"></i> ${showReply ? 'Reply to message' : 'View message'}</span>
         <button class="admin-modal-close" id="msg-modal-close"><i class="bi bi-x-lg"></i></button>
       </div>
-      <div class="admin-modal-field"><label>Last name</label><input type="text" value="${escapeHtml(m.lastname || '')}" readonly></div>
-      <div class="admin-modal-field"><label>First name</label><input type="text" value="${escapeHtml(m.firstname || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Name</label><input type="text" value="${escapeHtml(m.nom || '')}" readonly></div>
       <div class="admin-modal-field"><label>Email</label><input type="text" value="${escapeHtml(m.email || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Message subject</label><input type="text" value="${escapeHtml(m.subject || '')}" readonly></div>
+      <div class="admin-modal-field"><label>Subject</label><input type="text" value="${escapeHtml(m.sujet || '')}" readonly></div>
       <div class="admin-modal-field"><label>Message</label><textarea rows="4" readonly>${escapeHtml(m.message || '')}</textarea></div>
       ${hasReponse ? `
         <div style="padding:.6rem .9rem;background:var(--accent-soft);border-radius:.75rem;margin-bottom:.75rem;font-size:.82rem">
-          <strong>Initial message by ${escapeHtml(m.firstname || '')} ${escapeHtml(m.lastname || '')}</strong>
+          <strong>Initial message by ${escapeHtml(m.nom || '')}</strong>
         </div>
         <div class="admin-modal-field"><label>Previous reply</label><textarea rows="3" readonly>${escapeHtml(m.reply || '')}</textarea></div>
       ` : ''}
