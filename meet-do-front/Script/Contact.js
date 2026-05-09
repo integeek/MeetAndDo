@@ -680,18 +680,33 @@ function resetContactForm() {
 }
 
 /* =====================================================================
-   HISTORIQUE LOCAL
-   ===================================================================== */
-
-/* =====================================================================
    VUE DÉTAIL — CONVERSATION AVEC L'ADMIN
    ===================================================================== */
 
 let _detailItemId = null;
 let _pollingTimer = null;
+let _mesMessages  = [];
 
-function ouvrirDetail(itemId) {
-  const item = obtenirHistorique().find(i => i.id === itemId);
+function getEmailUtilisateur() {
+  try {
+    const raw = localStorage.getItem('meetando_current_user');
+    if (raw) { const u = JSON.parse(raw); if (u?.email) return u.email; }
+    const raw2 = localStorage.getItem('AUTH_USER_STORAGE_KEY');
+    if (raw2) { const u2 = JSON.parse(raw2); if (u2?.email) return u2.email; }
+  } catch (_) {}
+  return null;
+}
+
+async function chargerMesMessages(email) {
+  try {
+    const res = await fetch(`${API_URL}/contact/mes-messages?email=${encodeURIComponent(email)}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (_) { return []; }
+}
+
+async function ouvrirDetail(itemId) {
+  const item = _mesMessages.find(i => i.id === itemId);
   if (!item) return;
 
   _detailItemId = itemId;
@@ -701,9 +716,20 @@ function ouvrirDetail(itemId) {
 
   remplirDetail(item);
 
-  if (item.serverId) {
-    demarrerPolling(item.serverId);
-  }
+  // Fetch fresh data silently — in case admin replied since last page load
+  try {
+    const res = await fetch(`${API_URL}/contact/${itemId}`);
+    if (res.ok) {
+      const fresh = await res.json();
+      const idx = _mesMessages.findIndex(i => i.id === itemId);
+      if (idx !== -1) {
+        _mesMessages[idx] = Object.assign({}, _mesMessages[idx], fresh);
+        if (fresh.repondu || fresh.reponse) {
+          remplirDetail(_mesMessages[idx]);
+        }
+      }
+    }
+  } catch (_) {}
 
   const textarea = document.getElementById('followup-message');
   if (textarea) {
@@ -725,7 +751,7 @@ function retourHistorique() {
 
 function remplirDetail(item) {
   document.getElementById('detail-sujet').textContent     = item.sujet || '(no subject)';
-  document.getElementById('detail-date').textContent      = formaterDate(item.envoyeA);
+  document.getElementById('detail-date').textContent      = formaterDate(item.created_at || item.envoyeA);
   document.getElementById('detail-categorie').textContent = labelCategorie(item.categorie || 'general');
 
   const prioEl = document.getElementById('detail-priorite');
@@ -742,10 +768,8 @@ function afficherStatut(item) {
 
   if (item.repondu) {
     el.innerHTML = '<span class="statut-badge statut-repondu">✓ Replied</span>';
-  } else if (item.serverId) {
-    el.innerHTML = '<span class="statut-badge statut-attente">⏳ Awaiting reply</span>';
   } else {
-    el.innerHTML = '<span class="statut-badge statut-local">📨 Sent locally</span>';
+    el.innerHTML = '<span class="statut-badge statut-attente">⏳ Awaiting reply</span>';
   }
 }
 
@@ -753,7 +777,18 @@ function afficherMessages(item) {
   const container = document.getElementById('thread-messages');
   if (!container) return;
 
-  const suivis = item.suivis || [];
+  // Build a flat chronological list of all events after the original message
+  const events = [];
+
+  (item.suivis || []).forEach(s => {
+    events.push({ ts: new Date(s.date).getTime(), type: s.auteur === 'admin' ? 'admin' : 'user', message: s.message, date: s.date });
+  });
+
+  if (item.reponse) {
+    events.push({ ts: item.reponse_date ? new Date(item.reponse_date).getTime() : Infinity, type: 'admin', message: item.reponse, date: item.reponse_date });
+  }
+
+  events.sort((a, b) => a.ts - b.ts);
 
   let html = `
     <div class="thread-msg thread-msg--user">
@@ -763,74 +798,57 @@ function afficherMessages(item) {
       <div class="thread-msg-body">
         <div class="thread-msg-meta">
           <strong>${echapper(item.nom || 'Moi')}</strong>
-          <span>${formaterDate(item.envoyeA)}</span>
+          <span>${formaterDate(item.created_at || item.envoyeA)}</span>
         </div>
         <div class="thread-msg-content">${echapper(item.message)}</div>
       </div>
     </div>
   `;
 
-  suivis.forEach(s => {
-    const estAdmin = s.auteur === 'admin';
+  events.forEach(e => {
+    const isAdmin = e.type === 'admin';
     html += `
-      <div class="thread-msg ${estAdmin ? 'thread-msg--admin' : 'thread-msg--user'}">
-        <div class="thread-msg-avatar ${estAdmin ? 'admin-avatar' : 'user-avatar'}">
-          ${estAdmin ? 'AD' : echapper(initialesDepuisNom(item.nom || 'Moi'))}
+      <div class="thread-msg ${isAdmin ? 'thread-msg--admin' : 'thread-msg--user'}">
+        <div class="thread-msg-avatar ${isAdmin ? 'admin-avatar' : 'user-avatar'}">
+          ${isAdmin ? 'AD' : echapper(initialesDepuisNom(item.nom || 'Moi'))}
         </div>
         <div class="thread-msg-body">
           <div class="thread-msg-meta">
-            <strong>${estAdmin ? 'Équipe MeetAndDo' : echapper(item.nom || 'Moi')}</strong>
-            <span>${formaterDate(s.date)}</span>
+            <strong>${isAdmin ? 'MeetAndDo Team' : echapper(item.nom || 'Moi')}</strong>
+            <span>${e.date ? formaterDate(new Date(e.date).getTime()) : ''}</span>
           </div>
-          <div class="thread-msg-content">${echapper(s.message)}</div>
+          <div class="thread-msg-content">${echapper(e.message)}</div>
         </div>
       </div>
     `;
   });
-
-  if (item.reponse) {
-    html += `
-      <div class="thread-msg thread-msg--admin">
-        <div class="thread-msg-avatar admin-avatar">AD</div>
-        <div class="thread-msg-body">
-          <div class="thread-msg-meta">
-            <strong>MeetAndDo Team</strong>
-            <span>${item.reponse_date ? formaterDate(new Date(item.reponse_date).getTime()) : ''}</span>
-          </div>
-          <div class="thread-msg-content">${echapper(item.reponse)}</div>
-        </div>
-      </div>
-    `;
-  }
 
   container.innerHTML = html;
   container.scrollTop = container.scrollHeight;
 }
 
 async function actualiserReponse() {
-  const historique = obtenirHistorique();
-  const item = historique.find(i => i.id === _detailItemId);
-  if (!item?.serverId) {
-    afficherToast('Not yet synced with the server', 'info');
-    return;
-  }
+  const item = _mesMessages.find(i => i.id === _detailItemId);
+  if (!item) return;
 
   const btn = document.getElementById('btn-refresh');
   if (btn) { btn.disabled = true; btn.textContent = '↻ ...'; }
 
   try {
-    const res = await fetch(`${API_URL}/contact/${item.serverId}`);
+    const res = await fetch(`${API_URL}/contact/${item.id}`);
     if (!res.ok) throw new Error();
 
     const data = await res.json();
 
     if (data.repondu && data.reponse) {
-      mettreAJourReponseLocale(item.id, data.reponse, data.reponse_date);
-      const itemMaj = obtenirHistorique().find(i => i.id === _detailItemId);
-      if (itemMaj) {
-        remplirDetail(itemMaj);
-        afficherToast('The admin replied to your message!', 'success', 5000);
+      const idx = _mesMessages.findIndex(i => i.id === _detailItemId);
+      if (idx !== -1) {
+        _mesMessages[idx].repondu      = true;
+        _mesMessages[idx].reponse      = data.reponse;
+        _mesMessages[idx].reponse_date = data.reponse_date;
+        remplirDetail(_mesMessages[idx]);
       }
+      afficherToast('The admin replied to your message!', 'success', 5000);
     } else {
       afficherToast('No reply yet. We respond within 24 hours.', 'info');
     }
@@ -894,8 +912,9 @@ async function envoyerSuivi() {
     return;
   }
 
-  const item = obtenirHistorique().find(i => i.id === _detailItemId);
-  if (!item) return;
+  const idx = _mesMessages.findIndex(i => i.id === _detailItemId);
+  if (idx === -1) return;
+  const item = _mesMessages[idx];
 
   const btn     = document.querySelector('#thread-followup-form .btn-submit');
   const txtEl   = btn?.querySelector('.btn-text');
@@ -904,31 +923,29 @@ async function envoyerSuivi() {
   if (txtEl) txtEl.classList.add('hidden');
   if (loaderEl) loaderEl.classList.remove('hidden');
 
-  const payload = {
-    nom:       item.nom,
-    email:     item.email,
-    sujet:     `[Follow-up] ${item.sujet}`,
-    message:   message,
-    categorie: item.categorie || 'general',
-    priorite:  item.priorite  || 'normale',
-  };
-
-  const suiviEntry = { auteur: 'user', message, date: Date.now() };
+  const suiviEntry = { auteur: 'user', nom: item.nom, message, date: new Date().toISOString() };
 
   try {
-    await fetch(`${API_URL}/contact`, {
-      method: 'POST',
+    const res = await fetch(`${API_URL}/contact/${item.id}/suivi`, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ message, nom: item.nom }),
     });
-  } catch (_) {}
+    if (!res.ok) throw new Error('save failed');
+  } catch (_) {
+    afficherToast('Unable to save follow-up message', 'error');
+    if (btn) btn.disabled = false;
+    if (txtEl) txtEl.classList.remove('hidden');
+    if (loaderEl) loaderEl.classList.add('hidden');
+    return;
+  }
 
-  ajouterSuiviLocal(_detailItemId, suiviEntry);
+  if (!_mesMessages[idx].suivis) _mesMessages[idx].suivis = [];
+  _mesMessages[idx].suivis.push(suiviEntry);
   textarea.value = '';
   document.getElementById('counter-followup').textContent = '0';
 
-  const itemMaj = obtenirHistorique().find(i => i.id === _detailItemId);
-  if (itemMaj) afficherMessages(itemMaj);
+  afficherMessages(_mesMessages[idx]);
 
   if (btn) btn.disabled = false;
   if (txtEl) txtEl.classList.remove('hidden');
@@ -971,51 +988,109 @@ function obtenirHistorique() {
   }
 }
 
-function afficherHistorique() {
+async function afficherHistorique() {
   const container = document.getElementById('history-container');
   if (!container) return;
 
-  const historique = obtenirHistorique();
+  const email = getEmailUtilisateur();
 
-  if (historique.length === 0) {
-    container.innerHTML = `<div class="history-empty">You haven't sent any messages from this device yet.</div>`;
+  if (!email) {
+    container.innerHTML = `
+      <div class="history-empty" style="text-align:center;padding:2rem">
+        <p style="margin-bottom:1rem">Enter your email address to view your messages.</p>
+        <div style="display:flex;gap:.5rem;justify-content:center;max-width:360px;margin:0 auto">
+          <input type="email" id="history-email-input" placeholder="your@email.com"
+                 style="flex:1;padding:.55rem .85rem;border:1px solid #d1d5db;border-radius:.6rem;font-size:.9rem">
+          <button type="button" onclick="rechercherParEmail()"
+                  style="padding:.55rem 1.1rem;background:#004AAD;color:#fff;border:none;border-radius:.6rem;cursor:pointer;font-size:.9rem">
+            Search
+          </button>
+        </div>
+      </div>`;
     return;
   }
 
-  container.innerHTML = historique.map(item => {
-    const aReponse  = item.repondu || !!item.reponse;
-    const nbSuivis  = (item.suivis || []).length;
-    const statutHtml = aReponse
-      ? '<span class="statut-badge statut-repondu">✓ Replied</span>'
-      : (item.serverId
-          ? '<span class="statut-badge statut-attente">⏳ Waiting</span>'
-          : '<span class="statut-badge statut-local">📨 Sent</span>');
-    return `
-      <div class="history-item history-item--clickable animate-in" onclick="ouvrirDetail('${item.id}')">
-        <div class="history-item-header">
-          <span class="history-item-subject">${echapper(item.sujet)}</span>
-          <div class="history-item-header-right">
-            ${statutHtml}
-            <span class="history-item-date">${formaterDate(item.envoyeA)}</span>
+  container.innerHTML = `<div class="history-empty">Loading…</div>`;
+  _mesMessages = await chargerMesMessages(email);
+
+  if (_mesMessages.length === 0) {
+    container.innerHTML = `
+      <div class="history-empty">
+        No messages found for <strong>${echapper(email)}</strong>.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="font-size:.8rem;color:#6b7280;margin-bottom:.75rem;padding:0 .25rem">
+      ${_mesMessages.length} message(s) for ${echapper(email)}
+      <button type="button" onclick="afficherHistorique()"
+              style="margin-left:.75rem;padding:.2rem .6rem;font-size:.75rem;border:1px solid #d1d5db;border-radius:.4rem;background:#fff;cursor:pointer">
+        ↻ Refresh
+      </button>
+    </div>
+    ${_mesMessages.map(item => {
+      const statutHtml = item.repondu
+        ? '<span class="statut-badge statut-repondu">✓ Replied</span>'
+        : '<span class="statut-badge statut-attente">⏳ Awaiting reply</span>';
+      const nbSuivis = (item.suivis || []).length;
+      return `
+        <div class="history-item history-item--clickable animate-in" onclick="ouvrirDetail('${item.id}')">
+          <div class="history-item-header">
+            <span class="history-item-subject">${echapper(item.sujet)}${nbSuivis > 0 ? ` <span style="font-size:.72rem;color:#6b7280;font-weight:400">(+${nbSuivis} follow-up${nbSuivis > 1 ? 's' : ''})</span>` : ''}</span>
+            <div class="history-item-header-right">
+              ${statutHtml}
+              <span class="history-item-date">${formaterDate(new Date(item.created_at).getTime())}</span>
+            </div>
           </div>
-        </div>
-        <div class="history-item-meta">
-          ${item.categorie ? `<span class="history-badge history-badge-cat">${echapper(labelCategorie(item.categorie))}</span>` : ''}
-          <span class="history-badge history-badge-prio-${item.priorite || 'normale'}">${echapper(labelPriorite(item.priorite || 'normale'))}</span>
-          ${nbSuivis > 0 ? `<span class="history-badge history-badge-suivis">${nbSuivis} follow-up${nbSuivis > 1 ? 's' : ''}</span>` : ''}
-        </div>
-        <div class="history-item-msg">${echapper(item.message)}</div>
-        <div class="history-item-chevron">›</div>
-      </div>
-    `;
-  }).join('');
+          <div class="history-item-meta">
+            ${item.categorie ? `<span class="history-badge history-badge-cat">${echapper(labelCategorie(item.categorie))}</span>` : ''}
+            <span class="history-badge history-badge-prio-${item.priorite || 'normale'}">${echapper(labelPriorite(item.priorite || 'normale'))}</span>
+          </div>
+          <div class="history-item-msg">${echapper(item.message)}</div>
+          <div class="history-item-chevron">›</div>
+        </div>`;
+    }).join('')}`;
 }
 
-function effacerHistorique() {
-  if (!confirm('Clear all sent message history?')) return;
-  try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
-  afficherHistorique();
-  afficherToast('History cleared', 'info');
+async function rechercherParEmail() {
+  const input = document.getElementById('history-email-input');
+  if (!input || !input.value.includes('@')) return;
+  const email = input.value.trim();
+  const container = document.getElementById('history-container');
+  if (container) container.innerHTML = `<div class="history-empty">Loading…</div>`;
+  _mesMessages = await chargerMesMessages(email);
+  if (_mesMessages.length === 0) {
+    container.innerHTML = `<div class="history-empty">No messages found for <strong>${echapper(email)}</strong>.</div>`;
+    return;
+  }
+  // Reuse afficherHistorique display but with already-loaded data
+  container.innerHTML = `
+    <div style="font-size:.8rem;color:#6b7280;margin-bottom:.75rem;padding:0 .25rem">
+      ${_mesMessages.length} message(s) for ${echapper(email)}
+    </div>
+    ${_mesMessages.map(item => {
+      const statutHtml = item.repondu
+        ? '<span class="statut-badge statut-repondu">✓ Replied</span>'
+        : '<span class="statut-badge statut-attente">⏳ Awaiting reply</span>';
+      const nbSuivis = (item.suivis || []).length;
+      return `
+        <div class="history-item history-item--clickable animate-in" onclick="ouvrirDetail('${item.id}')">
+          <div class="history-item-header">
+            <span class="history-item-subject">${echapper(item.sujet)}${nbSuivis > 0 ? ` <span style="font-size:.72rem;color:#6b7280;font-weight:400">(+${nbSuivis} follow-up${nbSuivis > 1 ? 's' : ''})</span>` : ''}</span>
+            <div class="history-item-header-right">
+              ${statutHtml}
+              <span class="history-item-date">${formaterDate(new Date(item.created_at).getTime())}</span>
+            </div>
+          </div>
+          <div class="history-item-meta">
+            ${item.categorie ? `<span class="history-badge history-badge-cat">${echapper(labelCategorie(item.categorie))}</span>` : ''}
+            <span class="history-badge history-badge-prio-${item.priorite || 'normale'}">${echapper(labelPriorite(item.priorite || 'normale'))}</span>
+          </div>
+          <div class="history-item-msg">${echapper(item.message)}</div>
+          <div class="history-item-chevron">›</div>
+        </div>`;
+    }).join('')}`;
 }
 
 /* =====================================================================

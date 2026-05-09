@@ -3061,9 +3061,31 @@ function adminMsgGoPage(page) {
 }
 
 function ouvrirModalMessage(m, showReply) {
+  // Build chronological thread from suivis JSONB column + admin reply
+  const events = [];
+  (m.suivis || []).forEach(s => events.push({ ts: new Date(s.date).getTime(), type: s.auteur === 'admin' ? 'admin' : 'user', message: s.message, date: s.date }));
+  if (m.reponse) events.push({ ts: m.reponse_date ? new Date(m.reponse_date).getTime() : Infinity, type: 'admin', message: m.reponse, date: m.reponse_date });
+  events.sort((a, b) => a.ts - b.ts);
+
+  const initiales = (nom) => nom.trim().split(/\s+/).map(p => p[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+  const threadHtml = events.map(e => {
+    const isAdmin = e.type === 'admin';
+    const avatar = isAdmin ? 'AD' : initiales(m.nom || '?');
+    const author = isAdmin ? 'MeetAndDo Team' : escapeHtml(m.nom || '');
+    const dateStr = e.date ? new Date(e.date).toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    return `
+      <div style="display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.75rem;${isAdmin ? 'flex-direction:row-reverse' : ''}">
+        <div style="width:2rem;height:2rem;border-radius:50%;background:${isAdmin ? '#6366f1' : '#004AAD'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0">${avatar}</div>
+        <div style="max-width:80%">
+          <div style="font-size:.72rem;color:#6b7280;margin-bottom:.2rem;${isAdmin ? 'text-align:right' : ''}">${author} · ${dateStr}</div>
+          <div style="background:${isAdmin ? '#ede9fe' : '#f3f4f6'};padding:.5rem .75rem;border-radius:.6rem;font-size:.85rem;white-space:pre-wrap">${escapeHtml(e.message)}</div>
+        </div>
+      </div>`;
+  }).join('');
+
   const overlay = document.createElement('div');
   overlay.className = 'admin-modal-overlay';
-  const hasReponse = !!m.reply;
   overlay.innerHTML = `
     <div class="admin-modal" role="dialog" aria-modal="true">
       <div class="admin-modal-title">
@@ -3073,17 +3095,16 @@ function ouvrirModalMessage(m, showReply) {
       <div class="admin-modal-field"><label>Name</label><input type="text" value="${escapeHtml(m.nom || '')}" readonly></div>
       <div class="admin-modal-field"><label>Email</label><input type="text" value="${escapeHtml(m.email || '')}" readonly></div>
       <div class="admin-modal-field"><label>Subject</label><input type="text" value="${escapeHtml(m.sujet || '')}" readonly></div>
-      <div class="admin-modal-field"><label>Message</label><textarea rows="4" readonly>${escapeHtml(m.message || '')}</textarea></div>
-      ${hasReponse ? `
-        <div style="padding:.6rem .9rem;background:var(--accent-soft);border-radius:.75rem;margin-bottom:.75rem;font-size:.82rem">
-          <strong>Initial message by ${escapeHtml(m.nom || '')}</strong>
-        </div>
-        <div class="admin-modal-field"><label>Previous reply</label><textarea rows="3" readonly>${escapeHtml(m.reply || '')}</textarea></div>
-      ` : ''}
+      <div class="admin-modal-field"><label>Message</label><textarea rows="3" readonly>${escapeHtml(m.message || '')}</textarea></div>
+      ${events.length > 0 ? `
+        <div style="border-top:1px solid #e5e7eb;padding-top:.75rem;margin-top:.25rem">
+          <div style="font-size:.75rem;font-weight:600;color:#6b7280;margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.05em">Conversation thread</div>
+          ${threadHtml}
+        </div>` : ''}
       ${showReply ? `
-        <div class="admin-modal-field">
+        <div class="admin-modal-field" style="margin-top:.5rem">
           <label>Reply</label>
-          <textarea id="msg-reply-text" rows="4" placeholder="Your reply…">${escapeHtml(m.reply || '')}</textarea>
+          <textarea id="msg-reply-text" rows="4" placeholder="Your reply…"></textarea>
         </div>
       ` : ''}
       <div id="msg-modal-feedback"></div>
@@ -3113,7 +3134,7 @@ function ouvrirModalMessage(m, showReply) {
       fb.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">Sending…</div>';
       try {
         await appelApi(`/dashboard/admin/contact-messages/${m.id}/reply`, 'POST', { reply: replyText });
-        m.reply = replyText;
+        m.reponse = replyText;
         fb.innerHTML = '<div style="color:#059669;font-size:.82rem"><i class="bi bi-check-circle-fill"></i> Reply sent.</div>';
         setTimeout(close, 1000);
       } catch (e) {
