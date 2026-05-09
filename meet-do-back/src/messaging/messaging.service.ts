@@ -10,6 +10,10 @@ export class MessagingService {
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
+  // ================================================================
+  //  UTILITAIRES UUID ↔ INT
+  // ================================================================
+
   intToUUID(id: number): string {
     return `00000000-0000-0000-0000-${id.toString().padStart(12, '0')}`;
   }
@@ -18,6 +22,10 @@ export class MessagingService {
     const match = uuid.match(/^00000000-0000-0000-0000-0*(\d+)$/);
     return match ? parseInt(match[1], 10) : null;
   }
+
+  // ================================================================
+  //  UTILISATEURS
+  // ================================================================
 
   async getUserByUUID(uuid: string) {
     const id = this.uuidToInt(uuid);
@@ -33,17 +41,14 @@ export class MessagingService {
   }
 
   async getUsersByUUIDs(uuids: string[]) {
-    const ids = uuids.map((u) => this.uuidToInt(u)).filter(Boolean) as number[];
+    const ids = uuids.map(u => this.uuidToInt(u)).filter(Boolean) as number[];
     if (!ids.length) return [];
     const { data } = await this.supabaseService
       .getAdminClient()
       .from('users')
       .select('id, firstname, lastname, email')
       .in('id', ids);
-    return (data ?? []).map((u) => ({
-      ...u,
-      uuid: this.intToUUID(u.id as number),
-    }));
+    return (data ?? []).map(u => ({ ...u, uuid: this.intToUUID(u.id) }));
   }
 
   async searchUsers(query: string, currentUUID: string) {
@@ -52,23 +57,23 @@ export class MessagingService {
       .getAdminClient()
       .from('users')
       .select('id, firstname, lastname, email')
-      .or(
-        `firstname.ilike.%${query}%,lastname.ilike.%${query}%,email.ilike.%${query}%`,
-      )
+      .or(`firstname.ilike.%${query}%,lastname.ilike.%${query}%,email.ilike.%${query}%`)
       .limit(10);
 
     if (currentId) req = req.neq('id', currentId);
 
     const { data } = await req;
-    return (data ?? []).map((u) => ({
-      ...u,
-      uuid: this.intToUUID(u.id as number),
-    }));
+    return (data ?? []).map(u => ({ ...u, uuid: this.intToUUID(u.id) }));
   }
+
+  // ================================================================
+  //  CONVERSATIONS 1-1
+  // ================================================================
 
   async getConversations(userId: string) {
     const client = this.supabaseService.getAdminClient();
 
+    // Conversations directes 
     const { data: direct } = await client
       .from('conversations')
       .select('*')
@@ -76,6 +81,7 @@ export class MessagingService {
       .eq('is_group', false)
       .order('last_message_at', { ascending: false, nullsFirst: false });
 
+    // Conversations de groupe 
     const { data: memberRows } = await client
       .from('conversation_members')
       .select('conversation_id')
@@ -93,19 +99,11 @@ export class MessagingService {
     }
 
     const all = [...(direct ?? []), ...groups];
-    all.sort(
-      (
-        a: { last_message_at: string | null },
-        b: { last_message_at: string | null },
-      ) => {
-        if (!a.last_message_at) return 1;
-        if (!b.last_message_at) return -1;
-        return (
-          new Date(b.last_message_at).getTime() -
-          new Date(a.last_message_at).getTime()
-        );
-      },
-    );
+    all.sort((a, b) => {
+      if (!a.last_message_at) return 1;
+      if (!b.last_message_at) return -1;
+      return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime();
+    });
 
     this.logger.log(`getConversations(${userId}) → ${all.length} conv`);
     return all;
@@ -127,16 +125,12 @@ export class MessagingService {
 
     const { data, error } = await client
       .from('conversations')
-      .insert({
-        participant_1: userId1,
-        participant_2: userId2,
-        is_group: false,
-      })
+      .insert({ participant_1: userId1, participant_2: userId2, is_group: false })
       .select()
       .single();
 
     if (error) {
-      this.logger.error('Failed to create conversation', error.message);
+      this.logger.error('Erreur création conversation', error.message);
       return null;
     }
     return data;
@@ -151,17 +145,17 @@ export class MessagingService {
       .maybeSingle();
 
     if (error) {
-      this.logger.error('Failed to fetch conversation', error.message);
+      this.logger.error('Erreur récupération conversation', error.message);
       return null;
     }
     return data;
   }
 
-  async createGroupConversation(
-    name: string,
-    creatorId: string,
-    memberIds: string[],
-  ) {
+  // ================================================================
+  //  GROUPES
+  // ================================================================
+
+  async createGroupConversation(name: string, creatorId: string, memberIds: string[]) {
     const client = this.supabaseService.getAdminClient();
 
     const { data: conv, error } = await client
@@ -171,16 +165,14 @@ export class MessagingService {
       .single();
 
     if (error) {
-      this.logger.error('Failed to create group', error.message);
+      this.logger.error('Erreur création groupe', error.message);
       return null;
     }
 
     const allMembers = Array.from(new Set([creatorId, ...memberIds]));
-    await client
-      .from('conversation_members')
-      .insert(
-        allMembers.map((user_id) => ({ conversation_id: conv.id, user_id })),
-      );
+    await client.from('conversation_members').insert(
+      allMembers.map(user_id => ({ conversation_id: conv.id, user_id })),
+    );
 
     return conv;
   }
@@ -194,6 +186,10 @@ export class MessagingService {
     return (data ?? []).map((m: any) => m.user_id);
   }
 
+  // ================================================================
+  //  MESSAGES
+  // ================================================================
+
   async getMessages(conversationId: string) {
     const { data, error } = await this.supabaseService
       .getAdminClient()
@@ -203,7 +199,7 @@ export class MessagingService {
       .order('created_at', { ascending: true });
 
     if (error) {
-      this.logger.error(`getMessages error: ${error.message}`);
+      this.logger.error(`getMessages erreur: ${error.message}`);
       return [];
     }
     return data ?? [];
@@ -223,10 +219,11 @@ export class MessagingService {
       .single();
 
     if (error) {
-      this.logger.error('Failed to save message', error.message);
+      this.logger.error('Erreur sauvegarde message', error.message);
       return null;
     }
 
+    // Mettre à jour le résumé de la conversation
     const conv = await this.getConversationById(dto.conversationId);
     if (conv) {
       const update: any = {
@@ -237,16 +234,10 @@ export class MessagingService {
 
       if (!conv.is_group) {
         const isP1 = conv.participant_1 === dto.senderId;
-        Object.assign(
-          update,
-          isP1 ? { is_read_by_p2: false } : { is_read_by_p1: false },
-        );
+        Object.assign(update, isP1 ? { is_read_by_p2: false } : { is_read_by_p1: false });
       }
 
-      await client
-        .from('conversations')
-        .update(update)
-        .eq('id', dto.conversationId);
+      await client.from('conversations').update(update).eq('id', dto.conversationId);
     }
 
     return data;
@@ -256,8 +247,7 @@ export class MessagingService {
     const conv = await this.getConversationById(conversationId);
     if (!conv || conv.is_group) return;
 
-    const field =
-      conv.participant_1 === userId ? 'is_read_by_p1' : 'is_read_by_p2';
+    const field = conv.participant_1 === userId ? 'is_read_by_p1' : 'is_read_by_p2';
     await this.supabaseService
       .getAdminClient()
       .from('conversations')
@@ -265,27 +255,29 @@ export class MessagingService {
       .eq('id', conversationId);
   }
 
-  async uploadFile(file: {
-    buffer: Buffer;
-    originalname: string;
-    mimetype: string;
-  }): Promise<string | null> {
+  // ================================================================
+  //  FICHIERS
+  // ================================================================
+
+  async uploadFile(file: { buffer: Buffer; originalname: string; mimetype: string }): Promise<string | null> {
     const ext = file.originalname.split('.').pop();
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     const { error } = await this.supabaseService
       .getAdminClient()
-      .storage.from(STORAGE_BUCKET)
+      .storage
+      .from(STORAGE_BUCKET)
       .upload(path, file.buffer, { contentType: file.mimetype, upsert: false });
 
     if (error) {
-      this.logger.error(`uploadFile error: ${error.message}`);
+      this.logger.error(`uploadFile erreur: ${error.message}`);
       return null;
     }
 
     const { data } = this.supabaseService
       .getAdminClient()
-      .storage.from(STORAGE_BUCKET)
+      .storage
+      .from(STORAGE_BUCKET)
       .getPublicUrl(path);
 
     return data.publicUrl;

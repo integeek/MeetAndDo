@@ -25,9 +25,21 @@ export class MessagingGateway
 
   constructor(private readonly messagingService: MessagingService) {}
 
-  afterInit()                    { this.logger.log('MessagingGateway initialized'); }
-  handleConnection(client: Socket)    { this.logger.log(`Client connected: ${client.id}`); }
-  handleDisconnect(client: Socket)    { this.logger.log(`Client disconnected: ${client.id}`); }
+  afterInit() {
+    this.logger.log('MessagingGateway initialisé');
+  }
+
+  handleConnection(client: Socket) {
+    this.logger.log(`Client connecté: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client déconnecté: ${client.id}`);
+  }
+
+  // ----------------------------------------------------------------
+  //  Enregistrement + chargement des conversations
+  // ----------------------------------------------------------------
 
   @SubscribeMessage('register')
   async handleRegister(
@@ -35,7 +47,7 @@ export class MessagingGateway
     @ConnectedSocket() client: Socket,
   ) {
     await client.join(data.userId);
-    this.logger.log(`User ${data.userId} registered`);
+    this.logger.log(`Utilisateur ${data.userId} enregistré`);
   }
 
   @SubscribeMessage('get_conversations')
@@ -47,6 +59,10 @@ export class MessagingGateway
     const conversations = await this.messagingService.getConversations(data.userId);
     client.emit('conversations_list', conversations);
   }
+
+  // ----------------------------------------------------------------
+  //  Rejoindre une conversation
+  // ----------------------------------------------------------------
 
   @SubscribeMessage('join_conversation')
   async handleJoinConversation(
@@ -61,6 +77,10 @@ export class MessagingGateway
     }
   }
 
+  // ----------------------------------------------------------------
+  //  Envoyer un message (1-1 et groupe)
+  // ----------------------------------------------------------------
+
   @SubscribeMessage('send_message')
   async handleSendMessage(
     @MessageBody() dto: SendMessageDto,
@@ -68,16 +88,18 @@ export class MessagingGateway
   ) {
     const message = await this.messagingService.saveMessage(dto);
     if (!message) {
-      client.emit('error', { message: 'Failed to send message' });
+      client.emit('error', { message: "Échec de l'envoi du message" });
       return;
     }
 
+    // Diffuser à tous les membres de la room de la conversation
     this.server.to(dto.conversationId).emit('new_message', message);
 
     const conversation = await this.messagingService.getConversationById(dto.conversationId);
     if (!conversation) return;
 
     if (conversation.is_group) {
+      // Notifier tous les membres via leur room perso
       const members = await this.messagingService.getGroupMembers(dto.conversationId);
       for (const memberId of members) {
         if (memberId !== dto.senderId) {
@@ -85,6 +107,7 @@ export class MessagingGateway
         }
       }
     } else {
+      // Notifier le destinataire via sa room perso
       const recipientId =
         conversation.participant_1 === dto.senderId
           ? conversation.participant_2
@@ -94,6 +117,10 @@ export class MessagingGateway
       }
     }
   }
+
+  // ----------------------------------------------------------------
+  //  Ouvrir / créer une conversation 1-1
+  // ----------------------------------------------------------------
 
   @SubscribeMessage('open_conversation')
   async handleOpenConversation(
@@ -108,6 +135,10 @@ export class MessagingGateway
       this.server.to(data.userId2).emit('conversation_opened', conversation);
     }
   }
+
+  // ----------------------------------------------------------------
+  //  Créer un groupe
+  // ----------------------------------------------------------------
 
   @SubscribeMessage('create_group')
   async handleCreateGroup(
