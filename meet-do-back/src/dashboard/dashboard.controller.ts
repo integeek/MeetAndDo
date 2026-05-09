@@ -164,7 +164,7 @@ export class DashboardController {
     if ((req.user.role || '').toLowerCase() !== 'admin') {
       throw new ForbiddenException('Accès réservé aux administrateurs.');
     }
-    return this.dashboardService.replyToContactMessage(Number(id), body.reply);
+    return this.dashboardService.replyToContactMessage(id, body.reply);
   }
 
   @Delete('admin/contact-messages/:id')

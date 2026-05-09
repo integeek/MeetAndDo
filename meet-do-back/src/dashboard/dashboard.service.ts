@@ -195,13 +195,20 @@ export class DashboardService {
     return { message: 'Message supprimé.' };
   }
 
-  async replyToContactMessage(id: number, reply: string) {
+  async replyToContactMessage(id: string, reply: string) {
+    const now = new Date().toISOString();
+
+    await this.db.rpc('append_contact_suivi', {
+      p_id: id,
+      p_entry: { auteur: 'admin', message: reply, date: now },
+    });
+
     const { error } = await this.db
       .from('contact_messages')
-      .update({ reply, replied_at: new Date().toISOString() })
+      .update({ reponse: reply, repondu: true, reponse_date: now })
       .eq('id', id);
+
     if (error) {
-      // Table inexistante : ne pas planter
       return { message: 'Impossible d\'enregistrer la réponse.' };
     }
     return { message: 'Réponse enregistrée.' };

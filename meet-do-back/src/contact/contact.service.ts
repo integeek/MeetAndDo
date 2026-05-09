@@ -59,6 +59,46 @@ export class ContactService {
   }
 
   /* ------------------------------------------------------------------
+     FIND BY EMAIL — Messages d'un utilisateur (public)
+     ------------------------------------------------------------------ */
+
+  async findByEmail(email: string) {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('contact_messages')
+      .select('id, nom, sujet, message, email, categorie, priorite, repondu, reponse, reponse_date, suivis, created_at')
+      .eq('email', email.toLowerCase().trim())
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      this.logger.error(`contact.findByEmail error: ${error.message}`);
+      return [];
+    }
+    return data ?? [];
+  }
+
+  /* ------------------------------------------------------------------
+     AJOUTER SUIVI — Append a follow-up message to the suivis JSONB array
+     ------------------------------------------------------------------ */
+
+  async ajouterSuivi(id: string, message: string, nom: string) {
+    const { error } = await this.supabaseService
+      .getAdminClient()
+      .rpc('append_contact_suivi', {
+        p_id: id,
+        p_entry: { auteur: 'user', nom, message, date: new Date().toISOString() },
+      });
+
+    if (error) {
+      this.logger.error(`contact.ajouterSuivi error: ${error.message}`);
+      throw new HttpException('Unable to save follow-up.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return { success: true };
+  }
+
+  /* ------------------------------------------------------------------
      FIND ALL — Liste paginée avec filtres (admin)
      ------------------------------------------------------------------ */
 
