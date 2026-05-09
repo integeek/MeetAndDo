@@ -373,7 +373,7 @@ export class DashboardService {
     return (data ?? []).map((conv: any) => {
       const isP1 = conv.participant_1 === uuid;
       const otherId: string = isP1 ? conv.participant_2 : conv.participant_1;
-      const match = otherId.match(/^00000000-0000-0000-0000-0*(\d+)$/);
+      const match = otherId?.match(/^00000000-0000-0000-0000-0*(\d+)$/);
       const otherUserId = match ? parseInt(match[1], 10) : null;
       return {
         id: conv.id,
