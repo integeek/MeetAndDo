@@ -322,7 +322,7 @@ export class DashboardService {
       .select('*');
 
     if (error || !data?.length) {
-      this.logger.warn('getThemes: using default themes');
+      if (error) this.logger.warn(`getThemes: ${error.message} — using default themes`);
       return this.DEFAULT_THEMES;
     }
 
