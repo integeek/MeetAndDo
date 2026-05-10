@@ -1,18 +1,14 @@
-function Footer(url) {
-        return `
-        <div>
-            <ul class="footerLinks">
-                <li><a href="./Faq">FAQ</a></li>
-                <li><a href="./Contact.html">Contact us</a></li>
-                <li><a href="./MentionLegales">General terms of use</a></li>
-                <li><a href="./CGU">CGU</a></li>
+function Footer(url = "..") {
+    const pagePath = `${url}/Page`;
+
+    return `
+        <div class="meetdo-footer-inner container-fluid">
+            <ul class="footerLinks d-flex align-items-center justify-content-between w-100 mb-0">
+                <li><a href="${pagePath}/Faq.html">FAQ</a></li>
+                <li><a href="${pagePath}/Contact.html">Contact us</a></li>
+                <li><a href="${pagePath}/MentionLegales">General terms of use</a></li>
+                <li><a href="${pagePath}/CGU">CGU</a></li>
             </ul>
-        </div>
-        <div class="footerSocialContainer">
-            <a href="https://www.linkedin.com/"><img src="${url}/Assets/img/icon-linkedin.png" alt="linkedin" class="footerSocial"></a>
-            <a href="https://www.facebook.com/"><img src="${url}/Assets/img/icon-facebook.png" alt="facebook" class="footerSocial"></a>
-            <a href="https://www.twitter.com/"><img src="${url}/Assets/img/icon-x.png" alt="twitter" class="footerSocial"></a>
-            <a href="https://www.instagram.com/"><img src="${url}/Assets/img/icon-instagram.png" alt="instagram" class="footerSocial"></a>
         </div>
     `;
 };
