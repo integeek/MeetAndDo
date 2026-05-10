@@ -229,18 +229,38 @@ body {
     display: block;
     width: 100%;
     padding: 0.55rem 0.7rem;
+    border: 0;
     border-radius: 6px;
+    background: transparent;
     color: #004aad;
     font-weight: 700;
     line-height: 1.2;
+    text-align: left;
     text-decoration: none;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .meetdo-profile-menu .dropdown-item:hover,
 .meetdo-profile-menu .dropdown-item:focus {
     background: #eef5ff;
     color: #003b8a;
+}
+
+.meetdo-profile-menu-divider {
+    height: 1px;
+    margin: 0.35rem 0.2rem;
+    background: #d8e6f8;
+}
+
+.meetdo-profile-menu .meetdo-logout-button {
+    color: #b42318;
+}
+
+.meetdo-profile-menu .meetdo-logout-button:hover,
+.meetdo-profile-menu .meetdo-logout-button:focus {
+    background: #fff1f0;
+    color: #8f1d14;
 }
 
 #profilImg {
