@@ -47,12 +47,14 @@
   --accent-grad: linear-gradient(135deg, #003d91, #004AAD);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+
+.dash-layout, .dash-layout *,
+.dash-layout *::before, .dash-layout *::after { margin: 0; padding: 0; }
 
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
-  color: var(--text);
   min-height: 100vh;
 }
 
@@ -65,6 +67,7 @@ body {
   height: calc(100vh - 8vh);
   overflow: hidden;
   position: relative;
+  color: var(--text);
 }
 
 /* ============================================================

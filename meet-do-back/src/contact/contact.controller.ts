@@ -28,6 +28,16 @@ export class ContactController {
   }
 
   /* ----------------------------------------------------------------
+     GET /contact/mes-messages?email=...
+     Messages d'un utilisateur par email (public)
+     ---------------------------------------------------------------- */
+  @Get('mes-messages')
+  mesMessages(@Query('email') email: string) {
+    if (!email || !email.includes('@')) return [];
+    return this.contactService.findByEmail(email);
+  }
+
+  /* ----------------------------------------------------------------
      GET /contact
      Liste des messages de contact (admin)
      ---------------------------------------------------------------- */
@@ -64,6 +74,18 @@ export class ContactController {
     @Body() dto: ReplyContactDto,
   ) {
     return this.contactService.reply(id, dto);
+  }
+
+  /* ----------------------------------------------------------------
+     PATCH /contact/:id/suivi
+     Ajouter un message de suivi utilisateur (public)
+     ---------------------------------------------------------------- */
+  @Patch(':id/suivi')
+  ajouterSuivi(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { message: string; nom: string },
+  ) {
+    return this.contactService.ajouterSuivi(id, body.message, body.nom);
   }
 
   /* ----------------------------------------------------------------
