@@ -4,8 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+    crossorigin="anonymous"
+  />
   <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+  <link rel="stylesheet" href="../Component/Footer/Footer.css" />
   <script src="../Component/Navbar/Navbar.js"></script>
+  <script src="../Component/Footer/Footer.js"></script>
   <title>Meet & Do</title>
 </head>
 
@@ -16,6 +24,11 @@
       document.getElementById("navbar-container").innerHTML = Navbar();
     </script>
   </header>
+  <footer id="footer-container" class="footer-container">
+    <script>
+      document.getElementById("footer-container").innerHTML = Footer("..");
+    </script>
+  </footer>
 </body>
 
 </html>
