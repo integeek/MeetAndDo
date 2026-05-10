@@ -8,10 +8,10 @@ function redirectToLogin() {
 }
 
 function getMeetDoApiUrl() {
-  const hostname = window.location.hostname;
-  const apiHostname = hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
+    const hostname = window.location.hostname;
+    const apiHostname = hostname || 'localhost';
 
-  return `http://${apiHostname}:3000`;
+    return `http://${apiHostname}:3000`;
 }
 
 async function loadUserProfile() {

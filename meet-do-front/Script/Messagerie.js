@@ -2,7 +2,14 @@
    Meet&Do — Messaging
    ============================================= */
 
-const API_URL    = 'http://localhost:3000';
+function getMeetDoApiUrl() {
+  const hostname = window.location.hostname;
+  const apiHostname = hostname || 'localhost';
+
+  return `http://${apiHostname}:3000`;
+}
+
+const API_URL    = getMeetDoApiUrl();
 const SOCKET_URL = `${API_URL}/messaging`;
 
 // ---- Local state ---- //
@@ -135,8 +142,17 @@ function injectBurgerMenu() {
 async function initUser() {
   try {
     const res = await fetch(`${API_URL}/user/me`, { credentials: 'include' });
-    if (res.status === 401) { window.location.href = 'Login.html'; return; }
-    const user = await res.json();
+    let user = null;
+
+    if (res.status === 401) {
+      const authRes = await fetch(`${API_URL}/authentication/me`, { credentials: 'include' });
+      if (authRes.status === 401) { window.location.href = 'Login.html'; return; }
+      if (!authRes.ok) throw new Error('Unable to verify authentication');
+      user = await authRes.json();
+    } else {
+      if (!res.ok) throw new Error('Unable to load current user');
+      user = await res.json();
+    }
 
     state.currentUser   = user;
     state.currentUserId = intToUUID(user.id);

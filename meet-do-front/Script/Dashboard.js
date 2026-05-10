@@ -2,7 +2,14 @@
    Meet&Do — Dashboard (vanilla JS + API réelle)
    ===================================================== */
 
-const API = 'http://localhost:3000';
+function getMeetDoApiUrl() {
+  const hostname = window.location.hostname;
+  const apiHostname = hostname || 'localhost';
+
+  return `http://${apiHostname}:3000`;
+}
+
+const API = getMeetDoApiUrl();
 
 // ---- État centralisé ----
 const state = {};
@@ -205,15 +212,31 @@ async function appelApi(chemin, methode = 'GET', corps = null) {
   if (corps) options.body = JSON.stringify(corps);
 
   const res = await fetch(`${API}${chemin}`, options);
-  if (res.status === 401) { window.location.href = 'Login.html'; throw new Error('Not authenticated'); }
+  if (res.status === 401) { throw new Error('Not authenticated'); }
   if (!res.ok) throw new Error(`Error ${res.status} on ${chemin}`);
   return res.json();
+}
+
+async function chargerProfilConnecte() {
+  try {
+    return await appelApi('/user/me');
+  } catch (err) {
+    if (!err.message.includes('Not authenticated')) {
+      throw err;
+    }
+
+    return appelApi('/authentication/me');
+  }
+}
+
+function redirigerLogin() {
+  window.location.href = 'Login.html';
 }
 
 async function chargerDonnees() {
   afficherLoader(true);
   try {
-    const profil = await appelApi('/user/me');
+    const profil = await chargerProfilConnecte();
     state.profil = profil;
 
     const role = (profil.role || 'user').toLowerCase();
@@ -239,9 +262,12 @@ async function chargerDonnees() {
       demarrerNotificationsPublisher();
     }
   } catch (err) {
-    if (!err.message.includes('Not authenticated')) {
-      afficherErreur(err.message);
+    if (err.message.includes('Not authenticated')) {
+      redirigerLogin();
+      return;
     }
+
+    afficherErreur(err.message);
   }
 }
 
@@ -4202,7 +4228,7 @@ function attachEventListeners() {
       const formData = new FormData();
       formData.append('avatar', file);
       try {
-        const res = await fetch('http://localhost:3000/user/me/avatar', {
+        const res = await fetch(`${API}/user/me/avatar`, {
           method: 'POST', credentials: 'include', body: formData,
         });
         if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erreur'); }

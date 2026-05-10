@@ -2,7 +2,7 @@ const AUTH_USER_STORAGE_KEY = 'meetando_current_user';
 
 function getMeetDoApiUrl() {
     const hostname = window.location.hostname;
-    const apiHostname = hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
+    const apiHostname = hostname || 'localhost';
 
     return `http://${apiHostname}:3000`;
 }
