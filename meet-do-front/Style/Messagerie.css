@@ -88,8 +88,8 @@ body {
   overflow: hidden;
 }
 
-/* Footer.css applique « main { margin: 0 auto 7rem auto !important } »
-   ce qui centre et rétrécit notre layout — on neutralise ici */
+/* Footer.css applies "main { margin: 0 auto 7rem auto !important }"
+   which centers and shrinks our layout — we neutralize it here */
 #messagerie-app {
   margin: 0 !important;
   width: 100% !important;
@@ -508,7 +508,7 @@ footer {
 
 .msg-row.sent  { flex-direction: row-reverse; }
 
-/* Animation par défaut */
+/* Default animation */
 .msg-row.recv  { animation: fadeInLeft  .28s var(--ease-out) both; }
 .msg-row.sent  { animation: fadeInRight .28s var(--ease-out) both; }
 
@@ -619,7 +619,6 @@ footer {
 .typing-dot:nth-child(3) { animation-delay: .4s; }
 
 /* =====================
-<<<<<<< Updated upstream
    ATTACHMENT PREVIEW
    ===================== */
 
@@ -732,8 +731,6 @@ footer {
 }
 
 /* =====================
-=======
->>>>>>> Stashed changes
    INPUT AREA
    ===================== */
 
@@ -866,11 +863,11 @@ footer {
 
 .modal-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 1.75rem;
-  width: 420px;
-  max-width: 92vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  border-radius: 20px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  width: 440px;
+  max-width: 94vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.08);
   animation: popIn .3s var(--ease-spring) both;
 }
 
@@ -878,7 +875,9 @@ footer {
   font-weight: 800;
   font-size: 1.05rem;
   color: var(--brand-blue);
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid #eef1f6;
 }
 
 .modal-input {
@@ -888,7 +887,7 @@ footer {
   border-radius: 10px;
   font-size: .9rem;
   outline: none;
-  margin-bottom: 1.25rem;
+  margin-bottom: .75rem;
   transition: border-color .25s, box-shadow .25s;
 }
 
@@ -939,6 +938,126 @@ footer {
   color: var(--brand-blue);
 }
 
+/* ---- Tabs ---- */
+.modal-tabs {
+  display: flex;
+  background: #f1f4f9;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 1.25rem;
+}
+
+.modal-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: .45rem .75rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, color .2s, box-shadow .2s;
+}
+
+.modal-tab.active {
+  background: #fff;
+  color: var(--brand-blue);
+  box-shadow: 0 2px 8px rgba(0,0,0,.10);
+}
+
+.modal-tab:not(.active):hover { background: rgba(255,255,255,.6); color: #333; }
+
+/* ---- Search results ---- */
+.modal-results {
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 10px;
+  margin-top: -.75rem;
+  margin-bottom: .75rem;
+}
+
+.modal-result-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.modal-result-item:hover { background: var(--brand-light); }
+
+.modal-result-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-blue) 0%, #0066dd 100%);
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-result-name  { font-size: .875rem; font-weight: 600; color: #1a1a1a; }
+.modal-result-email { font-size: .77rem;  color: var(--text-muted); }
+
+.modal-no-result {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .85rem;
+  padding: .75rem;
+}
+
+/* ---- Group member chips ---- */
+.modal-group-members { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+
+.modal-members-label {
+  width: 100%;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: .25rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.modal-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: var(--brand-light);
+  color: var(--brand-blue);
+  border: 1.5px solid rgba(0,74,173,.18);
+  border-radius: 20px;
+  padding: .28rem .6rem .28rem .7rem;
+  font-size: .82rem;
+  font-weight: 600;
+  animation: popIn .2s var(--ease-spring) both;
+}
+
+.chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--brand-blue);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  opacity: .7;
+  transition: opacity .15s, transform .15s;
+}
+.chip-remove:hover { opacity: 1; transform: scale(1.2); }
+
 /* =====================
    BURGER MENU
    ===================== */
@@ -959,7 +1078,7 @@ footer {
   border-radius: 8px;
   transition: background .2s;
   flex-shrink: 0;
-  order: 99; /* toujours à droite dans le nav */
+  order: 99; /* always on the right in the nav */
 }
 
 .burger-btn:hover { background: var(--brand-light); }
@@ -1027,14 +1146,14 @@ footer {
 .drawer-link:hover  { background: var(--brand-light); color: var(--brand-blue); }
 .drawer-link.active { background: var(--brand-light); color: var(--brand-blue); font-weight: 700; }
 
-/* ---- Séparateur ---- */
+/* ---- Separator ---- */
 .drawer-divider {
   height: 1px;
   background: var(--border);
   margin: .6rem 0;
 }
 
-/* ---- Actions (annonce + profil) ---- */
+/* ---- Actions (post listing + profile) ---- */
 .drawer-actions {
   display: flex;
   flex-direction: column;
@@ -1073,28 +1192,28 @@ footer {
 .drawer-btn-secondary:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
 
 /* =====================
-   RESPONSIVE — style WhatsApp
+   RESPONSIVE — WhatsApp style
    ===================== */
 
-/* ---- Tablette (sidebar plus étroite) ---- */
+/* ---- Tablet (narrower sidebar) ---- */
 @media screen and (max-width: 1024px) {
   :root { --sidebar-w: 260px; }
 }
 
-/* ---- Burger visible + items nav cachés ---- */
+/* ---- Burger visible + nav items hidden ---- */
 @media screen and (max-width: 768px) {
   .burger-btn { display: flex; }
 
-  /* Cacher les items de la navbar originale (ils sont dupliqués dans le drawer) */
+  /* Hide original navbar items (duplicated inside the drawer) */
   .navbar-container .navLinks,
   .navbar-container .annonce,
   .navbar-container #profil { display: none !important; }
 
-  /* Positionner le navbar-container en relative pour que le drawer s'ancre dessus */
+  /* Position navbar-container as relative so the drawer anchors to it */
   .navbar-container { position: relative; }
 }
 
-/* ---- Mobile : une seule vue à la fois (comme WhatsApp) ---- */
+/* ---- Mobile: one view at a time (WhatsApp style) ---- */
 @media screen and (max-width: 768px) {
   :root { --sidebar-w: 100vw; }
 
@@ -1103,7 +1222,7 @@ footer {
     overflow: hidden;
   }
 
-  /* Sidebar = plein écran, glisse depuis la gauche */
+  /* Sidebar = full screen, slides in from the left */
   .conv-sidebar {
     position: absolute;
     inset: 0;
@@ -1114,26 +1233,26 @@ footer {
     will-change: transform;
   }
 
-  /* Quand une conversation est ouverte : sidebar glisse vers la gauche */
+  /* When a conversation is open: sidebar slides left */
   .conv-sidebar.hidden-mobile {
     transform: translateX(-100%);
     pointer-events: none;
   }
 
-  /* Panneau chat : plein écran */
+  /* Chat panel: full screen */
   .chat-panel {
     width: 100%;
     position: absolute;
     inset: 0;
   }
 
-  /* Bouton retour visible */
+  /* Back button visible */
   .btn-back { display: flex; }
 
-  /* Bulles plus larges sur mobile */
+  /* Wider bubbles on mobile */
   .msg-bubble { max-width: 82%; }
 
-  /* Zone saisie plus compacte */
+  /* More compact input area */
   .chat-input-area { padding: .6rem .85rem; }
   .chat-messages   { padding: 1rem; }
 
