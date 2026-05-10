@@ -231,6 +231,12 @@ function UserNavbar(basePath, variant = "auto") {
                                     <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
                                 </li>
                                 ${publisherMenuItem}
+                                <li class="meetdo-profile-menu-divider" aria-hidden="true"></li>
+                                <li>
+                                    <button class="dropdown-item meetdo-logout-button" type="button" onclick="logoutMeetDoUser('${basePath}')">
+                                        Logout
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -247,6 +253,20 @@ function toggleMeetDoNavbar(button) {
 
     const isOpen = target.classList.toggle("show");
     button.setAttribute("aria-expanded", String(isOpen));
+}
+
+async function logoutMeetDoUser(basePath = "..") {
+    try {
+        await fetch(`${getMeetDoApiUrl()}/authentication/logout`, {
+            method: "POST",
+            credentials: "include",
+        });
+    } catch (error) {
+        console.warn("Unable to logout from server:", error);
+    } finally {
+        localStorage.removeItem("meetando_current_user");
+        window.location.href = `${basePath}/Page/Home.html`;
+    }
 }
 
 async function refreshNavbarAuthenticatedUser() {
