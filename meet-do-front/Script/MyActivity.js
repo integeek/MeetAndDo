@@ -31,8 +31,6 @@ const MOCK_MY_ACTIVITIES = [
   },
 ];
 
-const ACTIVITY_API_URL = "http://localhost:3000/activity";
-const AUTH_API_URL = "http://localhost:3000/authentication";
 const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 
 let activityActionsModal = null;
@@ -40,6 +38,13 @@ let activityDeleteConfirmModal = null;
 let selectedActivity = null;
 let myActivities = [];
 let currentUser = null;
+
+function getMeetDoApiUrl() {
+  const hostname = window.location.hostname;
+  const apiHostname = hostname === "127.0.0.1" ? "127.0.0.1" : "localhost";
+
+  return `http://${apiHostname}:3000`;
+}
 
 function getUserIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -94,17 +99,19 @@ function redirectToActivityBuilder() {
 
 async function getCurrentUser() {
   try {
-    const response = await fetch(AUTH_API_URL, {
+    const response = await fetch(`${getMeetDoApiUrl()}/authentication/me`, {
       credentials: "include",
     });
 
     if (!response.ok) {
+      localStorage.removeItem(AUTH_USER_STORAGE_KEY);
       return null;
     }
 
     return await response.json();
   } catch (error) {
     console.warn("Unable to fetch current user for my activities:", error);
+    localStorage.removeItem(AUTH_USER_STORAGE_KEY);
     return null;
   }
 }
@@ -115,7 +122,7 @@ async function getMyActivities(userId) {
   }
 
   try {
-    const response = await fetch(`${ACTIVITY_API_URL}?userId=${userId}`, {
+    const response = await fetch(`${getMeetDoApiUrl()}/activity?userId=${userId}`, {
       credentials: "include",
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -375,8 +382,9 @@ async function deleteSelectedActivity() {
   }
 
   try {
-    const response = await fetch(`${ACTIVITY_API_URL}/${selectedActivity.id}`, {
+    const response = await fetch(`${getMeetDoApiUrl()}/activity/${selectedActivity.id}`, {
       method: "DELETE",
+      credentials: "include",
     });
 
     if (!response.ok) {

@@ -28,6 +28,13 @@ function Navbar(options = {}) {
     return GuestNavbar(basePath);
 }
 
+function getMeetDoApiUrl() {
+    const hostname = window.location.hostname;
+    const apiHostname = hostname === "127.0.0.1" ? "127.0.0.1" : "localhost";
+
+    return `http://${apiHostname}:3000`;
+}
+
 function getAuthenticatedUserId() {
     const user = getStoredAuthenticatedUser();
     const userId = Number(user?.id);
@@ -247,11 +254,15 @@ async function refreshNavbarAuthenticatedUser() {
     if (!navbarContainer) return;
 
     try {
-        const response = await fetch("http://localhost:3000/authentication/me", {
+        const response = await fetch(`${getMeetDoApiUrl()}/authentication/me`, {
             credentials: "include",
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+            localStorage.removeItem("meetando_current_user");
+            navbarContainer.innerHTML = Navbar();
+            return;
+        }
 
         const user = await response.json();
         if (!user || typeof user !== "object") return;

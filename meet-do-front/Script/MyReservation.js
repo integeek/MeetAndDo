@@ -6,6 +6,13 @@ function closePopUp(id) {
   document.getElementById(id).style.display = 'none';
 }
 
+function getMeetDoApiUrl() {
+  const hostname = window.location.hostname;
+  const apiHostname = hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
+
+  return `http://${apiHostname}:3000`;
+}
+
 function resaComponent(resa, index) {
   const activity = resa.event?.activity;
   const imageUrl = activity?.image || '../Assets/img/placeholder.png';
@@ -61,11 +68,12 @@ function initButtons(resa, index) {
 }
 
 async function loadReservations() {
-  const response = await fetch('http://localhost:3000/reservation/user', {
+  const response = await fetch(`${getMeetDoApiUrl()}/reservation/user`, {
     credentials: 'include',
   });
 
   if (!response.ok) {
+    localStorage.removeItem('meetando_current_user');
     window.location.href = '../Page/Login.html';
     return;
   }
@@ -97,7 +105,7 @@ async function cancelReservation() {
     return;
   }
 
-  const response = await fetch(`http://localhost:3000/reservation/${currentIdResa}`, {
+  const response = await fetch(`${getMeetDoApiUrl()}/reservation/${currentIdResa}`, {
     method: 'DELETE',
     credentials: 'include',
   });

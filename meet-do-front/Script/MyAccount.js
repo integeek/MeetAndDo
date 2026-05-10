@@ -1,4 +1,5 @@
 function redirectToLogin() {
+  localStorage.removeItem('meetando_current_user');
   const params = new URLSearchParams({
     authMessage: 'Vous devez etre connecte pour acceder a votre compte.',
     redirect: 'MyAccount.html',
@@ -6,9 +7,16 @@ function redirectToLogin() {
   window.location.href = `Login.html?${params.toString()}`;
 }
 
+function getMeetDoApiUrl() {
+  const hostname = window.location.hostname;
+  const apiHostname = hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
+
+  return `http://${apiHostname}:3000`;
+}
+
 async function loadUserProfile() {
   try {
-    const response = await fetch('http://localhost:3000/authentication/me', {
+    const response = await fetch(`${getMeetDoApiUrl()}/authentication/me`, {
       method: 'GET',
       credentials: 'include',
     });
@@ -46,7 +54,7 @@ async function updateLastname() {
   const newLastname = document.getElementById('edited-lastname').value;
   if (!newLastname.trim()) return;
 
-  const response = await fetch('http://localhost:3000/user', {
+  const response = await fetch(`${getMeetDoApiUrl()}/user`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -65,7 +73,7 @@ async function updateFirstname() {
   const newFirstname = document.getElementById('edited-firstname').value;
   if (!newFirstname.trim()) return;
 
-  const response = await fetch('http://localhost:3000/user', {
+  const response = await fetch(`${getMeetDoApiUrl()}/user`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

@@ -1,5 +1,11 @@
-const API_URL = 'http://localhost:3000';
 const AUTH_USER_STORAGE_KEY = 'meetando_current_user';
+
+function getMeetDoApiUrl() {
+    const hostname = window.location.hostname;
+    const apiHostname = hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
+
+    return `http://${apiHostname}:3000`;
+}
 
 function getRedirectParams() {
     const params = new URLSearchParams(window.location.search);
@@ -54,7 +60,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     successDiv.textContent = '';
 
     try {
-        const response = await fetch(`${API_URL}/authentication/login`, {
+        const response = await fetch(`${getMeetDoApiUrl()}/authentication/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -111,7 +117,7 @@ document.getElementById('sendResetLink').addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch(`${API_URL}/authentication/request-reset-password`, {
+        const response = await fetch(`${getMeetDoApiUrl()}/authentication/request-reset-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
