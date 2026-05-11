@@ -148,6 +148,44 @@ h2 {
   margin-top: 0.5rem;
 }
 
+.account-actions {
+  width: min(100%, 260px);
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.password-action {
+  width: 100%;
+  margin-top: 0;
+}
+
+.account-logout-button {
+  min-height: 48px;
+  padding: 10px 20px;
+  border: 1px solid #b42318;
+  border-radius: 10px;
+  background: #b42318;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.account-logout-button:hover,
+.account-logout-button:focus {
+  border-color: #8f1d14;
+  background: #8f1d14;
+}
+
+.account-logout-button:active {
+  transform: translateY(1px);
+}
+
 .success {
   color: #047857;
   font-size: 1rem;
@@ -311,7 +349,7 @@ h2 {
   }
 
   .profile-action,
-  .password-action {
+  .account-actions {
     width: 100%;
   }
 

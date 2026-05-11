@@ -183,6 +183,20 @@ async function uploadProfilePhoto() {
   }
 }
 
+async function logoutMyAccountUser() {
+  try {
+    await fetch(`${getMeetDoApiUrl()}/authentication/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.warn('Unable to logout from server:', error);
+  } finally {
+    localStorage.removeItem('meetando_current_user');
+    window.location.href = 'Home.html';
+  }
+}
+
 function openPopUp(id) {
     document.getElementById(id).style.display = "block";
 }
