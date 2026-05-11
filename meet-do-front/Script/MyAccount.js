@@ -87,3 +87,49 @@ async function updateFirstname() {
     alert('Erreur lors de la mise à jour');
   }
 }
+
+async function updatePassword() {
+  const oldPassword = document.getElementById('old-password').value;
+  const password = document.getElementById('password').value;
+  const newPassword = document.getElementById('new-password').value;
+  const erreurDiv = document.querySelector('.erreur');
+
+  if (!oldPassword.trim() || !password.trim() || !newPassword.trim()){
+    return;
+  }
+
+  if (password.value !== newPassword.value) {
+    erreurDiv.textContent = "The passwords do not match";
+    return;
+  }
+
+  if (!/[0-9]/.test(password)) {
+      erreurDiv.textContent = "The password must contain at least one number";
+      return;
+  }
+
+  if (!/[A-Z]/.test(password)) {
+      erreurDiv.textContent = "The password must contain at least one uppercase letter";
+      return;
+  }
+
+  if (!/[a-z]/.test(password)) {
+      erreurDiv.textContent = "The password must contain at least one lowercase letter";
+      return;
+  }
+
+  const response = await fetch('http://localhost:3000/user/password', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ oldPassword: oldPassword, password: newPassword }),
+  });
+
+  if (response.ok) {
+    closePopUp('edit-password-popup');
+    alert('The password has been successfully changed');
+    await loadUserProfile();
+  } else {
+    alert('Error during update');
+  }
+}

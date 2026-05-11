@@ -129,14 +129,12 @@ h2 {
 }
 
 .edit-content {
-  width: 500px;
-  height: 300px;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  padding: 20px;
+  padding: 40px 32px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   display: flex;
@@ -164,6 +162,54 @@ h2 {
   justify-content: space-around;
   margin-top: 50px;
 }
+
+
+.edit-password {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.containerPassword {
+    position: relative; 
+    display: inline-block;
+    width: 100%;
+}
+
+.containerPassword input {
+    padding-right: 40px;
+}
+
+.togglePassword {
+    position: absolute;
+    right: 10px;
+    top: 50%; 
+    transform: translateY(-50%);
+    width: 20px; 
+    cursor: pointer;
+}
+
+.validatorCriters {
+    padding: 10px 3px;
+    margin: auto;
+    display: none;
+  }
+  
+.validatorCriters span {
+    display: block;
+    color: #cacaca;
+    font-size: 13px;
+    margin: 5px 0;
+  }
+  
+.validatorCriters span.error {
+    color: #a70b0b;
+  }
+  
+.validatorCriters span.succes {
+    color: green;
+  }
 
 .buttonRo {
   background-color: #ff4646;
