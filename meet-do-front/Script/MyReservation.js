@@ -103,31 +103,52 @@ async function loadReservations() {
 
 let currentIdResa = null;
 
+function setCancelFeedback(message = '', status = '') {
+  const feedback = document.getElementById('cancel-feedback');
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.className = `cancel-feedback${status ? ` is-${status}` : ''}`;
+}
+
 function openCancelPopUp(idResa) {
   currentIdResa = idResa;
   document.getElementById('cancel-input').value = '';
+  setCancelFeedback();
   openPopUp('cancel-popup');
 }
 
 async function cancelReservation() {
   const input = document.getElementById('cancel-input').value;
+  const confirmButton = document.querySelector('#bouton-confirmer button');
 
   if (!input || input !== 'CANCEL') {
-    alert('Please type CANCEL exactly to confirm.');
+    setCancelFeedback('Please type CANCEL exactly to confirm.', 'error');
     return;
   }
 
-  const response = await fetch(`${getMeetDoApiUrl()}/reservation/${currentIdResa}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
+  setCancelFeedback('Cancelling your reservation...', 'loading');
+  if (confirmButton) confirmButton.disabled = true;
 
-  if (response.ok) {
-    alert('Reservation successfully cancelled.');
-    closePopUp('cancel-popup');
-    loadReservations();
-  } else {
-    alert('Error during cancellation.');
+  try {
+    const response = await fetch(`${getMeetDoApiUrl()}/reservation/${currentIdResa}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      setCancelFeedback('Reservation successfully cancelled.', 'success');
+      setTimeout(() => {
+        closePopUp('cancel-popup');
+        loadReservations();
+      }, 700);
+    } else {
+      setCancelFeedback('Error during cancellation. Please try again.', 'error');
+    }
+  } catch {
+    setCancelFeedback('Network error. Please try again.', 'error');
+  } finally {
+    if (confirmButton) confirmButton.disabled = false;
   }
 }
 document.addEventListener('DOMContentLoaded', () => {

@@ -238,6 +238,24 @@ h1 {
   background: #fff;
 }
 
+.cancel-feedback {
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cancel-feedback.is-error {
+  color: #dc2626;
+}
+
+.cancel-feedback.is-success {
+  color: #15803d;
+}
+
+.cancel-feedback.is-loading {
+  color: #475467;
+}
+
 .edit-footer {
   display: flex;
   align-items: center;
