@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -25,6 +26,15 @@ interface UploadedMulterFile {
   size: number;
   buffer: Buffer;
 }
+
+const ALLOWED_AVATAR_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+];
+
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
 @Controller('user')
 export class UserController {
@@ -80,11 +90,33 @@ export class UserController {
 
   @Post('me/avatar')
   @UseGuards(JwtAuthenticationGuard)
-  @UseInterceptors(FileInterceptor('avatar', { storage: memoryStorage() }))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: memoryStorage(),
+      limits: {
+        files: 1,
+        fileSize: MAX_AVATAR_SIZE,
+      },
+    }),
+  )
   uploadAvatar(
     @Req() req: RequestWithUser,
     @UploadedFile() file: UploadedMulterFile,
   ) {
+    if (!file) {
+      throw new BadRequestException('Aucune image fournie');
+    }
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Format non autorisé. Utilisez une image JPG, PNG, GIF ou WebP.',
+      );
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      throw new BadRequestException("L'image doit faire moins de 5 Mo");
+    }
+
     return this.userService.uploadAvatar(req.user.id, file);
   }
 

@@ -284,9 +284,17 @@
               name="photo"
               id="input-pdp"
               class="form-control form-control-lg"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp"
               required
             />
+            <div class="avatar-preview-wrap">
+              <img
+                src="../Assets/img/icon-profil.png"
+                alt="Aperçu de la photo de profil"
+                id="avatar-preview"
+              />
+            </div>
+            <p id="avatar-upload-feedback" class="form-text avatar-feedback"></p>
           </div>
           <div class="edit-footer">
             <button
@@ -296,6 +304,7 @@
             >
               Annuler
             </button>
+            <div id="bouton-photo-confirm"></div>
           </div>
         </form>
       </div>
@@ -336,6 +345,8 @@
       document.getElementById("bouton-bleue1").innerHTML = BoutonBleu("Valider");
       document.getElementById("bouton-bleue2").innerHTML = BoutonBleu("Valider");
       document.getElementById("bouton-bleue3").innerHTML = BoutonBleu("Validate");
+      document.getElementById("bouton-photo-confirm").innerHTML =
+        BoutonBleu("Confirmer");
       document.querySelector("#bouton-bleue1 .buttonCo").onclick = (event) => {
         event.preventDefault();
         updateFirstname();
@@ -348,15 +359,12 @@
         event.preventDefault();
         updatePassword();
       };
-
-      fetch("../../controller/Compte/PhotoController.php", { method: "GET" })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.photo && data.photo !== "") {
-            document.getElementById("profile-icon").src = data.photo;
-          }
-        })
-        .catch(() => {});
+      document.querySelector("#bouton-photo-confirm .buttonCo").onclick = (
+        event,
+      ) => {
+        event.preventDefault();
+        uploadProfilePhoto();
+      };
     </script>
   </body>
 </html>

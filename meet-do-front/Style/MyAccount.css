@@ -202,6 +202,38 @@ h2 {
   width: 100%;
 }
 
+.avatar-preview-wrap {
+  width: 112px;
+  height: 112px;
+  margin: 1.25rem auto 0;
+  border: 4px solid var(--meetdo-blue-soft);
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+#avatar-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.avatar-feedback {
+  min-height: 1.4rem;
+  margin: 0.85rem 0 0;
+  font-weight: 600;
+  text-align: center;
+}
+
+.avatar-feedback.is-error {
+  color: #b42318;
+}
+
+.avatar-feedback.is-success {
+  color: #047857;
+}
+
 .edit-footer {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
