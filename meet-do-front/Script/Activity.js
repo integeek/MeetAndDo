@@ -282,29 +282,44 @@ function renderReportButton() {
   `;
 }
 
-function renderActivity(activity) {
-  document.getElementById("activity-title").textContent = activity.title;
-  document.getElementById("activity-report-button").innerHTML =
-    renderReportButton();
-  document.getElementById("activity-address-text").textContent =
-    activity.address;
-  document.getElementById("activity-description-text").textContent =
-    activity.description;
-  document.getElementById("activity-participate-button").innerHTML =
-    BoutonBleu("Join");
-  document.getElementById("activity-review-button").innerHTML =
-    BoutonBleu("Leave a review");
-  document.getElementById("creator-contact-button").innerHTML =
-    renderContactButton();
-  document.getElementById("activity-group-size").textContent =
-    `Group size: ${activity.group_size} people`;
-  document.getElementById("activity-price").textContent =
-    `Price: ${activity.price} EUR`;
-  document.getElementById("activity-reviews-rating").textContent =
-    `${activity.average_rating} / 5`;
-  document.getElementById("activity-reviews-list").innerHTML = (
-    activity.reviews || []
-  )
+function hasActivityReviews(activity) {
+  return Array.isArray(activity.reviews) && activity.reviews.length > 0;
+}
+
+function getActivityAverageRating(activity) {
+  const average = Number(activity.average_rating);
+
+  if (Number.isFinite(average)) {
+    return average;
+  }
+
+  const notes = (activity.reviews || [])
+    .map((review) => Number(review.note))
+    .filter(Number.isFinite);
+
+  if (!notes.length) {
+    return null;
+  }
+
+  return notes.reduce((total, note) => total + note, 0) / notes.length;
+}
+
+function renderActivityReviews(activity) {
+  const reviews = Array.isArray(activity.reviews) ? activity.reviews : [];
+
+  if (!reviews.length) {
+    return `
+      <div class="activity-reviews-empty">
+        <p class="mb-2 fw-semibold">No reviews yet for this activity.</p>
+        <p class="mb-3 text-secondary">
+          Be the first participant to share your experience and help others decide.
+        </p>
+        ${BoutonBleu("Leave the first review")}
+      </div>
+    `;
+  }
+
+  return reviews
     .map(
       (avis) => `
         <div class="card border-0 bg-body-tertiary mb-3">
@@ -334,6 +349,35 @@ function renderActivity(activity) {
       `,
     )
     .join("");
+}
+
+function renderActivity(activity) {
+  const hasReviews = hasActivityReviews(activity);
+  const averageRating = getActivityAverageRating(activity);
+
+  document.getElementById("activity-title").textContent = activity.title;
+  document.getElementById("activity-report-button").innerHTML =
+    renderReportButton();
+  document.getElementById("activity-address-text").textContent =
+    activity.address;
+  document.getElementById("activity-description-text").textContent =
+    activity.description;
+  document.getElementById("activity-participate-button").innerHTML =
+    BoutonBleu("Join");
+  document.getElementById("activity-review-button").innerHTML =
+    BoutonBleu("Leave a review");
+  document.getElementById("creator-contact-button").innerHTML =
+    renderContactButton();
+  document.getElementById("activity-group-size").textContent =
+    `Group size: ${activity.group_size} people`;
+  document.getElementById("activity-price").textContent =
+    `Price: ${activity.price} EUR`;
+  document.getElementById("activity-reviews-rating").textContent =
+    hasReviews && averageRating !== null
+      ? `${averageRating.toFixed(1)} / 5`
+      : "No reviews yet";
+  document.getElementById("activity-reviews-list").innerHTML =
+    renderActivityReviews(activity);
   document.getElementById("activity-created-by").textContent =
     "Activity created by";
   document.getElementById("creator-avatar").src = activity.creator?.photo || "";
