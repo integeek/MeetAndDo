@@ -679,7 +679,7 @@ export class DashboardService {
 
     const { data: activites, error: e1 } = await this.db
       .from('activity')
-      .select('id, title, price, address, images, theme')
+      .select('id, title, price, address, images, theme, average_rating')
       .eq('id_user', userId);
 
     if (e1 || !activites?.length) {
@@ -719,9 +719,27 @@ export class DashboardService {
       return [];
     }
 
-    return (data ?? []).map((r: any) => {
+    const reservations = data ?? [];
+
+    // Fetch reviews for these activities/users to display in history
+    const userIds = [...new Set(reservations.map((r: any) => r.id_user).filter(Boolean))];
+    const reviewMap: Record<string, { rating: number; comment: string }> = {};
+    if (userIds.length && activityIds.length) {
+      const { data: reviews } = await this.db
+        .from('review')
+        .select('id_user, id_activity, rating, comment')
+        .in('id_activity', activityIds)
+        .in('id_user', userIds);
+      for (const rv of reviews ?? []) {
+        reviewMap[`${rv.id_activity}_${rv.id_user}`] = { rating: rv.rating, comment: rv.comment };
+      }
+    }
+
+    return reservations.map((r: any) => {
       const event    = eventMap[r.id_event]    ?? null;
       const activity = event ? activityMap[event.id_activity] ?? null : null;
+      const activityId = event?.id_activity ?? null;
+      const review = activityId ? reviewMap[`${activityId}_${r.id_user}`] ?? null : null;
       return {
         id:           r.id,
         date:         r.date,
@@ -729,6 +747,7 @@ export class DashboardService {
         id_event:     r.id_event,
         id_user:      r.id_user,
         user_rating:  r.user_rating,
+        review,
         event: event
           ? { id: event.id, date: event.date, id_activity: event.id_activity, activity }
           : null,

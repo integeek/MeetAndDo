@@ -143,18 +143,65 @@ export class ActivityService {
 
   async findOne(id: number) {
     const client = this.supabaseService.getClient();
-    const { data, error } = await client
-      .from('activity')
-      .select('id, title, description, address, group_size, price, id_user, theme, average_rating, images')
-      .eq('id', id)
-      .single();
+    const admin  = this.supabaseService.getAdminClient();
+
+    const [{ data, error }, { data: reviewData }, eventSlots] = await Promise.all([
+      client
+        .from('activity')
+        .select('id, title, description, address, group_size, price, id_user, theme, average_rating, images')
+        .eq('id', id)
+        .single(),
+      admin
+        .from('review')
+        .select('id, rating, comment, created_at, id_user')
+        .eq('id_activity', id)
+        .order('created_at', { ascending: false }),
+      this.getEventSlotsByActivityId(id),
+    ]);
 
     if (error) throw new Error(error.message);
 
-    return {
-      ...data,
-      eventSlots: await this.getEventSlotsByActivityId(id),
-    };
+    // Fetch user names for reviews
+    const userIds = [...new Set((reviewData ?? []).map((r: any) => r.id_user).filter(Boolean))];
+    const usersMap: Record<number, any> = {};
+    if (userIds.length) {
+      const { data: users } = await admin
+        .from('users')
+        .select('id, firstname, lastname')
+        .in('id', userIds);
+      for (const u of users ?? []) usersMap[u.id] = u;
+    }
+
+    const reviews = (reviewData ?? []).map((r: any) => ({
+      id: r.id,
+      note: r.rating,
+      commentaire: r.comment,
+      created_at: r.created_at,
+      auteur: usersMap[r.id_user]
+        ? `${usersMap[r.id_user].firstname || ''} ${usersMap[r.id_user].lastname || ''}`.trim() || 'Anonymous'
+        : 'Anonymous',
+    }));
+
+    // Fetch creator info
+    let creator: any = null;
+    if ((data as any).id_user) {
+      const { data: userData } = await admin
+        .from('users')
+        .select('id, firstname, lastname, avatar_url')
+        .eq('id', (data as any).id_user)
+        .single();
+      if (userData) {
+        creator = {
+          id: userData.id,
+          first_name: userData.firstname,
+          last_name: userData.lastname,
+          photo: userData.avatar_url ?? null,
+          rating: (data as any).average_rating ?? null,
+        };
+      }
+    }
+
+    return { ...data, reviews, creator, eventSlots };
   }
 
   async findAll(userId?: number) {
