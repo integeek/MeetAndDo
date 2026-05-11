@@ -15,7 +15,7 @@ function getMeetDoApiUrl() {
 
 function resaComponent(resa, index) {
   const activity = resa.event?.activity;
-  const imageUrl = activity?.image || '../Assets/img/placeholder.png';
+  const imageUrl = activity?.images?.[0] ?? activity?.image ?? '../Assets/img/placeholder.png';
   const activityTitle = activity?.title || 'Activity';
   const activityAddress = activity?.address ?? '-';
   const activityPrice = activity?.price ?? '-';
