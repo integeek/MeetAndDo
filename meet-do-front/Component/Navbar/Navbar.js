@@ -54,6 +54,21 @@ function getStoredAuthenticatedUser() {
     }
 }
 
+function getAuthenticatedUserAvatarUrl(basePath) {
+    const avatarUrl = getStoredAuthenticatedUser()?.avatar_url;
+    return typeof avatarUrl === "string" && avatarUrl.trim()
+        ? avatarUrl
+        : `${basePath}/Assets/img/icon-profil.png`;
+}
+
+function escapeHtmlAttribute(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+}
+
 function isPublisherUser() {
     const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
     return role === "publisher";
@@ -170,6 +185,10 @@ function GuestNavbar(basePath) {
 
 function UserNavbar(basePath, variant = "auto") {
     const accountHref = getUserAccountHref(basePath);
+    const avatarUrl = getAuthenticatedUserAvatarUrl(basePath);
+    const escapedAvatarUrl = escapeHtmlAttribute(avatarUrl);
+    const fallbackAvatarUrl = escapeHtmlAttribute(`${basePath}/Assets/img/icon-profil.png`);
+    const hasCustomAvatar = avatarUrl !== `${basePath}/Assets/img/icon-profil.png`;
     const publisherActions = getPublisherNavbarActions(basePath, variant);
     const reservationsHref = getMyReservationsHref(basePath);
     const activitiesHref = getMyActivitiesHref(basePath);
@@ -221,7 +240,14 @@ function UserNavbar(basePath, variant = "auto") {
                                 aria-expanded="false"
                             >
                                 <div>Profil</div>
-                                <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
+                                <img
+                                    src="${escapedAvatarUrl}"
+                                    id="profilImg"
+                                    class="${hasCustomAvatar ? "has-avatar" : ""}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    onerror="this.onerror=null;this.src='${fallbackAvatarUrl}';this.classList.remove('has-avatar');"
+                                >
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end meetdo-profile-menu" aria-labelledby="profil">
                                 <li>

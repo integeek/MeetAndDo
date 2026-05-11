@@ -264,11 +264,18 @@ body {
 }
 
 #profilImg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     object-fit: contain;
     display: block;
     filter: brightness(0) invert(1);
+}
+
+#profilImg.has-avatar {
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    object-fit: cover;
+    filter: none;
 }
 
 @media (max-width: 991px) {
