@@ -128,9 +128,22 @@ function getAuthenticatedUserId(user) {
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 
+function intToUUID(id) {
+  return `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
+}
+
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
     authMessage: "You must be logged in to reserve an event.",
+    redirect: `Activity.html?id=${activityId}`,
+  });
+
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
+function redirectToLoginForContact(activityId) {
+  const params = new URLSearchParams({
+    authMessage: "You must be logged in to contact the activity creator.",
     redirect: `Activity.html?id=${activityId}`,
   });
 
@@ -441,6 +454,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize the report modal
   initReportModal();
+  initCreatorContactButton(resolvedActivityId, activity);
   initReservationModal(resolvedActivityId, activity);
 });
 
@@ -539,6 +553,42 @@ function initReservationModal(activityId, activity) {
   document
     .getElementById("reservation-confirm-button")
     ?.addEventListener("click", submitReservations);
+}
+
+function initCreatorContactButton(activityId, activity) {
+  const contactButton = document.querySelector(
+    "#creator-contact-button .buttonCo",
+  );
+  const feedback = document.getElementById("creator-contact-feedback");
+
+  if (!contactButton) return;
+
+  contactButton.addEventListener("click", async (event) => {
+    event.preventDefault();
+    feedback?.classList.add("d-none");
+
+    const currentUser = await getCurrentUser();
+    const currentUserId = getAuthenticatedUserId(currentUser);
+    const creatorId = Number(activity?.id_user ?? activity?.creator?.id);
+
+    if (!currentUserId) {
+      redirectToLoginForContact(activityId);
+      return;
+    }
+
+    if (creatorId === currentUserId) {
+      if (feedback) {
+        feedback.textContent =
+          "You cannot contact yourself because you are the creator of this activity.";
+        feedback.classList.remove("d-none");
+      }
+      return;
+    }
+
+    window.location.href = `Messagerie.html?userId=${encodeURIComponent(
+      intToUUID(creatorId),
+    )}`;
+  });
 }
 
 function renderReservationEventsLoading() {

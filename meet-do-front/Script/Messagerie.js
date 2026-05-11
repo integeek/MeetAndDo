@@ -215,6 +215,7 @@ function initSocket() {
 
   state.socket.on('connect', () => {
     state.socket.emit('register', { userId: state.currentUserId });
+    openRequestedUserConversation();
     loadConversations();
   });
 
@@ -226,9 +227,12 @@ function initSocket() {
     state.conversations = data;
     renderConversationList(data);
 
+    const requestedId = getRequestedConversationId();
     const savedId = localStorage.getItem('meetando_active_conv');
-    if (savedId && !state.activeConversationId) {
-      const conv = data.find(c => c.id === savedId);
+    const conversationIdToOpen = requestedId || savedId;
+
+    if (conversationIdToOpen && !state.activeConversationId) {
+      const conv = data.find(c => c.id === conversationIdToOpen);
       if (conv) selectConversation(conv);
     }
   });
@@ -254,6 +258,27 @@ function initSocket() {
 
 function loadConversations() {
   state.socket.emit('get_conversations', { userId: state.currentUserId });
+}
+
+function getRequestedConversationId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('conversationId');
+}
+
+function getRequestedUserId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('userId');
+}
+
+function openRequestedUserConversation() {
+  const requestedUserId = getRequestedUserId();
+
+  if (!requestedUserId || requestedUserId === state.currentUserId) return;
+
+  state.socket.emit('open_conversation', {
+    userId1: state.currentUserId,
+    userId2: requestedUserId,
+  });
 }
 
 // ================================================================
