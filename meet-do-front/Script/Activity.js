@@ -70,6 +70,7 @@ const RESERVATION_API_URL = "http://localhost:3000/reservation";
 const AUTH_API_URL = "http://localhost:3000/authentication";
 const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 const AUTH_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+const CREATOR_AVATAR_PLACEHOLDER = "../Assets/img/icon-profil.png";
 
 let currentReservationEvents = [];
 let selectedReservationQuantities = new Map();
@@ -128,9 +129,22 @@ function getAuthenticatedUserId(user) {
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 
+function intToUUID(id) {
+  return `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
+}
+
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
     authMessage: "You must be logged in to reserve an event.",
+    redirect: `Activity.html?id=${activityId}`,
+  });
+
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
+function redirectToLoginForContact(activityId) {
+  const params = new URLSearchParams({
+    authMessage: "You must be logged in to contact the activity creator.",
     redirect: `Activity.html?id=${activityId}`,
   });
 
@@ -282,29 +296,44 @@ function renderReportButton() {
   `;
 }
 
-function renderActivity(activity) {
-  document.getElementById("activity-title").textContent = activity.title;
-  document.getElementById("activity-report-button").innerHTML =
-    renderReportButton();
-  document.getElementById("activity-address-text").textContent =
-    activity.address;
-  document.getElementById("activity-description-text").textContent =
-    activity.description;
-  document.getElementById("activity-participate-button").innerHTML =
-    BoutonBleu("Join");
-  document.getElementById("activity-review-button").innerHTML =
-    BoutonBleu("Leave a review");
-  document.getElementById("creator-contact-button").innerHTML =
-    renderContactButton();
-  document.getElementById("activity-group-size").textContent =
-    `Group size: ${activity.group_size} people`;
-  document.getElementById("activity-price").textContent =
-    `Price: ${activity.price} EUR`;
-  document.getElementById("activity-reviews-rating").textContent =
-    `${activity.average_rating} / 5`;
-  document.getElementById("activity-reviews-list").innerHTML = (
-    activity.reviews || []
-  )
+function hasActivityReviews(activity) {
+  return Array.isArray(activity.reviews) && activity.reviews.length > 0;
+}
+
+function getActivityAverageRating(activity) {
+  const average = Number(activity.average_rating);
+
+  if (Number.isFinite(average)) {
+    return average;
+  }
+
+  const notes = (activity.reviews || [])
+    .map((review) => Number(review.note))
+    .filter(Number.isFinite);
+
+  if (!notes.length) {
+    return null;
+  }
+
+  return notes.reduce((total, note) => total + note, 0) / notes.length;
+}
+
+function renderActivityReviews(activity) {
+  const reviews = Array.isArray(activity.reviews) ? activity.reviews : [];
+
+  if (!reviews.length) {
+    return `
+      <div class="activity-reviews-empty">
+        <p class="mb-2 fw-semibold">No reviews yet for this activity.</p>
+        <p class="mb-3 text-secondary">
+          Be the first participant to share your experience and help others decide.
+        </p>
+        ${BoutonBleu("Leave the first review")}
+      </div>
+    `;
+  }
+
+  return reviews
     .map(
       (avis) => `
         <div class="card border-0 bg-body-tertiary mb-3">
@@ -334,15 +363,66 @@ function renderActivity(activity) {
       `,
     )
     .join("");
+}
+
+function setCreatorAvatar(photoUrl) {
+  const avatar = document.getElementById("creator-avatar");
+  if (!avatar) return;
+
+  avatar.onerror = () => {
+    avatar.onerror = null;
+    avatar.src = CREATOR_AVATAR_PLACEHOLDER;
+  };
+  avatar.src = photoUrl || CREATOR_AVATAR_PLACEHOLDER;
+}
+
+function getCreatorName(creator) {
+  const firstName = creator?.first_name || creator?.firstname || "";
+  const lastName = creator?.last_name || creator?.lastname || "";
+  return `${firstName} ${lastName}`.trim();
+}
+
+function getCreatorRatingText(creator) {
+  const rating = Number(creator?.rating);
+  return Number.isFinite(rating)
+    ? `Rating: ${rating.toFixed(1)} / 5`
+    : "This creator has no reviews yet.";
+}
+
+function renderActivity(activity) {
+  const hasReviews = hasActivityReviews(activity);
+  const averageRating = getActivityAverageRating(activity);
+
+  document.getElementById("activity-title").textContent = activity.title;
+  document.getElementById("activity-report-button").innerHTML =
+    renderReportButton();
+  document.getElementById("activity-address-text").textContent =
+    activity.address;
+  document.getElementById("activity-description-text").textContent =
+    activity.description;
+  document.getElementById("activity-participate-button").innerHTML =
+    BoutonBleu("Join");
+  document.getElementById("activity-review-button").innerHTML =
+    BoutonBleu("Leave a review");
+  document.getElementById("creator-contact-button").innerHTML =
+    renderContactButton();
+  document.getElementById("activity-group-size").textContent =
+    `Group size: ${activity.group_size} people`;
+  document.getElementById("activity-price").textContent =
+    `Price: ${activity.price} EUR`;
+  document.getElementById("activity-reviews-rating").textContent =
+    hasReviews && averageRating !== null
+      ? `${averageRating.toFixed(1)} / 5`
+      : "No reviews yet";
+  document.getElementById("activity-reviews-list").innerHTML =
+    renderActivityReviews(activity);
   document.getElementById("activity-created-by").textContent =
     "Activity created by";
-  document.getElementById("creator-avatar").src = activity.creator?.photo || "";
-  document.getElementById("creator-name").textContent = activity.creator
-    ? `${activity.creator.first_name || ""} ${activity.creator.last_name || ""}`
-    : "";
-  document.getElementById("creator-rating").textContent = activity.creator
-    ? `Rating: ${activity.creator.rating} / 5`
-    : "";
+  setCreatorAvatar(activity.creator?.photo || activity.creator?.avatar_url);
+  document.getElementById("creator-name").textContent =
+    getCreatorName(activity.creator) || "Activity creator";
+  document.getElementById("creator-rating").textContent =
+    getCreatorRatingText(activity.creator);
   document.getElementById("activity-images").innerHTML = `
     <div
       id="activityCarousel"
@@ -397,6 +477,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize the report modal
   initReportModal();
+  initCreatorContactButton(resolvedActivityId, activity);
   initReservationModal(resolvedActivityId, activity);
 });
 
@@ -495,6 +576,42 @@ function initReservationModal(activityId, activity) {
   document
     .getElementById("reservation-confirm-button")
     ?.addEventListener("click", submitReservations);
+}
+
+function initCreatorContactButton(activityId, activity) {
+  const contactButton = document.querySelector(
+    "#creator-contact-button .buttonCo",
+  );
+  const feedback = document.getElementById("creator-contact-feedback");
+
+  if (!contactButton) return;
+
+  contactButton.addEventListener("click", async (event) => {
+    event.preventDefault();
+    feedback?.classList.add("d-none");
+
+    const currentUser = await getCurrentUser();
+    const currentUserId = getAuthenticatedUserId(currentUser);
+    const creatorId = Number(activity?.id_user ?? activity?.creator?.id);
+
+    if (!currentUserId) {
+      redirectToLoginForContact(activityId);
+      return;
+    }
+
+    if (creatorId === currentUserId) {
+      if (feedback) {
+        feedback.textContent =
+          "You cannot contact yourself because you are the creator of this activity.";
+        feedback.classList.remove("d-none");
+      }
+      return;
+    }
+
+    window.location.href = `Messagerie.html?userId=${encodeURIComponent(
+      intToUUID(creatorId),
+    )}`;
+  });
 }
 
 function renderReservationEventsLoading() {
