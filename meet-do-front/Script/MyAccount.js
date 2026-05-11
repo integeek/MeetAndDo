@@ -98,7 +98,7 @@ async function updatePassword() {
     return;
   }
 
-  if (password.value !== newPassword.value) {
+  if (password !== newPassword) {
     erreurDiv.textContent = "The passwords do not match";
     return;
   }
@@ -118,7 +118,7 @@ async function updatePassword() {
       return;
   }
 
-  const response = await fetch('http://localhost:3000/user/password', {
+  const response = await fetch(`${getMeetDoApiUrl()}/user/password`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

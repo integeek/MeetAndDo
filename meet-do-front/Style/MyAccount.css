@@ -1,215 +1,266 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --meetdo-blue: #004aad;
+  --meetdo-blue-dark: #003b8a;
+  --meetdo-blue-soft: #eef5ff;
+  --meetdo-border: #e4e7ec;
+  --meetdo-text: #111827;
+  --meetdo-muted: #667085;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--meetdo-text);
+  background: #fff;
+}
+
 h1 {
-  font-size: 2.5rem;
-  margin-left: 50px;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
-hr {
-  width: 90%;
-  margin: 0 auto;
-  margin: 20px 0;
-}
-
-.global-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.infos-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 50px auto;
-  padding: 20px;
-  border: #000000 solid 2px;
-  border-radius: 10px;
+.account-panel {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--meetdo-border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
 }
 
 .profile-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 30px;
+  gap: 1.5rem;
 }
 
 #profile-icon {
-  width: 150px;
-  height: 150px;
+  width: clamp(96px, 13vw, 140px);
+  height: clamp(96px, 13vw, 140px);
+  border: 4px solid var(--meetdo-blue-soft);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f8fafc;
 }
 
-.success {
-  color: green;
-  font-size: 1.5rem;
-}
-
-.error {
-  color: red;
-  font-size: 1.5rem;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  margin-top: 2%;
-  gap: 20px;
-}
-
-.firstname-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.input-firstname {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.lastname-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.input-lastname {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.email-container {
-  display: flex;
-  align-items: flex-end;
-}
-
-.input-email {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.edit-icon {
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-}
-
-form label {
-  font-size: 1.5rem;
-}
-
-form input {
-  width: 500px;
-  height: 50px;
-  font-size: 1.5rem;
-  border: #000000 solid 2px;
-  border-radius: 10px;
-  background: #f9f4f4;
-  padding-left: 10px;
+.section-kicker {
+  color: var(--meetdo-blue);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 h2 {
-  margin-left: 50px;
-  margin-top: 50px;
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
+  font-weight: 800;
 }
 
-.meeter-container {
-  display: flex;
+.profile-helper {
+  max-width: 560px;
+  color: var(--meetdo-muted);
+  line-height: 1.6;
+}
+
+.profile-action {
+  min-width: 220px;
+}
+
+.profile-action .buttonCo,
+.password-action .buttonCo,
+.edit-footer .buttonCo,
+.edit-footer .buttonRo {
+  margin: 0;
+  min-height: 48px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.account-divider {
+  margin: 2rem 0;
+  border-color: #d9d9d9;
+  opacity: 1;
+}
+
+.account-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.account-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.85rem;
+}
+
+.account-field-control {
+  min-width: 0;
+}
+
+.form-control {
+  border-radius: 12px;
+  border-color: #cfd8e3;
+}
+
+.form-control:read-only {
+  background: #f8fafc;
+  color: #344054;
+}
+
+.form-control:focus {
+  border-color: var(--meetdo-blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 74, 173, 0.14);
+}
+
+.edit-icon-button {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
   align-items: center;
-  margin-left: 70px;
-  gap: 20px;
+  justify-content: center;
+  border: 1px solid #d8e6f8;
+  border-radius: 10px;
+  background: var(--meetdo-blue-soft);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.edit-icon-button:hover,
+.edit-icon-button:focus {
+  background: #d8e6f8;
+  transform: translateY(-1px);
+}
+
+.edit-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.password-action {
+  width: min(100%, 260px);
+  margin-top: 0.5rem;
+}
+
+.success {
+  color: #047857;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.error,
+.erreur {
+  color: #b42318;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.erreur {
+  min-height: 1.4rem;
+  margin-top: 1rem;
 }
 
 .edit-container {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
   z-index: 1000;
+  padding: 1rem;
+  background-color: rgba(15, 23, 42, 0.52);
 }
 
 .edit-content {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: min(100% - 2rem, 520px);
   transform: translate(-50%, -50%);
-  background: white;
-  padding: 40px 32px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  text-align: center;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+}
+
+.edit-password-content {
+  width: min(100% - 2rem, 620px);
 }
 
 .edit-header h3 {
-  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  font-weight: 800;
+  text-align: left;
 }
 
-.edit-main input {
-  width: 200px;
-  height: 30px;
-  font-size: 1.2rem;
-  border: #000000 solid 2px;
-  border-radius: 10px;
-  background: #f9f4f4;
-  padding-left: 10px;
+.edit-main {
+  width: 100%;
 }
 
 .edit-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: 50px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
+.edit-footer > * {
+  min-width: 0;
+}
 
 .edit-password {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.edit-password label {
+  margin-top: 0.25rem;
+  font-weight: 700;
+  text-align: left;
 }
 
 .containerPassword {
-    position: relative; 
-    display: inline-block;
-    width: 100%;
+  position: relative;
+  width: 100%;
 }
 
 .containerPassword input {
-    padding-right: 40px;
+  padding-right: 2.75rem;
 }
 
 .togglePassword {
-    position: absolute;
-    right: 10px;
-    top: 50%; 
-    transform: translateY(-50%);
-    width: 20px; 
-    cursor: pointer;
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  width: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .validatorCriters {
-    padding: 10px 3px;
-    margin: auto;
-    display: none;
-  }
-  
+  display: none;
+  padding: 0.25rem 0;
+}
+
 .validatorCriters span {
-    display: block;
-    color: #cacaca;
-    font-size: 13px;
-    margin: 5px 0;
-  }
-  
+  display: block;
+  margin: 0.35rem 0;
+  color: #98a2b3;
+  font-size: 0.86rem;
+}
+
 .validatorCriters span.error {
-    color: #a70b0b;
-  }
-  
+  color: #b42318;
+}
+
 .validatorCriters span.succes {
-    color: green;
-  }
+  color: #047857;
+}
 
 .buttonRo {
   background-color: #ff4646;
@@ -219,5 +270,38 @@ h2 {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  margin: 10px;
+}
+
+@media (max-width: 767.98px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .profile-action,
+  .password-action {
+    width: 100%;
+  }
+
+  .account-field {
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .account-panel {
+    padding: 1rem;
+  }
+
+  .account-field {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-icon-button {
+    justify-self: end;
+  }
+
+  .edit-footer {
+    grid-template-columns: 1fr;
+  }
 }
