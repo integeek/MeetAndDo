@@ -179,6 +179,24 @@ export class DashboardController {
   //  ADMIN — SIGNALEMENTS
   // ----------------------------------------------------------------
 
+  /* ----------------------------------------------------------------
+     POST /dashboard/report
+     Soumettre un signalement (activité ou utilisateur) — tout utilisateur connecté
+     ---------------------------------------------------------------- */
+  @Post('report')
+  submitReport(
+    @Req() req: RequestWithUser,
+    @Body() body: {
+      type: 'activity' | 'user';
+      id_activity?: number;
+      id_reported?: number;
+      reason: string;
+      description?: string;
+    },
+  ) {
+    return this.dashboardService.submitReport(body, req.user.id);
+  }
+
   @Get('admin/reports/users')
   getReportedUsers(@Req() req: RequestWithUser) {
     if ((req.user.role || '').toLowerCase() !== 'admin') {
