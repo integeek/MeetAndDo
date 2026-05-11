@@ -1,202 +1,379 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My account</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../Style/MyAccount.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+    <script src="../Script/TogglePassword.js" defer></script>
+    <script src="../Script/ValidatorCriters.js" defer></script>
+    <script src="../Script/MyAccount.js" defer></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-    crossorigin="anonymous"
-  />
-  <link rel="stylesheet" href="../Style/MyAccount.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
-  <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
-  <link rel="stylesheet" href="../Component/Footer/Footer.css" />
-  <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
-  <script src="../Component/Button/BlueButton.js"></script>
-  <script src="../Script/TogglePassword.js" defer></script>
-  <script src="../Script/ValidatorCriters.js" defer></script>
-  <script src="../Component/Footer/Footer.js"></script>
-  <script src="../Component/Navbar/Navbar.js"></script>
-  <script src="../Script/MyAccount.js" defer></script>
-  <title>My account</title>
-</head>
+  <body>
+    <header>
+      <div id="navbar-container" class="navbar-container"></div>
+    </header>
 
-<body>
-  <header>
-    <div class="navbar-container" id="navbar-container"></div>
-    <script>
-      document.getElementById('navbar-container').innerHTML = Navbar("..");
-    </script>
-    <h1>My Account :</h1>
-  </header>
-  <main>
-    <div class="global-container">
-      <div class="infos-container">
-        <div class="profile-container">
-          <img src="../Assets/img/icon-profil.png" alt="profile-icon" id="profile-icon" />
-          <div id="boutonContainer"></div>
-          <script>
-            document.getElementById("boutonContainer").innerHTML = BoutonBleu(
-              "Modifier photo de profil"
-            );
-            fetch('../../controller/Compte/PhotoController.php', { method: 'GET' })
-              .then(response => response.json())
-              .then(data => {
-                if (data.photo && data.photo !== "") {
-                  document.getElementById('profile-icon').src = data.photo;
-                }
-              });
-          </script>
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1>My account</h1>
         </div>
-        <hr>
-        <form>
-          <div class="firstname-container">
-            <div class="input-firstname">
-              <label for="firstname">Firstname :</label>
-              <input type="text" id="firstname" readonly />
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <section class="account-panel" aria-labelledby="account-profile-title">
+            <div class="profile-container">
+              <img
+                src="../Assets/img/icon-profil.png"
+                alt="Profile picture"
+                id="profile-icon"
+              />
+              <div class="profile-copy">
+                <p class="section-kicker mb-2">Profile</p>
+                <h2 id="account-profile-title" class="mb-2">
+                  Personal information
+                </h2>
+                <p class="profile-helper mb-0">
+                  Manage the information linked to your Meet & Do account.
+                </p>
+              </div>
+              <div id="boutonContainer" class="profile-action"></div>
             </div>
-            <img src="../Assets/img/icon-edit.svg" alt="edit-icon" class="edit-icon"
-              onclick="openPopUp('edit-firstname-popup')" />
+
+            <hr class="account-divider" />
+
+            <form class="account-form">
+              <div class="account-field">
+                <div class="account-field-control">
+                  <label for="firstname" class="form-label fw-semibold">
+                    Firstname
+                  </label>
+                  <input
+                    type="text"
+                    id="firstname"
+                    class="form-control form-control-lg"
+                    readonly
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="edit-icon-button"
+                  onclick="openPopUp('edit-firstname-popup')"
+                  aria-label="Edit firstname"
+                >
+                  <img src="../Assets/img/icon-edit.svg" alt="" class="edit-icon" />
+                </button>
+              </div>
+
+              <div class="account-field">
+                <div class="account-field-control">
+                  <label for="lastname" class="form-label fw-semibold">
+                    Lastname
+                  </label>
+                  <input
+                    type="text"
+                    id="lastname"
+                    class="form-control form-control-lg"
+                    readonly
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="edit-icon-button"
+                  onclick="openPopUp('edit-lastname-popup')"
+                  aria-label="Edit lastname"
+                >
+                  <img src="../Assets/img/icon-edit.svg" alt="" class="edit-icon" />
+                </button>
+              </div>
+
+              <div class="account-field">
+                <div class="account-field-control">
+                  <label for="email" class="form-label fw-semibold">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control form-control-lg"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <div class="account-actions">
+                <div id="editPassword" class="password-action"></div>
+                <button
+                  type="button"
+                  class="account-logout-button"
+                  onclick="logoutMyAccountUser()"
+                >
+                  Logout
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer id="footer-container" class="footer-container"></footer>
+
+    <div class="edit-container" id="edit-firstname-popup">
+      <div class="edit-content">
+        <div class="edit-header">
+          <h3>Update your firstname</h3>
+        </div>
+        <form id="edit-firstname-form">
+          <div class="edit-main">
+            <input
+              type="text"
+              name="edit-firstname"
+              id="edited-firstname"
+              class="form-control form-control-lg"
+            />
           </div>
-          <div class="lastname-container">
-            <div class="input-lastname">
-              <label for="lastname">Lastname :</label>
-              <input type="text" id="lastname" readonly />
-            </div>
-            <img src="../Assets/img/icon-edit.svg" alt="edit-icon" class="edit-icon"
-              onclick="openPopUp('edit-lastname-popup')" />
+          <div class="edit-footer">
+            <button
+              type="button"
+              onclick="closePopUp('edit-firstname-popup')"
+              class="buttonRo"
+            >
+              Annuler
+            </button>
+            <div id="bouton-bleue1"></div>
           </div>
-          <div class="email-container">
-            <div class="input-email">
-              <label for="email">Email :</label>
-              <input type="email" id="email" readonly />
-            </div>
-          </div>
-          <div id="editPassword"></div>
-          <script>
-            document.getElementById("editPassword").innerHTML = BoutonBleu("Edit my password");
-            document.querySelector("#editPassword .buttonCo").onclick = (event) => {
-              event.preventDefault();
-              openPopUp('edit-password-popup');
-            };
-          </script>
         </form>
       </div>
-        </div>
-      </div>
     </div>
-  </main>
-  <footer id="footer-container" class="footer-container"></footer>
-  <script src="../component/Footer/Footer.js"></script>
-  <script>
-    document.getElementById('footer-container').innerHTML = Footer("..");
-  </script>
 
-  <div class="edit-container" id="edit-firstname-popup">
-    <div class="edit-content">
-      <div class="edit-header">
-        <h3>Update your firstname</h3>
-      </div>
-      <form id="edit-firstname-form">
-        <div class="edit-main">
-          <input type="text" name="edit-firstname" id="edited-firstname" />
+    <div class="edit-container" id="edit-lastname-popup">
+      <div class="edit-content">
+        <div class="edit-header">
+          <h3>Update your lastname</h3>
         </div>
-        <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-firstname-popup')" class="buttonRo">Annuler</button>
-          <div onclick="updateFirstname()" id="bouton-bleue1"></div>
-          <script>
-            document.getElementById("bouton-bleue1").innerHTML =
-              BoutonBleu("Valider");
-          </script>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="edit-container" id="edit-lastname-popup">
-    <div class="edit-content">
-      <div class="edit-header">
-        <h3>Update your lastname</h3>
-      </div>
-      <form onsubmit="event.preventDefault(); updateLastname();" id="edit-lastname-form">
-        <div class="edit-main">
-          <input type="text" name="edit-lastname" id="edited-lastname" />
-        </div>
-        <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-lastname-popup')" class="buttonRo">Annuler</button>
-          <div onclick="document.getElementById('edit-lastname-form').submit()" id="bouton-bleue2"></div>
-          <script>
-            document.getElementById("bouton-bleue2").innerHTML =
-              BoutonBleu("Valider");
-          </script>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="edit-container" id="edit-password-popup">
-    <div class="edit-content">
-      <div class="edit-header">
-        <h3>Update your password</h3>
-      </div>
-      <form id="edit-password-form" class="groupForm">
-        <div class="edit-password">
-          <label for="old-password">Enter your old password</label>
-          <div class="containerPassword">
-            <input class="textbox" type="password" id="old-password" name="old-password" placeholder="********" required>
-            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
-          </div> 
-          <label for="old-password">Enter your new password</label>
-          <div class="containerPassword">
-            <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
-            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
-          </div> 
-          <div class="validatorCriters">
-            <span class="digit"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one number</span>
-            <span class="uppercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one uppercase letter</span>
-            <span class="lowercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one lowercase letter</span>
-            <span class="length"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least 8 characters</span>
+        <form
+          onsubmit="event.preventDefault(); updateLastname();"
+          id="edit-lastname-form"
+        >
+          <div class="edit-main">
+            <input
+              type="text"
+              name="edit-lastname"
+              id="edited-lastname"
+              class="form-control form-control-lg"
+            />
           </div>
-          <label for="old-password">Confirm your new password</label>
-          <div class="containerPassword">
-            <input class="textbox" type="password" id="new-password" name="new-password" placeholder="********" required>
-            <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
-          </div> 
-        </div>
-        <div class="erreur" style="color: red; margin-bottom: 1rem;"></div>
-        <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-password-popup')" class="buttonRo">Cancel</button>
-          <div id="bouton-bleue3"></div>
-          <script>
-            document.getElementById("bouton-bleue3").innerHTML = BoutonBleu("Validate");
-            document.querySelector("#bouton-bleue3 .buttonCo").onclick = (event) => {
-              event.preventDefault();
-              updatePassword();
-            };
-          </script>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="edit-container" id="edit-photo-popup" style="display:none;">
-    <div class="edit-content">
-      <div class="edit-header">
-        <h3>Changer la photo de profil</h3>
+          <div class="edit-footer">
+            <button
+              type="button"
+              onclick="closePopUp('edit-lastname-popup')"
+              class="buttonRo"
+            >
+              Annuler
+            </button>
+            <div id="bouton-bleue2"></div>
+          </div>
+        </form>
       </div>
-      <form id="edit-photo-form" enctype="multipart/form-data">
-        <div class="edit-main">
-          <input type="file" name="photo" id="input-pdp" accept="image/*" required />
-        </div>
-        <div class="edit-footer">
-          <button type="button" onclick="closePopUp('edit-photo-popup')" class="buttonRo">Annuler</button>
-        </div>
-      </form>
     </div>
-  </div>
-</body>
 
+    <div class="edit-container" id="edit-password-popup">
+      <div class="edit-content edit-password-content">
+        <div class="edit-header">
+          <h3>Update your password</h3>
+        </div>
+        <form id="edit-password-form" class="groupForm">
+          <div class="edit-password">
+            <label for="old-password">Enter your old password</label>
+            <div class="containerPassword">
+              <input
+                class="textbox form-control form-control-lg"
+                type="password"
+                id="old-password"
+                name="old-password"
+                placeholder="********"
+                required
+              />
+              <img
+                class="togglePassword"
+                src="../assets/img/icon-eye-open.png"
+                alt="Afficher/Masquer"
+              />
+            </div>
+            <label for="password">Enter your new password</label>
+            <div class="containerPassword">
+              <input
+                class="textbox form-control form-control-lg"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="********"
+                required
+              />
+              <img
+                class="togglePassword"
+                src="../assets/img/icon-eye-open.png"
+                alt="Afficher/Masquer"
+              />
+            </div>
+            <div class="validatorCriters">
+              <span class="digit">
+                <i class="far fa-check-circle"></i>
+                &nbsp;Your password must contain at least one number
+              </span>
+              <span class="uppercase">
+                <i class="far fa-check-circle"></i>
+                &nbsp;Your password must contain at least one uppercase letter
+              </span>
+              <span class="lowercase">
+                <i class="far fa-check-circle"></i>
+                &nbsp;Your password must contain at least one lowercase letter
+              </span>
+              <span class="length">
+                <i class="far fa-check-circle"></i>
+                &nbsp;Your password must contain at least 8 characters
+              </span>
+            </div>
+            <label for="new-password">Confirm your new password</label>
+            <div class="containerPassword">
+              <input
+                class="textbox form-control form-control-lg"
+                type="password"
+                id="new-password"
+                name="new-password"
+                placeholder="********"
+                required
+              />
+              <img
+                class="togglePassword"
+                src="../assets/img/icon-eye-open.png"
+                alt="Afficher/Masquer"
+              />
+            </div>
+          </div>
+          <div class="erreur"></div>
+          <div class="edit-footer">
+            <button
+              type="button"
+              onclick="closePopUp('edit-password-popup')"
+              class="buttonRo"
+            >
+              Cancel
+            </button>
+            <div id="bouton-bleue3"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="edit-container" id="edit-photo-popup">
+      <div class="edit-content">
+        <div class="edit-header">
+          <h3>Changer la photo de profil</h3>
+        </div>
+        <form id="edit-photo-form" enctype="multipart/form-data">
+          <div class="edit-main">
+            <input
+              type="file"
+              name="photo"
+              id="input-pdp"
+              class="form-control form-control-lg"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              required
+            />
+            <div class="avatar-preview-wrap">
+              <img
+                src="../Assets/img/icon-profil.png"
+                alt="Aperçu de la photo de profil"
+                id="avatar-preview"
+              />
+            </div>
+            <p id="avatar-upload-feedback" class="form-text avatar-feedback"></p>
+          </div>
+          <div class="edit-footer">
+            <button
+              type="button"
+              onclick="closePopUp('edit-photo-popup')"
+              class="buttonRo"
+            >
+              Annuler
+            </button>
+            <div id="bouton-photo-confirm"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
+    <script>
+      document.getElementById("navbar-container").innerHTML = Navbar("..");
+      document.getElementById("footer-container").innerHTML = Footer("..");
+
+      if (window.initializeNavbar) {
+        window.initializeNavbar();
+      }
+
+      document.getElementById("boutonContainer").innerHTML = BoutonBleu(
+        "Modifier photo de profil",
+      );
+      document.querySelector("#boutonContainer .buttonCo").onclick = (event) => {
+        event.preventDefault();
+        openPopUp("edit-photo-popup");
+      };
+
+      document.getElementById("editPassword").innerHTML =
+        BoutonBleu("Edit my password");
+      document.querySelector("#editPassword .buttonCo").onclick = (event) => {
+        event.preventDefault();
+        openPopUp("edit-password-popup");
+      };
+
+      document.getElementById("bouton-bleue1").innerHTML = BoutonBleu("Valider");
+      document.getElementById("bouton-bleue2").innerHTML = BoutonBleu("Valider");
+      document.getElementById("bouton-bleue3").innerHTML = BoutonBleu("Validate");
+      document.getElementById("bouton-photo-confirm").innerHTML =
+        BoutonBleu("Confirmer");
+      document.querySelector("#bouton-bleue1 .buttonCo").onclick = (event) => {
+        event.preventDefault();
+        updateFirstname();
+      };
+      document.querySelector("#bouton-bleue2 .buttonCo").onclick = (event) => {
+        event.preventDefault();
+        updateLastname();
+      };
+      document.querySelector("#bouton-bleue3 .buttonCo").onclick = (event) => {
+        event.preventDefault();
+        updatePassword();
+      };
+      document.querySelector("#bouton-photo-confirm .buttonCo").onclick = (
+        event,
+      ) => {
+        event.preventDefault();
+        uploadProfilePhoto();
+      };
+    </script>
+  </body>
 </html>

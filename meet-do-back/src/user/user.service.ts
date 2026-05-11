@@ -218,7 +218,39 @@ export class UserService {
     id: number,
     file: { buffer: Buffer; originalname: string; mimetype: string },
   ) {
-    const ext = file.originalname.split('.').pop();
+    const extensionsByMimeType: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+    };
+    const ext = extensionsByMimeType[file.mimetype];
+
+    if (!ext) {
+      throw new HttpException(
+        'Format image non autorisé.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const { data: currentUser, error: currentUserError } =
+      await this.supabaseService
+        .getAdminClient()
+        .from('users')
+        .select('avatar_url')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (currentUserError) {
+      this.logger.error(
+        `uploadAvatar current user: ${currentUserError.message}`,
+      );
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     const path = `avatar/${id}-${Date.now()}.${ext}`;
     const { error: uploadError } = await this.supabaseService
       .getAdminClient()
@@ -235,10 +267,13 @@ export class UserService {
       .getAdminClient()
       .storage.from('avatar')
       .getPublicUrl(path);
+
+    const publicUrl = `${data.publicUrl}?v=${Date.now()}`;
+
     const { error: updateError } = await this.supabaseService
       .getAdminClient()
       .from('users')
-      .update({ avatar_url: data.publicUrl })
+      .update({ avatar_url: publicUrl })
       .eq('id', id);
     if (updateError) {
       this.logger.error(`uploadAvatar update: ${updateError.message}`);
@@ -247,10 +282,43 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { avatar_url: data.publicUrl };
+
+    const oldAvatarPath = this.getAvatarStoragePathFromPublicUrl(
+      currentUser?.avatar_url,
+    );
+    if (oldAvatarPath && oldAvatarPath !== path) {
+      const { error: removeError } = await this.supabaseService
+        .getAdminClient()
+        .storage.from('avatar')
+        .remove([oldAvatarPath]);
+
+      if (removeError) {
+        this.logger.warn(`uploadAvatar remove old: ${removeError.message}`);
+      }
+    }
+
+    return { avatar_url: publicUrl };
   }
 
-    async updatePassword(id: number, oldPassword: string, newPassword: string) {
+  private getAvatarStoragePathFromPublicUrl(url?: string | null) {
+    if (!url) return null;
+
+    try {
+      const parsedUrl = new URL(url);
+      const marker = '/storage/v1/object/public/avatar/';
+      const markerIndex = parsedUrl.pathname.indexOf(marker);
+
+      if (markerIndex === -1) return null;
+
+      return decodeURIComponent(
+        parsedUrl.pathname.slice(markerIndex + marker.length),
+      );
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  async updatePassword(id: number, oldPassword: string, newPassword: string) {
     const { data: user, error } = await this.supabaseService
       .getAdminClient()
       .from('users')
