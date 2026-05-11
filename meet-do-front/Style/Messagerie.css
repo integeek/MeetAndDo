@@ -12,7 +12,7 @@
   --recv-bg:       #f0f2f5;
   --recv-text:     #1a1a1a;
   --sidebar-w:     320px;
-  --header-h:      64px;
+  --header-h:      76px;
   --border:        #e8e8e8;
   --shadow-sm:     0 2px 8px rgba(0,0,0,.06);
   --shadow-md:     0 4px 20px rgba(0,0,0,.10);
@@ -84,26 +84,19 @@
 body {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
 }
 
-/* Footer.css applies "main { margin: 0 auto 7rem auto !important }"
-   which centers and shrinks our layout — we neutralize it here */
 #messagerie-app {
   margin: 0 !important;
   width: 100% !important;
   display: flex;
-  flex: 1;
+  height: calc(100dvh - var(--header-h));
   min-height: 0;
   overflow: hidden;
   animation: fadeInUp .45s var(--ease-out) both;
 }
 
-/* Footer sorti du flux fixe → reste en bas de page */
 footer {
-  position: relative !important;
-  bottom: auto !important;
   flex-shrink: 0;
 }
 
