@@ -145,12 +145,13 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-auto d-flex align-items-center gap-2">
                           <div id="creator-contact-button"></div>
                           <p
                             id="creator-contact-feedback"
                             class="creator-contact-feedback mb-0 d-none"
                           ></p>
+                          <div id="creator-report-button"></div>
                         </div>
                       </div>
                     </div>
@@ -318,6 +319,75 @@
               Close
             </button>
             <button type="button" class="btn btn-danger" id="report-submit-btn">
+              Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Creator Modal -->
+    <div
+      class="modal fade"
+      id="reportCreatorModal"
+      tabindex="-1"
+      aria-labelledby="reportCreatorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportCreatorModalLabel">
+              Report this creator
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="creator-report-form">
+              <div class="mb-3">
+                <label for="creator-report-reason" class="form-label"
+                  >Reason for report</label
+                >
+                <select class="form-select" id="creator-report-reason" required>
+                  <option value="">-- Select a reason --</option>
+                  <option value="comportement-inapproprie">Inappropriate behavior</option>
+                  <option value="harcellement">Harassment</option>
+                  <option value="fraude">Fraud / Scam</option>
+                  <option value="fausse-information">False information</option>
+                  <option value="autre">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="creator-report-description" class="form-label"
+                  >Description (optional)</label
+                >
+                <textarea
+                  class="form-control"
+                  id="creator-report-description"
+                  rows="4"
+                  placeholder="Briefly describe the issue..."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="creator-report-submit-btn"
+            >
               Report
             </button>
           </div>

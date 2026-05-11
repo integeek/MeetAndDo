@@ -525,6 +525,19 @@ function renderActivity(activity) {
     BoutonBleu("Leave a review");
   document.getElementById("creator-contact-button").innerHTML =
     renderContactButton();
+  document.getElementById("creator-report-button").innerHTML = `
+    <button
+      type="button"
+      id="creator-report-btn"
+      class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
+      title="Report this creator"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M18 3a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4h-4.724l-4.762 2.857a1 1 0 0 1-1.508-.743L7 21v-2H6a4 4 0 0 1-3.995-3.8L2 15V7a4 4 0 0 1 4-4zm-6 10a1 1 0 0 0-1 1v.01a1 1 0 0 0 2 0V14a1 1 0 0 0-1-1m0-6a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0V8a1 1 0 0 0-1-1"/>
+      </svg>
+      Report creator
+    </button>
+  `;
   document.getElementById("activity-group-size").textContent =
     `Group size: ${activity.group_size} people`;
   document.getElementById("activity-price").textContent =
@@ -633,14 +646,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.warn("Could not load reviews:", err);
   }
+  initReportModal(resolvedActivityId);
+  initCreatorReportModal(activity?.creator?.id);
+  initReservationModal(resolvedActivityId, activity);
 });
 
 let reportModal = null;
+let creatorReportModal = null;
 let reservationEventsModal = null;
 let reviewModal = null;
 
-function initReportModal() {
-  // Get the Report button and attach an event listener
+function initReportModal(resolvedActivityId) {
   const reportButton = document.querySelector(
     "#activity-report-button .buttonRo",
   );
@@ -656,7 +672,6 @@ function initReportModal() {
     });
   }
 
-  // Handle form submission
   const submitBtn = document.getElementById("report-submit-btn");
   const reportForm = document.getElementById("report-form");
 
@@ -670,25 +685,113 @@ function initReportModal() {
         return;
       }
 
-      // Show a confirmation message
-      alert("Thank you for your report. Our team will review it.");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
 
-      // Reset the form
-      reportForm.reset();
+      try {
+        const currentUser = getStoredAuthenticatedUser();
+        const token = currentUser?.token || currentUser?.access_token;
+        const res = await fetch("http://localhost:3000/dashboard/report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            type: "activity",
+            id_activity: Number(resolvedActivityId),
+            reason,
+            description: description || undefined,
+          }),
+        });
 
-      // Close the modal
-      reportModal?.hide();
+        if (res.ok) {
+          alert("Thank you for your report. Our team will review it.");
+          reportForm.reset();
+          reportModal?.hide();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          alert(err.message || "Unable to submit report. Please try again.");
+        }
+      } catch (_) {
+        alert("Unable to submit report. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Report";
+      }
+    });
+  }
+}
 
-      // TODO: Send the data to the backend
-      // await fetch('http://localhost:3000/reports', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     activityId,
-      //     reason,
-      //     description
-      //   })
-      // });
+function initCreatorReportModal(creatorId) {
+  const modalElement = document.getElementById("reportCreatorModal");
+  if (modalElement) {
+    creatorReportModal = new bootstrap.Modal(modalElement);
+  }
+
+  const reportBtn = document.getElementById("creator-report-btn");
+  if (reportBtn) {
+    reportBtn.addEventListener("click", () => {
+      creatorReportModal?.show();
+    });
+  }
+
+  const submitBtn = document.getElementById("creator-report-submit-btn");
+  const reportForm = document.getElementById("creator-report-form");
+
+  if (submitBtn) {
+    submitBtn.addEventListener("click", async () => {
+      const reason = document.getElementById("creator-report-reason").value;
+      const description = document.getElementById(
+        "creator-report-description",
+      ).value;
+
+      if (!reason) {
+        alert("Please select a reason.");
+        return;
+      }
+
+      if (!creatorId) {
+        alert("Unable to identify the creator. Please try again later.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending…";
+
+      try {
+        const currentUser = getStoredAuthenticatedUser();
+        const token = currentUser?.token || currentUser?.access_token;
+        const res = await fetch("http://localhost:3000/dashboard/report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            type: "user",
+            id_reported: Number(creatorId),
+            reason,
+            description: description || undefined,
+          }),
+        });
+
+        if (res.ok) {
+          alert("Thank you for your report. Our team will review it.");
+          reportForm.reset();
+          creatorReportModal?.hide();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          alert(err.message || "Unable to submit report. Please try again.");
+        }
+      } catch (_) {
+        alert("Unable to submit report. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Report";
+      }
     });
   }
 }

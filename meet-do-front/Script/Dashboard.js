@@ -2608,6 +2608,15 @@ function afficherPublisherBookings(reservations) {
             </td>
             <td style="font-size:.78rem;color:var(--text-muted)">User #${r.id_user}</td>
             <td>${badgeStatut('confirme')}</td>
+            <td>
+              <button type="button"
+                class="btn-outline"
+                style="font-size:.68rem;padding:.2rem .55rem;color:#e74c3c;border-color:#e74c3c"
+                onclick="signalerUtilisateur(${r.id_user}, ${act.id})"
+                title="Report this user">
+                <i class="bi bi-flag-fill"></i>
+              </button>
+            </td>
           </tr>`).join('');
 
         return `
@@ -2638,7 +2647,7 @@ function afficherPublisherBookings(reservations) {
               <div class="dash-table-wrap">
                 <table class="dash-table" style="font-size:.82rem">
                   <thead>
-                    <tr><th>#</th><th>Date</th><th>Group</th><th>User</th><th>Status</th></tr>
+                    <tr><th>#</th><th>Date</th><th>Group</th><th>User</th><th>Status</th><th></th></tr>
                   </thead>
                   <tbody>${lignes}</tbody>
                 </table>
@@ -2680,6 +2689,117 @@ function toggleBookingAct(actId) {
   const isOpen = panel.style.display !== 'none';
   panel.style.display = isOpen ? 'none' : '';
   if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ----------------------------------------------------------------
+//  PUBLISHER — SIGNALER UN UTILISATEUR
+// ----------------------------------------------------------------
+
+let _reportUserModal = null;
+let _reportUserId = null;
+let _reportUserActivityId = null;
+
+function signalerUtilisateur(userId, activityId) {
+  _reportUserId = userId;
+  _reportUserActivityId = activityId;
+
+  if (!document.getElementById('reportUserModal')) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div class="modal fade" id="reportUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Report this user</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form id="report-user-form">
+                <div class="mb-3">
+                  <label for="report-user-reason" class="form-label">Reason for report</label>
+                  <select class="form-select" id="report-user-reason" required>
+                    <option value="">-- Select a reason --</option>
+                    <option value="comportement-inapproprie">Inappropriate behavior</option>
+                    <option value="no-show">No-show</option>
+                    <option value="harcellement">Harassment</option>
+                    <option value="fraude">Fraud</option>
+                    <option value="autre">Other</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="report-user-description" class="form-label">Description (optional)</label>
+                  <textarea class="form-control" id="report-user-description" rows="3"
+                    placeholder="Briefly describe the issue..."></textarea>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger" id="report-user-submit-btn">Report</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(wrapper.firstElementChild);
+    document.getElementById('report-user-submit-btn')
+      .addEventListener('click', soumettreSignalementUtilisateur);
+  }
+
+  if (!_reportUserModal) {
+    _reportUserModal = new bootstrap.Modal(document.getElementById('reportUserModal'));
+  }
+
+  document.getElementById('report-user-form')?.reset();
+  _reportUserModal.show();
+}
+
+async function soumettreSignalementUtilisateur() {
+  const reason = document.getElementById('report-user-reason').value;
+  const description = document.getElementById('report-user-description').value;
+  const submitBtn = document.getElementById('report-user-submit-btn');
+
+  if (!reason) {
+    alert('Please select a reason.');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending…';
+
+  try {
+    const userData = JSON.parse(localStorage.getItem('meetando_current_user') || '{}');
+    const token = userData.token || userData.access_token;
+
+    const res = await fetch('http://localhost:3000/dashboard/report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        type: 'user',
+        id_reported: _reportUserId,
+        id_activity: _reportUserActivityId,
+        reason,
+        description: description || undefined,
+      }),
+    });
+
+    if (res.ok) {
+      alert('Report submitted. Our team will review it.');
+      document.getElementById('report-user-form')?.reset();
+      _reportUserModal?.hide();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(err.message || 'Unable to submit report. Please try again.');
+    }
+  } catch (_) {
+    alert('Unable to submit report. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Report';
+  }
 }
 
 function ouvrirBookingsActivite(actId) {
