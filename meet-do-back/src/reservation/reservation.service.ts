@@ -157,7 +157,8 @@ export class ReservationService {
             title,
             description,
             address,
-            price
+            price,
+            images
           )
         )
       `,
