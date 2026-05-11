@@ -1,8 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
+<!doctype html>
+<html lang="en">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My reservations</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -17,44 +18,63 @@
     <script src="../Component/Button/BlueButton.js"></script>
     <script src="../Component/Button/RedButton.js"></script>
     <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
     <script src="../Component/Footer/Footer.js"></script>
     <script src="../Script/MyReservation.js" defer></script>
-
-    <title>My reservations</title>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <div class="navbar-container" id="navbar-container"></div>
-        <script>
-            document.getElementById("navbar-container").innerHTML = Navbar();
-        </script>
-        <h1>My reservations</h1>
+      <div class="navbar-container" id="navbar-container"></div>
+      <script>
+        document.getElementById("navbar-container").innerHTML = Navbar();
+      </script>
     </header>
-    <main>
-        <div class="reservation-list" id="reservation-list">
-        </div>
-        <div class="popup-container" id="cancel-popup">
-            <div class="edit-content">
-                <div class="edit-header">
-                    <h3>Confirm the cancellation</h3>
-                </div>
-                <div class="edit-main">
-                    <p>Write <strong>CANCEL</strong> to confirm</p>
-                    <input type="text" id="cancel-input" placeholder="CANCEL" />
-                </div>
-                <div class="edit-footer">
-                    <button type="button" onclick="closePopUp('cancel-popup')" class="buttonRo">Close</button>
-                    <div id="bouton-confirmer"></div>
-                </div>
-            </div>
-        </div>
-    </main>
-    <footer id="footer-container" class="footer-container">
-        <script>
-            document.getElementById("footer-container").innerHTML = Footer("..");
-        </script>
-    </footer>
-  </div>
 
-</body>
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md">
+              <h1>My reservations</h1>
+              <p class="page-subtitle mb-0">
+                Find all your upcoming activities and manage your bookings.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <div class="reservation-list" id="reservation-list"></div>
+        </div>
+      </div>
+
+      <div class="popup-container" id="cancel-popup">
+        <div class="edit-content" role="dialog" aria-modal="true" aria-labelledby="cancel-popup-title">
+          <div class="edit-header">
+            <p class="modal-kicker mb-2">Cancellation</p>
+            <h3 id="cancel-popup-title">Confirm the cancellation</h3>
+          </div>
+          <div class="edit-main">
+            <p>Write <strong>CANCEL</strong> to confirm your request.</p>
+            <input type="text" id="cancel-input" placeholder="CANCEL" />
+          </div>
+          <div class="edit-footer">
+            <button type="button" onclick="closePopUp('cancel-popup')" class="buttonRo">Close</button>
+            <div id="bouton-confirmer"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer id="footer-container" class="footer-container">
+      <script>
+        document.getElementById("footer-container").innerHTML = Footer("..");
+        if (window.initializeNavbar) {
+          window.initializeNavbar();
+        }
+      </script>
+    </footer>
+  </body>
 </html>

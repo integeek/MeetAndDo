@@ -16,21 +16,34 @@ function getMeetDoApiUrl() {
 function resaComponent(resa, index) {
   const activity = resa.event?.activity;
   const imageUrl = activity?.image || '../Assets/img/placeholder.png';
+  const activityTitle = activity?.title || 'Activity';
+  const activityAddress = activity?.address ?? '-';
+  const activityPrice = activity?.price ?? '-';
+  const reservationDate = resa.event?.date
+    ? new Date(resa.event.date).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '-';
 
   return `
     <div class="reservation-item" id="reservation-item-${index}">
       <div class="item-header">
-        <h2>${activity?.title}</h2>
-        <img src="${imageUrl}" alt="${activity?.title}" class="photo-reservation">
+        <img src="${imageUrl}" alt="${activityTitle}" class="photo-reservation">
+      </div>
+      <div class="item-title-block">
+        <span class="reservation-badge">Booked</span>
+        <h2>${activityTitle}</h2>
       </div>
       <div class="item-main">
         <div class="item-adresse">
           <img src="../Assets/img/icon-pin.png" alt="position-icon">
-          <p>${activity?.address ?? '-'}</p>
+          <p>${activityAddress}</p>
         </div>
         <div class="item-date">
           <img src="../Assets/img/icon-calendar.svg" alt="calendar-icon">
-          <p>${new Date(resa.event?.date).toLocaleDateString('fr-FR')}</p>
+          <p>${reservationDate}</p>
         </div>
         <div class="item-places">
           <img src="../Assets/img/icon-group.svg" alt="group-icon">
@@ -38,7 +51,7 @@ function resaComponent(resa, index) {
         </div>
         <div class="item-prix">
           <img src="../Assets/img/icon-price.svg" alt="price-icon">
-          <p>${activity?.price ?? '-'} €</p>
+          <p>${activityPrice} €</p>
         </div>
       </div>
       <div class="item-footer">
@@ -81,7 +94,12 @@ async function loadReservations() {
   const container = document.getElementById('reservation-list');
 
   if (!reservations || reservations.length === 0) {
-    container.innerHTML = `<p>You have no reservation.</p>`;
+    container.innerHTML = `
+      <div class="reservation-empty">
+        <strong>No reservations yet</strong>
+        <span>Your booked activities will appear here.</span>
+      </div>
+    `;
     return;
   }
 
