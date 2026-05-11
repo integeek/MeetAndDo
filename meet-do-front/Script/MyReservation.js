@@ -56,7 +56,6 @@ function resaComponent(resa, index) {
       </div>
       <div class="item-footer">
         <div id="boutonbleu-${index}"></div>
-        <div id="boutonbleu1-${index}"></div>
         <div id="boutonrouge-${index}"></div>
       </div>
     </div>
@@ -67,11 +66,6 @@ function initButtons(resa, index) {
   document.getElementById(`boutonbleu-${index}`).innerHTML = BoutonBleu("View the activity");
   document.getElementById(`boutonbleu-${index}`).onclick = () => {
     window.location.href = `../Page/Activity.html?id=${resa.event?.id_activity}`;
-  };
-
-  document.getElementById(`boutonbleu1-${index}`).innerHTML = BoutonBleu("Change my reservation");
-  document.getElementById(`boutonbleu1-${index}`).onclick = () => {
-    openPopUp('edit-reservation-popup', resa.id);
   };
 
   document.getElementById(`boutonrouge-${index}`).innerHTML = BoutonRouge("Cancel my reservation");
