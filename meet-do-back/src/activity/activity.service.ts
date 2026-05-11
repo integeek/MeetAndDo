@@ -53,6 +53,37 @@ export class ActivityService {
     return (eventData || []).map((event) => this.normalizeEventSlot(event));
   }
 
+  private async getCreatorById(userId?: number | null) {
+    if (!userId) return null;
+
+    const adminClient = this.supabaseService.getAdminClient();
+    const { data, error } = await adminClient
+      .from('users')
+      .select('id, firstname, lastname')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      this.logger.warn(`getCreatorById erreur: ${error.message}`);
+      return null;
+    }
+
+    if (!data) return null;
+
+    const { data: avatarData } = await adminClient
+      .from('users')
+      .select('avatar_url')
+      .eq('id', userId)
+      .maybeSingle();
+
+    return {
+      id: data.id,
+      first_name: data.firstname,
+      last_name: data.lastname,
+      photo: avatarData?.avatar_url ?? null,
+    };
+  }
+
   private buildStoragePath(originalname: string) {
     const sanitizedName = originalname.replace(/[^a-zA-Z0-9._-]/g, '-');
     return `activities/${Date.now()}-${Math.random()
@@ -153,6 +184,7 @@ export class ActivityService {
 
     return {
       ...data,
+      creator: await this.getCreatorById(data.id_user),
       eventSlots: await this.getEventSlotsByActivityId(id),
     };
   }

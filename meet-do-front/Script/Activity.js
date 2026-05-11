@@ -70,6 +70,7 @@ const RESERVATION_API_URL = "http://localhost:3000/reservation";
 const AUTH_API_URL = "http://localhost:3000/authentication";
 const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 const AUTH_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+const CREATOR_AVATAR_PLACEHOLDER = "../Assets/img/icon-profil.png";
 
 let currentReservationEvents = [];
 let selectedReservationQuantities = new Map();
@@ -364,6 +365,30 @@ function renderActivityReviews(activity) {
     .join("");
 }
 
+function setCreatorAvatar(photoUrl) {
+  const avatar = document.getElementById("creator-avatar");
+  if (!avatar) return;
+
+  avatar.onerror = () => {
+    avatar.onerror = null;
+    avatar.src = CREATOR_AVATAR_PLACEHOLDER;
+  };
+  avatar.src = photoUrl || CREATOR_AVATAR_PLACEHOLDER;
+}
+
+function getCreatorName(creator) {
+  const firstName = creator?.first_name || creator?.firstname || "";
+  const lastName = creator?.last_name || creator?.lastname || "";
+  return `${firstName} ${lastName}`.trim();
+}
+
+function getCreatorRatingText(creator) {
+  const rating = Number(creator?.rating);
+  return Number.isFinite(rating)
+    ? `Rating: ${rating.toFixed(1)} / 5`
+    : "This creator has no reviews yet.";
+}
+
 function renderActivity(activity) {
   const hasReviews = hasActivityReviews(activity);
   const averageRating = getActivityAverageRating(activity);
@@ -393,13 +418,11 @@ function renderActivity(activity) {
     renderActivityReviews(activity);
   document.getElementById("activity-created-by").textContent =
     "Activity created by";
-  document.getElementById("creator-avatar").src = activity.creator?.photo || "";
-  document.getElementById("creator-name").textContent = activity.creator
-    ? `${activity.creator.first_name || ""} ${activity.creator.last_name || ""}`
-    : "";
-  document.getElementById("creator-rating").textContent = activity.creator
-    ? `Rating: ${activity.creator.rating} / 5`
-    : "";
+  setCreatorAvatar(activity.creator?.photo || activity.creator?.avatar_url);
+  document.getElementById("creator-name").textContent =
+    getCreatorName(activity.creator) || "Activity creator";
+  document.getElementById("creator-rating").textContent =
+    getCreatorRatingText(activity.creator);
   document.getElementById("activity-images").innerHTML = `
     <div
       id="activityCarousel"
