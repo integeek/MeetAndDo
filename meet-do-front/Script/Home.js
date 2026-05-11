@@ -34,7 +34,7 @@ class ActivityCard {
 
         card.innerHTML = `
             <div class="card">
-                <img src="${this.data.image_url ?? '../Assets/img/placeholder.png'}" alt="Image of the activity" class="card-img">
+                <img src="${this.data.images[0] ?? '../Assets/img/placeholder.png'}" alt="Image of the activity" class="card-img">
                 <div class="card-content">
                     <h2 class="card-title">${this.data.title}</h2>
                     <p><strong>Place :</strong> ${this.data.address}</p>
@@ -84,7 +84,9 @@ async function loadThemes() {
     });
 
     container.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('theme-btn')) return;
+        if (!e.target.classList.contains('theme-btn')) {
+            return;
+        }
         container.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         filterActivities();
@@ -141,6 +143,7 @@ async function showActivitiesOnMap() {
         function loadNextBatch() {
             const batch = activities.slice(index, index + 2);
             batch.forEach(act => {
+                console.log("act", act)
                 if (act.address) {
                     fetch(`https://eu1.locationiq.com/v1/search.php?key=pk.d1e3a3fe1d9a93351d306e093bc54eb2&q=${encodeURIComponent(act.address)}&format=json`)
                         .then(r => r.json())
@@ -152,7 +155,7 @@ async function showActivitiesOnMap() {
                                     .addTo(window.mapInstance)
                                     .bindPopup(`
                                         <div style="text-align:center;min-width:150px;">
-                                            <img src="${act.image_url ?? '../Assets/img/placeholder.png'}" 
+                                            <img src="${act.images[0] ?? '../Assets/img/placeholder.png'}" 
                                                 style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px;">
                                             <b>${act.title}</b><br>
                                             <small>${act.address}</small><br>
@@ -178,3 +181,33 @@ async function showActivitiesOnMap() {
     }, 300);
 }
 
+async function getCurrentUser() {
+  try {
+    const response = await fetch('http://localhost:3000/authentication/me', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+        return null
+    };
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function updateWelcomeMessage() {
+  const user = await getCurrentUser();
+  console.log(user)
+  const h1 = document.querySelector('.message-bienvenue');
+
+  if (user?.firstname) {
+    h1.innerHTML = `Great to see you again 
+      <span style="color: #1E3A8A;">${user.firstname}</span> !`;
+  } else {
+    h1.innerHTML = `Welcome to Meet&Do !`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', updateWelcomeMessage);
