@@ -276,16 +276,11 @@ function renderMyActivities(activities) {
 }
 
 function renderActivityActionModalButtons() {
-  const viewButton = document.getElementById("modal-view-activity-button");
   const editButton = document.getElementById("modal-edit-activity-button");
   const deleteButton = document.getElementById("modal-delete-activity-button");
   const confirmDeleteButton = document.getElementById(
     "activity-confirm-delete-button",
   );
-
-  if (viewButton) {
-    viewButton.innerHTML = BoutonBleu("View participant list");
-  }
 
   if (editButton) {
     editButton.innerHTML = BoutonBleu("Edit activity");
