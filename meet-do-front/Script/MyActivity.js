@@ -247,7 +247,12 @@ function renderMyActivities(activities) {
               <p class="card-text text-secondary mb-1">${escapeHtml(city)}</p>
               <p class="card-text fw-semibold mb-4">${escapeHtml(activity.price)} EUR / person</p>
               <div class="mt-auto d-flex flex-wrap justify-content-center gap-3">
-                <div class="activity-action-button">${BoutonBleu("View activity")}</div>
+                <div
+                  class="activity-action-button activity-view-trigger"
+                  data-activity-id="${activity.id}"
+                >
+                  ${BoutonBleu("View activity")}
+                </div>
                 <div
                   class="activity-action-button activity-actions-trigger"
                   data-activity-id="${activity.id}"
@@ -263,9 +268,23 @@ function renderMyActivities(activities) {
     .join("");
 
   container
+    .querySelectorAll(".activity-view-trigger .buttonCo")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const trigger = event.currentTarget.closest(".activity-view-trigger");
+        const activityId = Number(trigger?.dataset.activityId);
+        if (!Number.isFinite(activityId) || activityId <= 0) return;
+
+        window.location.href = `Activity.html?id=${activityId}`;
+      });
+    });
+
+  container
     .querySelectorAll(".activity-actions-trigger .buttonRo")
     .forEach((button) => {
       button.addEventListener("click", (event) => {
+        event.preventDefault();
         const trigger = event.currentTarget.closest(
           ".activity-actions-trigger",
         );
@@ -276,16 +295,11 @@ function renderMyActivities(activities) {
 }
 
 function renderActivityActionModalButtons() {
-  const viewButton = document.getElementById("modal-view-activity-button");
   const editButton = document.getElementById("modal-edit-activity-button");
   const deleteButton = document.getElementById("modal-delete-activity-button");
   const confirmDeleteButton = document.getElementById(
     "activity-confirm-delete-button",
   );
-
-  if (viewButton) {
-    viewButton.innerHTML = BoutonBleu("View participant list");
-  }
 
   if (editButton) {
     editButton.innerHTML = BoutonBleu("Edit activity");
@@ -296,7 +310,7 @@ function renderActivityActionModalButtons() {
   }
 
   if (confirmDeleteButton) {
-    confirmDeleteButton.innerHTML = BoutonRouge("Confirmer la suppression");
+    confirmDeleteButton.innerHTML = BoutonRouge("Confirm deletion");
   }
 }
 
@@ -330,7 +344,7 @@ function openDeleteConfirmationModal() {
   );
 
   if (confirmText) {
-    confirmText.textContent = `Etes vous sur de vouloir supprimer l'activite "${selectedActivity.title}" ?`;
+    confirmText.textContent = `Are you sure you want to delete the activity "${selectedActivity.title}"?`;
   }
 
   if (upcomingWrapper && upcomingList) {
@@ -340,14 +354,14 @@ function openDeleteConfirmationModal() {
         .map((eventSlot) => `<li>${escapeHtml(formatEventSlot(eventSlot))}</li>`)
         .join("");
       setDeleteFeedback(
-        "La suppression est impossible tant que des creneaux a venir existent.",
+        "Deletion is not possible while upcoming time slots exist.",
         "error",
       );
     } else {
       upcomingWrapper.classList.add("d-none");
       upcomingList.innerHTML = "";
       setDeleteFeedback(
-        "Cette activite ne contient aucun creneau a venir. La suppression est definitive.",
+        "This activity has no upcoming time slots. Deletion is permanent.",
       );
     }
   }
@@ -366,7 +380,7 @@ async function deleteSelectedActivity() {
   const upcomingSlots = getUpcomingEventSlots(selectedActivity);
   if (upcomingSlots.length) {
     setDeleteFeedback(
-      "La suppression est impossible tant que des creneaux a venir existent.",
+      "Deletion is not possible while upcoming time slots exist.",
       "error",
     );
     return;
@@ -378,7 +392,7 @@ async function deleteSelectedActivity() {
 
   if (confirmDeleteButton) {
     confirmDeleteButton.disabled = true;
-    confirmDeleteButton.textContent = "Suppression...";
+    confirmDeleteButton.textContent = "Deleting...";
   }
 
   try {
@@ -401,13 +415,13 @@ async function deleteSelectedActivity() {
     setDeleteFeedback(
       error instanceof Error
         ? error.message
-        : "La suppression de l'activite a echoue.",
+        : "Activity deletion failed.",
       "error",
     );
   } finally {
     if (confirmDeleteButton) {
       confirmDeleteButton.disabled = false;
-      confirmDeleteButton.textContent = "Confirmer la suppression";
+      confirmDeleteButton.textContent = "Confirm deletion";
     }
   }
 }

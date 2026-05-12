@@ -35,6 +35,15 @@ h1 {
   min-width: 170px;
 }
 
+.activity-action-button .buttonCo,
+.activity-action-button .buttonRo {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 44px;
+}
+
 .modal-body .buttonCo,
 .modal-body .buttonRo {
   margin: 0;
@@ -63,7 +72,6 @@ h1 {
   .activity-action-button .buttonRo {
     font-size: 14px;
     padding: 8px 12px;
-    margin: 0;
   }
 
   .activity-card .mt-auto {
