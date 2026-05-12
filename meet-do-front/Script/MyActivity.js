@@ -247,7 +247,12 @@ function renderMyActivities(activities) {
               <p class="card-text text-secondary mb-1">${escapeHtml(city)}</p>
               <p class="card-text fw-semibold mb-4">${escapeHtml(activity.price)} EUR / person</p>
               <div class="mt-auto d-flex flex-wrap justify-content-center gap-3">
-                <div class="activity-action-button">${BoutonBleu("View activity")}</div>
+                <div
+                  class="activity-action-button activity-view-trigger"
+                  data-activity-id="${activity.id}"
+                >
+                  ${BoutonBleu("View activity")}
+                </div>
                 <div
                   class="activity-action-button activity-actions-trigger"
                   data-activity-id="${activity.id}"
@@ -263,9 +268,23 @@ function renderMyActivities(activities) {
     .join("");
 
   container
+    .querySelectorAll(".activity-view-trigger .buttonCo")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const trigger = event.currentTarget.closest(".activity-view-trigger");
+        const activityId = Number(trigger?.dataset.activityId);
+        if (!Number.isFinite(activityId) || activityId <= 0) return;
+
+        window.location.href = `Activity.html?id=${activityId}`;
+      });
+    });
+
+  container
     .querySelectorAll(".activity-actions-trigger .buttonRo")
     .forEach((button) => {
       button.addEventListener("click", (event) => {
+        event.preventDefault();
         const trigger = event.currentTarget.closest(
           ".activity-actions-trigger",
         );
