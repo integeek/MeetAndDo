@@ -5,6 +5,7 @@ body {
 }
 
 .navbar-container {
+    --meetdo-navbar-action-height: 44px;
     width: 100%;
     background: #ffffff;
     border-bottom: 1px solid #e7edf5;
@@ -124,7 +125,7 @@ body {
 }
 
 .meetdo-link {
-    min-height: 42px;
+    height: var(--meetdo-navbar-action-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -150,7 +151,7 @@ body {
 }
 
 .meetdo-btn {
-    min-height: 42px;
+    height: var(--meetdo-navbar-action-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
