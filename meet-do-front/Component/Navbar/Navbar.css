@@ -321,9 +321,15 @@ body {
         width: 100%;
     }
 
+    .meetdo-profile-dropdown {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .meetdo-profile-menu {
         position: static;
         margin-top: 0.45rem;
+        right: auto;
         box-shadow: none;
     }
 }
