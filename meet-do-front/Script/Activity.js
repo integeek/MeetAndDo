@@ -136,7 +136,7 @@ function intToUUID(id) {
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
     authMessage: "You must be logged in to reserve an event.",
-    redirect: `Activity.html?id=${activityId}`,
+    redirect: `Activity.html?id=${activityId}&join=1`,
   });
 
   window.location.href = `Login.html?${params.toString()}`;
@@ -478,7 +478,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize the report modal
   initReportModal();
   initCreatorContactButton(resolvedActivityId, activity);
-  initReservationModal(resolvedActivityId, activity);
+  initReservationModal(resolvedActivityId, activity, {
+    openOnLoad: params.get("join") === "1",
+  });
 });
 
 let reportModal = null;
@@ -538,7 +540,7 @@ function initReportModal() {
   }
 }
 
-function initReservationModal(activityId, activity) {
+function initReservationModal(activityId, activity, options = {}) {
   const joinButton = document.querySelector(
     "#activity-participate-button .buttonCo",
   );
@@ -550,7 +552,7 @@ function initReservationModal(activityId, activity) {
 
   if (!joinButton || !modalElement) return;
 
-  joinButton.addEventListener("click", async () => {
+  const openReservationModal = async () => {
     const currentUser = await getCurrentUser();
 
     if (!getAuthenticatedUserId(currentUser)) {
@@ -567,7 +569,9 @@ function initReservationModal(activityId, activity) {
     const events = await getActivityEvents(activityId, activity);
     currentReservationEvents = events;
     renderReservationEvents(events);
-  });
+  };
+
+  joinButton.addEventListener("click", openReservationModal);
 
   document
     .getElementById("reservation-review-button")
@@ -576,6 +580,10 @@ function initReservationModal(activityId, activity) {
   document
     .getElementById("reservation-confirm-button")
     ?.addEventListener("click", submitReservations);
+
+  if (options.openOnLoad) {
+    openReservationModal();
+  }
 }
 
 function initCreatorContactButton(activityId, activity) {
