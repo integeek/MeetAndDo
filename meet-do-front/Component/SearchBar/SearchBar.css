@@ -6,9 +6,10 @@
     padding: 10px 15px;
     border-radius: 20px;
     gap: 10px;
-    width: fit-content;
-    margin: 40px auto;
+    width: min(720px, calc(100% - 32px));
+    margin: 32px auto;
     border: 1px solid #ddd;
+    box-sizing: border-box;
 }
 
 .search-bar input {
@@ -29,7 +30,17 @@
     padding: 5px 10px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
+    flex: 0 0 auto;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.search-bar button img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
 }
 
 .separator {
@@ -49,6 +60,8 @@
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     z-index: 1000;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
 }
 
 .hidden {
@@ -109,4 +122,34 @@
   margin: 10px 0;
   width: 100%;
   height: 100%;
+}
+
+@media (max-width: 520px) {
+    .search-bar {
+        width: calc(100% - 24px);
+        margin: 24px auto;
+        padding: 8px 10px;
+        gap: 6px;
+        border-radius: 16px;
+    }
+
+    .search-bar input {
+        min-width: 0;
+        font-size: 15px;
+    }
+
+    .search-bar button {
+        padding: 4px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .separator {
+        height: 20px;
+    }
+
+    .popup {
+        width: calc(100vw - 24px);
+        padding: 1rem;
+    }
 }

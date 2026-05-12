@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('close-map').onclick = () => mapModal.classList.add('hidden');
 });
 
+const EVENT_API_URL = "http://localhost:3000/event";
+
 class ActivityCard {
     constructor(containerId, data) {
         this.container = document.getElementById(containerId);
@@ -28,21 +30,58 @@ class ActivityCard {
     }
 
     render() {
+        const availability = getActivityAvailability(this.data);
+        const isFull = availability?.hasEvents && availability.availablePlaces === 0;
         const card = document.createElement("div");
         card.classList.add("activity-card");
-        card.onclick = () => window.location.href = `../Page/Activity.html?id=${this.data.id}`;
+        card.classList.toggle("activity-card-full", isFull);
+        card.setAttribute("role", "link");
+        card.setAttribute("tabindex", "0");
+        card.onclick = (event) => {
+            if (event.target.closest(".card-join-button")) {
+                return;
+            }
+
+            window.location.href = `../Page/Activity.html?id=${this.data.id}`;
+        };
+        card.onkeydown = (event) => {
+            if (event.key === "Enter") {
+                card.click();
+            }
+        };
 
         card.innerHTML = `
-            <div class="card">
-                <img src="${this.data.images[0] ?? '../Assets/img/placeholder.png'}" alt="Image of the activity" class="card-img">
-                <div class="card-content">
-                    <h2 class="card-title">${this.data.title}</h2>
-                    <p><strong>Place :</strong> ${this.data.address}</p>
-                    <p><strong>Price :</strong> ${this.data.price}€</p>
-                    <p><strong>Group of :</strong> ${this.data.group_size}</p>
+            <article class="card">
+                <div class="card-img-wrapper">
+                    <img src="${this.data.images?.[0] ?? '../Assets/img/placeholder.png'}" alt="Image of the activity" class="card-img">
+                    ${isFull ? '<span class="card-full-badge">No places left</span>' : ""}
                 </div>
-            </div>
+                <div class="card-content">
+                    <h2 class="card-title">${this.data.title ?? "Activity"}</h2>
+                    <p class="card-location">${this.data.address ?? "Address to be confirmed"}</p>
+                    <div class="card-meta">
+                        <span>${this.data.price ?? 0}€</span>
+                        <button
+                            type="button"
+                            class="card-join-button"
+                            ${isFull ? "disabled" : ""}
+                            aria-label="${isFull ? "No places left" : `Join ${this.data.title ?? "activity"}`}"
+                        >
+                            ${isFull ? "Full" : "Join"}
+                        </button>
+                    </div>
+                </div>
+            </article>
         `;
+
+        const joinButton = card.querySelector(".card-join-button");
+        joinButton?.addEventListener("click", (event) => {
+            event.stopPropagation();
+
+            if (isFull) return;
+
+            window.location.href = `../Page/Activity.html?id=${this.data.id}&join=1`;
+        });
 
         this.container.appendChild(card);
     }
@@ -51,21 +90,80 @@ class ActivityCard {
 let loading = false;
 let allActivities = [];
 
-function loadActivities() {
+async function loadActivities() {
     loading = true;
     document.getElementById("loader").style.display = "block";
 
-    fetch(`http://localhost:3000/activity`)
-        .then(response => response.json())
-        .then(activities => {
-            allActivities = Array.isArray(activities) ? activities : activities.data ?? [];
-            renderActivities(allActivities);
-        })
-        .catch(error => console.error("Error loading activities :", error))
-        .finally(() => {
-            loading = false;
-            document.getElementById("loader").style.display = "none";
-        });
+    try {
+        const response = await fetch(`http://localhost:3000/activity`);
+        const activities = await response.json();
+        const activityList = Array.isArray(activities) ? activities : activities.data ?? [];
+        const availabilityByActivity = await getAvailabilityByActivity();
+
+        allActivities = activityList.map(activity => ({
+            ...activity,
+            availability: availabilityByActivity.get(Number(activity.id)) ?? null,
+        }));
+        renderActivities(allActivities);
+    } catch (error) {
+        console.error("Error loading activities :", error);
+    } finally {
+        loading = false;
+        document.getElementById("loader").style.display = "none";
+    }
+}
+
+async function getAvailabilityByActivity() {
+    try {
+        const response = await fetch(EVENT_API_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const events = await response.json();
+        return (Array.isArray(events) ? events : []).reduce((map, event) => {
+            const activityId = Number(event.id_activity || event.activityId || event.idActivity);
+            if (!Number.isInteger(activityId)) return map;
+
+            const current = map.get(activityId) ?? {
+                hasEvents: false,
+                availablePlaces: 0,
+            };
+            const availablePlaces = Number(
+                event.available_places ?? event.availablePlaces ?? 0,
+            );
+
+            current.hasEvents = true;
+            current.availablePlaces += Number.isFinite(availablePlaces)
+                ? Math.max(availablePlaces, 0)
+                : 0;
+            map.set(activityId, current);
+
+            return map;
+        }, new Map());
+    } catch (error) {
+        console.warn("Unable to load events availability:", error);
+        return new Map();
+    }
+}
+
+function getActivityAvailability(activity) {
+    if (activity?.availability) {
+        return activity.availability;
+    }
+
+    const availablePlaces = Number(
+        activity?.available_places ?? activity?.availablePlaces,
+    );
+
+    if (Number.isFinite(availablePlaces)) {
+        return {
+            hasEvents: true,
+            availablePlaces: Math.max(availablePlaces, 0),
+        };
+    }
+
+    return null;
 }
 
 async function loadThemes() {
