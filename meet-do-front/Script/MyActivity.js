@@ -291,7 +291,7 @@ function renderActivityActionModalButtons() {
   }
 
   if (confirmDeleteButton) {
-    confirmDeleteButton.innerHTML = BoutonRouge("Confirmer la suppression");
+    confirmDeleteButton.innerHTML = BoutonRouge("Confirm deletion");
   }
 }
 
@@ -325,7 +325,7 @@ function openDeleteConfirmationModal() {
   );
 
   if (confirmText) {
-    confirmText.textContent = `Etes vous sur de vouloir supprimer l'activite "${selectedActivity.title}" ?`;
+    confirmText.textContent = `Are you sure you want to delete the activity "${selectedActivity.title}"?`;
   }
 
   if (upcomingWrapper && upcomingList) {
@@ -335,14 +335,14 @@ function openDeleteConfirmationModal() {
         .map((eventSlot) => `<li>${escapeHtml(formatEventSlot(eventSlot))}</li>`)
         .join("");
       setDeleteFeedback(
-        "La suppression est impossible tant que des creneaux a venir existent.",
+        "Deletion is not possible while upcoming time slots exist.",
         "error",
       );
     } else {
       upcomingWrapper.classList.add("d-none");
       upcomingList.innerHTML = "";
       setDeleteFeedback(
-        "Cette activite ne contient aucun creneau a venir. La suppression est definitive.",
+        "This activity has no upcoming time slots. Deletion is permanent.",
       );
     }
   }
@@ -361,7 +361,7 @@ async function deleteSelectedActivity() {
   const upcomingSlots = getUpcomingEventSlots(selectedActivity);
   if (upcomingSlots.length) {
     setDeleteFeedback(
-      "La suppression est impossible tant que des creneaux a venir existent.",
+      "Deletion is not possible while upcoming time slots exist.",
       "error",
     );
     return;
@@ -373,7 +373,7 @@ async function deleteSelectedActivity() {
 
   if (confirmDeleteButton) {
     confirmDeleteButton.disabled = true;
-    confirmDeleteButton.textContent = "Suppression...";
+    confirmDeleteButton.textContent = "Deleting...";
   }
 
   try {
@@ -396,13 +396,13 @@ async function deleteSelectedActivity() {
     setDeleteFeedback(
       error instanceof Error
         ? error.message
-        : "La suppression de l'activite a echoue.",
+        : "Activity deletion failed.",
       "error",
     );
   } finally {
     if (confirmDeleteButton) {
       confirmDeleteButton.disabled = false;
-      confirmDeleteButton.textContent = "Confirmer la suppression";
+      confirmDeleteButton.textContent = "Confirm deletion";
     }
   }
 }
