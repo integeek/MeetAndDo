@@ -83,7 +83,7 @@ function getUserAccountHref(basePath) {
     }
 
     const params = new URLSearchParams({
-        authMessage: "Vous devez etre connecte pour acceder a votre profil.",
+        authMessage: "You must be logged in to access your profile.",
         redirect: "MyAccount.html",
     });
     return `${basePath}/Page/Login.html?${params.toString()}`;
@@ -99,7 +99,7 @@ function getCreateActivityHref(basePath) {
     }
 
     const params = new URLSearchParams({
-        authMessage: "Vous devez etre connecte pour creer une activite.",
+        authMessage: "You must be logged in to create an activity.",
         redirect: targetPath,
     });
     return `${basePath}/Page/Login.html?${params.toString()}`;
@@ -124,7 +124,7 @@ function getMyReservationsHref(basePath) {
     return getAuthenticatedPageHref(
         basePath,
         "MyReservations.html",
-        "Vous devez etre connecte pour acceder a vos reservations.",
+        "You must be logged in to access your reservations.",
     );
 }
 
@@ -132,7 +132,7 @@ function getMyActivitiesHref(basePath) {
     return getAuthenticatedPageHref(
         basePath,
         "MyActivity.html",
-        "Vous devez etre connecte pour acceder a vos activites.",
+        "You must be logged in to access your activities.",
     );
 }
 
@@ -149,9 +149,9 @@ function getPublisherNavbarActions(basePath, variant = "auto") {
 
 function GuestNavbar(basePath) {
     return `
-        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
+        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
             <div class="container-fluid meetdo-navbar-inner">
-                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Accueil">
+                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Home">
                     <img src="${basePath}/Assets/img/logoMeet&Do.png" id="logo" alt="Meet and Do">
                 </a>
 
@@ -160,7 +160,7 @@ function GuestNavbar(basePath) {
                     type="button"
                     aria-controls="meetdoNavbarGuest"
                     aria-expanded="false"
-                    aria-label="Afficher le menu"
+                    aria-label="Show menu"
                     onclick="toggleMeetDoNavbar(this)"
                 >
                     <span class="navbar-toggler-icon meetdo-toggler-icon"></span>
@@ -169,13 +169,13 @@ function GuestNavbar(basePath) {
                 <div class="collapse navbar-collapse meetdo-collapse" id="meetdoNavbarGuest">
                     <ul class="navbar-nav navLinks meetdo-main-links">
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Accueil</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Home</a>
                         </li>
                     </ul>
 
                     <div class="meetdo-auth-actions">
-                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Signup.html">S'inscrire</a>
-                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Login.html">Se connecter</a>
+                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Signup.html">Sign up</a>
+                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Login.html">Log in</a>
                     </div>
                 </div>
             </div>
@@ -202,9 +202,9 @@ function UserNavbar(basePath, variant = "auto") {
         : "";
 
     return `
-        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
+        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
             <div class="container-fluid meetdo-navbar-inner">
-                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Accueil">
+                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Home">
                     <img src="${basePath}/Assets/img/logoMeet&Do.png" id="logo" alt="Meet and Do">
                 </a>
 
@@ -213,7 +213,7 @@ function UserNavbar(basePath, variant = "auto") {
                     type="button"
                     aria-controls="meetdoNavbarUser"
                     aria-expanded="false"
-                    aria-label="Afficher le menu"
+                    aria-label="Show menu"
                     onclick="toggleMeetDoNavbar(this)"
                 >
                     <span class="navbar-toggler-icon meetdo-toggler-icon"></span>
@@ -222,10 +222,10 @@ function UserNavbar(basePath, variant = "auto") {
                 <div class="collapse navbar-collapse meetdo-collapse" id="meetdoNavbarUser">
                     <ul class="navbar-nav navLinks meetdo-main-links">
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Accueil</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Messagerie.html">Messagerie</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Messagerie.html">Messages</a>
                         </li>
                     </ul>
 
@@ -239,7 +239,7 @@ function UserNavbar(basePath, variant = "auto") {
                                 role="button"
                                 aria-expanded="false"
                             >
-                                <div>Profil</div>
+                                <div>Profile</div>
                                 <img
                                     src="${escapedAvatarUrl}"
                                     id="profilImg"
