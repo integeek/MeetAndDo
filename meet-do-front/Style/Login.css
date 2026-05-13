@@ -1,51 +1,241 @@
+:root {
+    --auth-ink: #172033;
+    --auth-muted: #667085;
+    --auth-line: #d7dee8;
+    --auth-blue: #004aad;
+    --auth-green: #0f7b62;
+    --auth-red: #b42318;
+}
+
+body {
+    min-height: 100vh;
+    background: #f6f8fb;
+    color: var(--auth-ink);
+}
+
 .backgroundImage {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url("../Assets/img/fondRando.jfif") center/cover;
-    opacity: 0.35;
+    inset: 0;
+    background:
+        linear-gradient(120deg, rgba(11, 28, 58, 0.84), rgba(0, 74, 173, 0.36)),
+        url("../Assets/img/fondRando.jfif") center/cover;
     z-index: -1;
 }
 
+.auth-main {
+    min-height: calc(100vh - 150px);
+    display: grid;
+    place-items: center;
+    padding: 48px 18px;
+}
+
+.auth-shell {
+    width: min(1040px, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.46);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 28px 80px rgba(16, 24, 40, 0.24);
+    backdrop-filter: blur(18px);
+}
+
+.auth-panel {
+    min-width: 0;
+}
+
+.auth-intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 18px;
+    min-height: 570px;
+    padding: 46px;
+    background:
+        linear-gradient(180deg, rgba(10, 26, 49, 0.04), rgba(10, 26, 49, 0.8)),
+        url("../Assets/img/fondRando.jfif") center/cover;
+    color: white;
+}
+
+.auth-eyebrow {
+    margin: 0;
+    color: #2d6cdf;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.auth-intro .auth-eyebrow {
+    color: #dbeafe;
+}
+
+.auth-intro h1,
+.auth-heading h2 {
+    margin: 0;
+    letter-spacing: 0;
+}
+
+.auth-intro h1 {
+    max-width: 520px;
+    font-size: clamp(2.25rem, 4vw, 4.3rem);
+    line-height: 0.98;
+    font-weight: 800;
+}
+
+.auth-copy {
+    max-width: 520px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.auth-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.auth-highlights span {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.13);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.86rem;
+    backdrop-filter: blur(10px);
+}
+
 .containerLogin {
-    background-color: white;
-    border: black solid 0.5px;
-    border-radius: 7px;
-    padding: 15px;
-    margin: 50px auto;
-    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 46px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.auth-heading {
+    margin-bottom: 28px;
+}
+
+.auth-heading h2 {
+    margin-top: 8px;
+    color: var(--auth-ink);
+    font-size: 2.35rem;
+    font-weight: 800;
+}
+
+.auth-heading p:last-child {
+    margin: 8px 0 0;
+    color: var(--auth-muted);
+}
+
+.field-label {
+    display: block;
+    margin: 16px 0 8px;
+    color: #344054;
+    font-size: 0.92rem;
+    font-weight: 700;
 }
 
 .textbox {
-    border: 1px solid;
-    border-radius: 5px;
-    background-color: #F9F4F4;
-    padding: 5px;
-    width: 95% ;
-}
-
-#noAccount, #signup {
-    display: inline-block;
-    margin-right: 4px;
-    text-decoration: none;
-}
-
-#containerPassword {
-    position: relative; 
-    display: inline-block;
     width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--auth-line);
+    border-radius: 12px;
+    background-color: #fbfcfe;
+    padding: 12px 14px;
+    color: var(--auth-ink);
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
 
+.textbox:focus {
+    border-color: var(--auth-blue);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(0, 74, 173, 0.12);
+}
+
+#containerPassword,
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field .textbox {
+    padding-right: 48px;
 }
 
 .togglePassword {
     position: absolute;
-    right: 10px;
-    top: 50%; 
+    right: 15px;
+    top: 50%;
     transform: translateY(-50%);
-    width: 20px; 
+    width: 20px;
+    height: 20px;
     cursor: pointer;
+    opacity: 0.62;
+}
+
+.togglePassword:hover {
+    opacity: 1;
+}
+
+#forgotPassword {
+    width: fit-content;
+    margin: 12px 0 22px auto;
+    color: var(--auth-blue);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#forgotPassword:hover,
+#signup:hover {
+    text-decoration: underline;
+}
+
+.auth-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0 18px;
+    color: var(--auth-muted);
+}
+
+#noAccount,
+#signup {
+    display: inline-block;
+    margin: 0;
+    text-decoration: none;
+}
+
+#signup {
+    color: var(--auth-blue);
+    font-weight: 800;
+}
+
+.erreur,
+.erreurModal {
+    min-height: 20px;
+    margin-bottom: 0.85rem;
+    color: var(--auth-red);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.success,
+.successModal {
+    min-height: 20px;
+    margin-bottom: 0.85rem;
+    color: var(--auth-green);
+    font-size: 0.92rem;
+    font-weight: 800;
 }
 
 #boutonContainer {
@@ -53,10 +243,18 @@
     justify-content: center;
 }
 
+#boutonContainer .buttonCo,
+#sendResetLink .buttonCo {
+    min-height: 48px;
+    border-radius: 12px;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(0, 74, 173, 0.22);
+}
+
 .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.58);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,14 +264,35 @@
 
 .modal-content {
     background: white;
-    padding: 1rem;
-    border-radius: 10px;
+    padding: 28px;
+    border: 1px solid rgba(215, 222, 232, 0.8);
+    border-radius: 20px;
     width: 100%;   
-    max-width: 400px; 
+    max-width: 430px;
     position: relative;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.28);
+}
+
+.modal-content h2 {
+    margin: 0 0 8px;
+    color: var(--auth-ink);
+    font-weight: 800;
+}
+
+.modal-content p {
+    color: var(--auth-muted);
+}
+
+.close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    color: #667085;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
 .modal-content .textbox {
@@ -81,80 +300,46 @@
     box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
-    .modal-content {
-        padding: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .modal-content {
-        padding: 1.25rem;
-        border-radius: 8px;
+@media screen and (max-width: 900px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 560px;
     }
 
-    .modal-content h2 {
-        font-size: 1.2rem;
+    .auth-intro {
+        min-height: 320px;
+        padding: 34px;
     }
 
-    .modal-content .textbox {
-        font-size: 1rem;
-    }
-
-    #sendResetLink {
-        width: 100%;
-        padding: 0.75rem;
-    }
-}
-
-@media screen and (max-width: 1100px) {
-    .popup-content {
-        width: 35%;
-    }
-}
-
-@media screen and (max-width: 1024px) {
     .containerLogin {
-        width: 25%;
-    }
-}
-
-@media screen and (max-width: 880px) {
-    .popup-content {
-        width: 45%;
-    }
-}
-
-@media screen and (max-width: 830px) {
-    .containerLogin {
-        width: 45%;
-    }
-}
-
-@media screen and (max-width: 680px) {
-    .popup-content {
-        width: 65%;
+        padding: 34px;
     }
 }
 
 @media screen and (max-width: 520px) {
+    .auth-main {
+        padding: 24px 12px;
+    }
+
+    .auth-shell {
+        border-radius: 20px;
+    }
+
+    .auth-intro,
     .containerLogin {
-        width: 50%;
+        padding: 26px 20px;
     }
-    
-    #noAccount, #signup {
-        display: inline-block;
-        margin: 1px;
-        text-decoration: none;
+
+    .auth-intro h1 {
+        font-size: 2.15rem;
     }
-    #boutonContainer {
-        margin-top: 10px;
+
+    .auth-heading h2 {
+        font-size: 2rem;
+    }
+
+    .modal-content {
+        padding: 24px 18px;
+        border-radius: 16px;
     }
 }
-
-@media screen and (max-width: 470px) {
-    .popup-content {
-        width: 80%;
-    }
-}
-
