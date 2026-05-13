@@ -432,6 +432,14 @@ footer {
   animation: slideDown .3s var(--ease-out) both;
 }
 
+.chat-header-profile-link {
+  cursor: pointer;
+}
+
+.chat-header-profile-link:hover .chat-header-name {
+  color: var(--brand-blue);
+}
+
 .chat-header-avatar {
   width: 42px;
   height: 42px;

@@ -82,12 +82,34 @@ h1 {
   margin: 0;
 }
 
+.review-author-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.review-author-link:hover {
+  color: #004aad;
+  text-decoration: underline;
+}
+
 .creator-avatar {
   width: 72px;
   height: 72px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
+}
+
+.creator-profile-link {
+  cursor: pointer;
+}
+
+.creator-profile-link:hover {
+  color: #004aad;
+}
+
+#creator-avatar.creator-profile-link:hover {
+  outline: 3px solid rgba(0, 74, 173, 0.18);
 }
 
 .creator-meta {
