@@ -7,7 +7,7 @@ function Footer(url = "..") {
                 <li><a href="${pagePath}/Faq.html">FAQ</a></li>
                 <li><a href="${pagePath}/Contact.html">Contact us</a></li>
                 <li><a href="${pagePath}/MentionLegales">General terms of use</a></li>
-                <li><a href="${pagePath}/CGU">CGU</a></li>
+                <li><a href="${pagePath}/CGU">Legal Notice</a></li>
             </ul>
         </div>
     `;
