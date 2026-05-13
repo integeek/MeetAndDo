@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User profile</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../Style/UserProfile.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+    <link rel="stylesheet" href="../Component/Button/RedButton.css" />
+  </head>
+  <body>
+    <header>
+      <div id="navbar-container" class="navbar-container"></div>
+    </header>
+
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <section class="profile-header" aria-labelledby="profile-name">
+        <div class="profile-avatar-wrap">
+          <img
+            id="profile-avatar"
+            class="profile-avatar"
+            src="../Assets/img/icon-profil.png"
+            alt="Profile photo"
+          />
+        </div>
+        <div class="profile-identity">
+          <p id="profile-role" class="profile-role mb-2">Member</p>
+          <h1 id="profile-name" class="mb-0">Loading profile...</h1>
+          <p
+            id="profile-action-feedback"
+            class="profile-action-feedback d-none mb-0"
+          ></p>
+          <div class="profile-actions">
+            <div id="profile-contact-button"></div>
+            <div id="profile-report-button"></div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="publisher-activities-section"
+        class="publisher-activities d-none"
+        aria-labelledby="publisher-activities-title"
+      >
+        <div class="d-flex align-items-end justify-content-between gap-3 mb-4">
+          <div>
+            <h2 id="publisher-activities-title" class="mb-1">
+              Available activities
+            </h2>
+            <p id="publisher-activities-subtitle" class="section-subtitle mb-0">
+              Activities currently open for reservation.
+            </p>
+          </div>
+        </div>
+        <div id="publisher-activities-list" class="row g-4"></div>
+      </section>
+
+      <div id="profile-feedback" class="alert alert-light border d-none"></div>
+    </main>
+
+    <footer id="footer-container" class="footer-container"></footer>
+
+    <div
+      id="profile-report-modal"
+      class="profile-report-modal d-none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-report-title"
+    >
+      <div class="profile-report-card">
+        <div class="profile-report-header">
+          <h2 id="profile-report-title" class="profile-report-title mb-0">
+            Report this profile
+          </h2>
+          <button
+            type="button"
+            id="profile-report-close"
+            class="profile-report-close"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <form id="profile-report-form">
+          <label for="profile-report-reason" class="form-label">
+            Reason
+          </label>
+          <select id="profile-report-reason" class="form-select mb-3" required>
+            <option value="">-- Select a reason --</option>
+            <option value="inappropriate-content">Inappropriate content</option>
+            <option value="fake-profile">Fake profile</option>
+            <option value="harassment">Harassment</option>
+            <option value="scam">Scam/Fraud</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label for="profile-report-description" class="form-label">
+            Description (optional)
+          </label>
+          <textarea
+            id="profile-report-description"
+            class="form-control mb-4"
+            rows="4"
+            placeholder="Briefly describe the issue..."
+          ></textarea>
+
+          <p id="profile-report-feedback" class="profile-report-feedback"></p>
+          <div class="profile-report-actions">
+            <button
+              type="button"
+              id="profile-report-cancel"
+              class="btn btn-outline-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-danger">Report</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Button/RedButton.js"></script>
+    <script src="../Script/UserProfile.js"></script>
+    <script>
+      if (document.getElementById("navbar-container")) {
+        document.getElementById("navbar-container").innerHTML = Navbar();
+      }
+      if (document.getElementById("footer-container")) {
+        document.getElementById("footer-container").innerHTML = Footer("..");
+      }
+      if (
+        window.initializeNavbar &&
+        document.getElementById("navbar-container")
+      ) {
+        window.initializeNavbar();
+      }
+    </script>
+  </body>
+</html>

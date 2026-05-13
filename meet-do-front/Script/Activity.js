@@ -9,8 +9,10 @@ const MOCK_ACTIVITY = {
   description:
     "Join us for a delicious and creative workshop where you will learn how to make tasty homemade macarons. Guided by an experienced pastry chef, you will discover the secrets of a perfect shell and leave with your own creations.",
   creator: {
+    id: 12,
     first_name: "Jean",
     last_name: "Dupont",
+    role: "publisher",
     rating: 4.8,
     photo:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
@@ -22,6 +24,7 @@ const MOCK_ACTIVITY = {
   ],
   reviews: [
     {
+      id_user: 21,
       auteur: "Alice",
       note: 5,
       commentaire:
@@ -300,6 +303,56 @@ function hasActivityReviews(activity) {
   return Array.isArray(activity.reviews) && activity.reviews.length > 0;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getUserProfileHref(userId, profile = {}) {
+  const numericUserId = Number(userId);
+  if (!Number.isInteger(numericUserId) || numericUserId <= 0) return "";
+
+  const params = new URLSearchParams({ userId: String(numericUserId) });
+  const firstName = profile.firstname || profile.first_name;
+  const lastName = profile.lastname || profile.last_name;
+  const avatar = profile.avatar_url || profile.photo;
+  const role = profile.role;
+  const name = profile.name || profile.auteur;
+
+  if (firstName) params.set("firstname", firstName);
+  if (lastName) params.set("lastname", lastName);
+  if (!firstName && !lastName && name) params.set("name", name);
+  if (avatar) params.set("avatar", avatar);
+  if (role) params.set("role", role);
+
+  return `UserProfile.html?${params.toString()}`;
+}
+
+function getCreatorId(activity) {
+  const creatorId = Number(
+    activity?.id_user ??
+      activity?.creator?.id ??
+      activity?.creator?.id_user ??
+      activity?.creator?.userId,
+  );
+
+  return Number.isInteger(creatorId) && creatorId > 0 ? creatorId : null;
+}
+
+function getReviewUserId(review) {
+  const reviewUserId = Number(
+    review?.id_user ?? review?.userId ?? review?.idUser ?? review?.author_id,
+  );
+
+  return Number.isInteger(reviewUserId) && reviewUserId > 0
+    ? reviewUserId
+    : null;
+}
+
 function getActivityAverageRating(activity) {
   const average = Number(activity.average_rating);
 
@@ -334,12 +387,18 @@ function renderActivityReviews(activity) {
   }
 
   return reviews
-    .map(
-      (avis) => `
+    .map((avis) => {
+      const reviewUserId = getReviewUserId(avis);
+      const reviewAuthor = escapeHtml(avis.auteur || "Participant");
+      const authorContent = reviewUserId
+        ? `<a class="review-author-link" href="${getUserProfileHref(reviewUserId, avis)}">${reviewAuthor}</a>`
+        : reviewAuthor;
+
+      return `
         <div class="card border-0 bg-body-tertiary mb-3">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-              <p class="mb-0 fw-semibold">${avis.auteur}</p>
+              <p class="mb-0 fw-semibold">${authorContent}</p>
               <span class="d-flex align-items-center gap-2 fw-semibold">
                 <span class="review-star-icon" aria-hidden="true">
                   <svg
@@ -354,14 +413,14 @@ function renderActivityReviews(activity) {
                     />
                   </svg>
                 </span>
-                ${avis.note} / 5
+                ${escapeHtml(avis.note)} / 5
               </span>
             </div>
-            <p class="mb-0">${avis.commentaire}</p>
+            <p class="mb-0">${escapeHtml(avis.commentaire)}</p>
           </div>
         </div>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 
@@ -392,6 +451,11 @@ function getCreatorRatingText(creator) {
 function renderActivity(activity) {
   const hasReviews = hasActivityReviews(activity);
   const averageRating = getActivityAverageRating(activity);
+  const creatorId = getCreatorId(activity);
+  const creatorProfileHref = getUserProfileHref(creatorId, {
+    ...activity.creator,
+    role: activity.creator?.role || "publisher",
+  });
 
   document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-report-button").innerHTML =
@@ -419,10 +483,12 @@ function renderActivity(activity) {
   document.getElementById("activity-created-by").textContent =
     "Activity created by";
   setCreatorAvatar(activity.creator?.photo || activity.creator?.avatar_url);
-  document.getElementById("creator-name").textContent =
+  const creatorNameElement = document.getElementById("creator-name");
+  creatorNameElement.textContent =
     getCreatorName(activity.creator) || "Activity creator";
   document.getElementById("creator-rating").textContent =
     getCreatorRatingText(activity.creator);
+  bindCreatorProfileLink(creatorProfileHref);
   document.getElementById("activity-images").innerHTML = `
     <div
       id="activityCarousel"
@@ -465,6 +531,23 @@ function renderActivity(activity) {
     </div>
   `;
   document.title = activity.title;
+}
+
+function bindCreatorProfileLink(profileHref) {
+  const avatar = document.getElementById("creator-avatar");
+  const name = document.getElementById("creator-name");
+
+  [avatar, name].forEach((element) => {
+    if (!element) return;
+
+    element.classList.toggle("creator-profile-link", Boolean(profileHref));
+    element.title = profileHref ? "View profile" : "";
+    element.onclick = profileHref
+      ? () => {
+          window.location.href = profileHref;
+        }
+      : null;
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -600,10 +683,19 @@ function initCreatorContactButton(activityId, activity) {
 
     const currentUser = await getCurrentUser();
     const currentUserId = getAuthenticatedUserId(currentUser);
-    const creatorId = Number(activity?.id_user ?? activity?.creator?.id);
+    const creatorId = getCreatorId(activity);
 
     if (!currentUserId) {
       redirectToLoginForContact(activityId);
+      return;
+    }
+
+    if (!creatorId) {
+      if (feedback) {
+        feedback.textContent =
+          "This creator profile is not available for the moment.";
+        feedback.classList.remove("d-none");
+      }
       return;
     }
 

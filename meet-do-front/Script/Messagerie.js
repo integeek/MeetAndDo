@@ -35,6 +35,7 @@ const DOM = {
   chatView:            document.getElementById('chat-view'),
   chatMessages:        document.getElementById('chat-messages'),
   chatHeader: {
+    root:   document.getElementById('chat-header'),
     name:   document.getElementById('chat-header-name'),
     avatar: document.getElementById('chat-header-avatar'),
     status: document.getElementById('chat-header-status'),
@@ -159,7 +160,14 @@ async function initUser() {
 
     // Mettre en cache le nom de l'utilisateur courant
     const name = [user.firstname, user.lastname].filter(Boolean).join(' ') || user.email;
-    state.userCache[state.currentUserId] = { name, email: user.email };
+    state.userCache[state.currentUserId] = {
+      name,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      avatar_url: user.avatar_url,
+      role: user.role,
+    };
 
   } catch {
     window.location.href = 'Login.html';
@@ -178,7 +186,14 @@ async function loadUserName(uuid) {
       const u = await res.json();
       if (u) {
         const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || uuid.slice(0, 8);
-        state.userCache[uuid] = { name, email: u.email };
+        state.userCache[uuid] = {
+          name,
+          email: u.email,
+          firstname: u.firstname,
+          lastname: u.lastname,
+          avatar_url: u.avatar_url,
+          role: u.role,
+        };
         renderConversationList(state.conversations);
         updateHeaderIfNeeded(uuid, name);
         return name;
@@ -270,6 +285,29 @@ function getRequestedUserId() {
   return params.get('userId');
 }
 
+function getOtherParticipantId(conv) {
+  if (!conv || conv.is_group) return null;
+
+  return conv.participant_1 === state.currentUserId
+    ? conv.participant_2
+    : conv.participant_1;
+}
+
+function getUserProfileHref(uuid, profile = {}) {
+  if (!uuid) return '';
+
+  const params = new URLSearchParams({ uuid });
+  const name = profile.name;
+
+  if (profile.firstname) params.set('firstname', profile.firstname);
+  if (profile.lastname) params.set('lastname', profile.lastname);
+  if (!profile.firstname && !profile.lastname && name) params.set('name', name);
+  if (profile.avatar_url) params.set('avatar', profile.avatar_url);
+  if (profile.role) params.set('role', profile.role);
+
+  return `UserProfile.html?${params.toString()}`;
+}
+
 function openRequestedUserConversation() {
   const requestedUserId = getRequestedUserId();
 
@@ -327,9 +365,7 @@ function getConvDisplay(conv) {
   if (conv.is_group) {
     return { displayName: conv.group_name || 'Group', initials: 'G' };
   }
-  const otherId = conv.participant_1 === state.currentUserId
-    ? conv.participant_2
-    : conv.participant_1;
+  const otherId = getOtherParticipantId(conv);
   const name = getCachedName(otherId);
   const initials = name.slice(0, 2).toUpperCase();
   return { displayName: name, initials };
@@ -345,15 +381,21 @@ async function selectConversation(conv) {
 
   // Pre-load the other participant's name so the header shows it immediately
   if (!conv.is_group) {
-    const otherId = conv.participant_1 === state.currentUserId ? conv.participant_2 : conv.participant_1;
+    const otherId = getOtherParticipantId(conv);
     if (otherId && !state.userCache[otherId]) await loadUserName(otherId);
   }
 
   const { displayName, initials } = getConvDisplay(conv);
+  const otherId = getOtherParticipantId(conv);
+  const profileHref = getUserProfileHref(otherId, {
+    ...(state.userCache[otherId] || {}),
+    name: displayName,
+  });
   DOM.chatHeader.name.textContent   = displayName;
   DOM.chatHeader.avatar.textContent = conv.is_group ? '' : initials;
   if (conv.is_group) DOM.chatHeader.avatar.innerHTML = '<i class="bi bi-people-fill"></i>';
   DOM.chatHeader.status.textContent = conv.is_group ? 'Group' : 'Active';
+  bindChatHeaderProfileLink(profileHref);
 
   showChatView();
   DOM.chatMessages.innerHTML = '';
@@ -367,6 +409,19 @@ async function selectConversation(conv) {
   if (window.innerWidth <= 768) {
     DOM.sidebar.classList.add('hidden-mobile');
   }
+}
+
+function bindChatHeaderProfileLink(profileHref) {
+  if (!DOM.chatHeader.root) return;
+
+  DOM.chatHeader.root.classList.toggle('chat-header-profile-link', Boolean(profileHref));
+  DOM.chatHeader.root.title = profileHref ? 'View profile' : '';
+  DOM.chatHeader.root.onclick = profileHref
+    ? event => {
+        if (event.target.closest('button')) return;
+        window.location.href = profileHref;
+      }
+    : null;
 }
 
 // ================================================================
@@ -751,7 +806,7 @@ function filterConversations(conversations, query) {
   if (!query) return conversations;
   return conversations.filter(c => {
     if (c.is_group) return (c.group_name || '').toLowerCase().includes(query.toLowerCase());
-    const otherId = c.participant_1 === state.currentUserId ? c.participant_2 : c.participant_1;
+    const otherId = getOtherParticipantId(c);
     const name = state.userCache[otherId]?.name || otherId;
     return name.toLowerCase().includes(query.toLowerCase());
   });
