@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
+    <title>Sign up</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -32,47 +32,63 @@
             document.getElementById('navbar-container').innerHTML = Navbar();
         </script>
     </header>
-    <main>
-        <div class="containerLogin">
-            <h1>Signup</h1>
-            <form id="signupForm" class="groupForm">
-                <p>Email</p>
-                <input class="textbox" type="text" name="email" placeholder="email@address.com" required>
-                <p>Password</p>
-                <div class="containerPassword">
-                    <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
-                    <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show/Hide" >
-                </div> 
-                <p>Confirm password</p>
-                <div class="containerPassword">
-                    <input class="textbox" type="password" id="password2" name="password2" placeholder="********" required>
-                    <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Afficher/Masquer" >
-                </div> 
-                <div class="validatorCriters">
-                    <span class="digit"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one number</span>
-                    <span class="uppercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one uppercase letter</span>
-                    <span class="lowercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one lowercase letter</span>
-                    <span class="length"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least 8 characters</span>
+    <main class="auth-main">
+        <section class="auth-shell" aria-label="Sign up">
+            <div class="auth-panel auth-intro">
+                <p class="auth-eyebrow">Start something new</p>
+                <h1>Create your Meet&Do account</h1>
+                <p class="auth-copy">Join activities, reserve your spot, and connect with people who want to do more together.</p>
+                <div class="auth-highlights" aria-label="Meet&Do benefits">
+                    <span>Discover nearby plans</span>
+                    <span>Book in a few clicks</span>
+                    <span>Manage your profile</span>
                 </div>
+            </div>
+            <div class="auth-panel containerLogin">
+                <div class="auth-heading">
+                    <p class="auth-eyebrow">New member</p>
+                    <h2>Sign up</h2>
+                    <p>Use a strong password to protect your account.</p>
+                </div>
+                <form id="signupForm" class="groupForm">
+                    <label class="field-label" for="signupEmail">Email</label>
+                    <input class="textbox" id="signupEmail" type="text" name="email" placeholder="email@address.com" autocomplete="email" required>
+                    <label class="field-label" for="password">Password</label>
+                    <div class="containerPassword password-field">
+                        <input class="textbox" type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password" required>
+                        <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show or hide password" >
+                    </div>
+                    <label class="field-label" for="password2">Confirm password</label>
+                    <div class="containerPassword password-field">
+                        <input class="textbox" type="password" id="password2" name="password2" placeholder="Confirm your password" autocomplete="new-password" required>
+                        <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show or hide password" >
+                    </div>
+                    <div class="validatorCriters">
+                        <span class="digit"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one number</span>
+                        <span class="uppercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one uppercase letter</span>
+                        <span class="lowercase"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least one lowercase letter</span>
+                        <span class="length"><i class="far fa-check-circle"></i> &nbsp;Your password must contain at least 8 characters</span>
+                    </div>
 
-                <div class="linkConnexion">
-                    <p id="noAccount">Already have an account ?</p> <a id="login" href="Login.html">Login</a>
-                </div>
+                    <div class="linkConnexion">
+                        <p id="noAccount">Already have an account?</p> <a id="login" href="Login.html">Sign in</a>
+                    </div>
 
-                <div id="mention">
-                    <input type="checkbox" id="mention" name="mention" required/>
-                    <div id="mentionTexte"><label id="" for="mention">I confirm that I have read and accept the </label><a  id="login" href="MentionLegales">general terms of use</a></div>
-                </div>
-                <div class="erreur" style="color: red; margin-bottom: 1rem;">
-                </div>
-                <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
-                </div>
-                <div id="boutonContainer"></div>
-                <script>
-                    document.getElementById('boutonContainer').innerHTML = BoutonBleu("Signup");
-                </script>
-            </form>
-        </div>
+                    <div class="terms-row">
+                        <input type="checkbox" id="mention" name="mention" required/>
+                        <div id="mentionTexte"><label for="mention">I confirm that I have read and accept the </label><a class="terms-link" href="MentionLegales">general terms of use</a></div>
+                    </div>
+                    <div class="erreur">
+                    </div>
+                    <div class="success">
+                    </div>
+                    <div id="boutonContainer"></div>
+                    <script>
+                        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Create account");
+                    </script>
+                </form>
+            </div>
+        </section>
     </main>
     <footer id="footer-container" class="footer-container">
         <script>
