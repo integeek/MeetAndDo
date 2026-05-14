@@ -74,6 +74,11 @@ function isPublisherUser() {
     return role === "publisher";
 }
 
+function isStandardUser() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "user";
+}
+
 function getUserAccountHref(basePath) {
     const userId = getAuthenticatedUserId();
 
@@ -210,9 +215,9 @@ function UserNavbar(basePath, variant = "auto") {
     const activitiesHref = getMyActivitiesHref(basePath);
     const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
-    const publisherApplicationAction = isPublisher
-        ? ""
-        : `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`;
+    const publisherApplicationAction = isStandardUser()
+        ? `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`
+        : "";
     const publisherMenuItem = isPublisher
         ? `
                                 <li>
