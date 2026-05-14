@@ -278,11 +278,13 @@ async function cancelPublisherRequest() {
 
 function openRequestModal(request, profile) {
   const modal = document.getElementById("request-modal");
+  const card = modal?.querySelector(".request-modal-card");
   const body = document.getElementById("request-modal-body");
   const detailsButton = document.getElementById("request-modal-details");
   const detailsFooter = document.querySelector(".request-modal-footer");
   if (!modal || !body) return;
 
+  card?.classList.remove("is-full-details");
   body.innerHTML = `
     <dl class="request-detail-list">
       <div>
@@ -347,10 +349,12 @@ function renderFullApplicationDetails(request, profile) {
 
 function showFullApplicationDetails(request, profile) {
   const body = document.getElementById("request-modal-body");
+  const card = document.querySelector("#request-modal .request-modal-card");
   const detailsButton = document.getElementById("request-modal-details");
   const detailsFooter = document.querySelector(".request-modal-footer");
   if (!body || !detailsButton) return;
 
+  card?.classList.add("is-full-details");
   body.innerHTML = `
     <div class="request-full-details request-full-details-visible">
       <h3>Full application</h3>
