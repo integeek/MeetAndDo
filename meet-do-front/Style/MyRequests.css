@@ -231,7 +231,7 @@ h1 {
 .request-modal-card {
   display: flex;
   flex-direction: column;
-  width: min(560px, 100%);
+  width: min(720px, 100%);
   max-height: calc(100vh - 40px);
   min-height: 0;
   overflow: hidden;
@@ -296,6 +296,7 @@ h1 {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr);
   gap: 16px;
+  min-width: 0;
   padding-bottom: 14px;
   border-bottom: 1px solid #edf1f6;
 }
@@ -312,9 +313,13 @@ h1 {
 }
 
 .request-detail-list dd {
+  min-width: 0;
   margin: 0;
   color: #172033;
   line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .request-full-details {
@@ -329,7 +334,7 @@ h1 {
 }
 
 .request-full-details-visible .request-detail-list div {
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
 }
 
 .request-modal-footer {
