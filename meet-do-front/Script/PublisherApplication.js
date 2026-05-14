@@ -195,6 +195,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    if (profile.publisher_request === true) {
+      setPublisherFeedback("You already have a publisher request under review.", "success");
+      form?.querySelectorAll("input, select, textarea, button").forEach((field) => {
+        field.disabled = true;
+      });
+      setTimeout(() => {
+        window.location.href = "../Page/MyRequests.html";
+      }, 900);
+      return;
+    }
+
     fillPublisherForm(profile);
   } catch (error) {
     setPublisherFeedback("Unable to load your profile. Please refresh the page.", "error");

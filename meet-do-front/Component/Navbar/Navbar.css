@@ -179,6 +179,34 @@ body {
     transform: translateY(0);
 }
 
+.navbar-container .meetdo-btn-disabled,
+.navbar-container .meetdo-btn-disabled:hover,
+.navbar-container .meetdo-btn-disabled:focus {
+    border-color: #9aa9bd;
+    background: #9aa9bd;
+    color: #ffffff;
+    cursor: not-allowed;
+    opacity: 0.82;
+    transform: none;
+}
+
+.meetdo-navbar-message {
+    position: fixed;
+    top: 92px;
+    right: 24px;
+    z-index: 2000;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border: 1px solid #cfe0ff;
+    border-radius: 10px;
+    background: #f5f8ff;
+    color: #004aad;
+    box-shadow: 0 14px 36px rgba(23, 32, 51, 0.16);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .meetdo-profile-btn {
     gap: 0.55rem;
     vertical-align: middle;
@@ -314,6 +342,13 @@ body {
     .meetdo-link,
     .navbar-container .meetdo-btn {
         width: 100%;
+    }
+
+    .meetdo-navbar-message {
+        top: 84px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
     }
 
     .meetdo-profile-dropdown,

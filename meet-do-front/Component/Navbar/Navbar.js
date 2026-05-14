@@ -79,6 +79,10 @@ function isStandardUser() {
     return role === "user";
 }
 
+function hasPendingPublisherRequest() {
+    return getStoredAuthenticatedUser()?.publisher_request === true;
+}
+
 function getUserAccountHref(basePath) {
     const userId = getAuthenticatedUserId();
 
@@ -215,9 +219,7 @@ function UserNavbar(basePath, variant = "auto") {
     const activitiesHref = getMyActivitiesHref(basePath);
     const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
-    const publisherApplicationAction = isStandardUser()
-        ? `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`
-        : "";
+    const publisherApplicationAction = getPublisherApplicationAction(basePath);
     const publisherMenuItem = isPublisher
         ? `
                                 <li>
@@ -299,6 +301,44 @@ function UserNavbar(basePath, variant = "auto") {
             </div>
         </nav>
     `;
+}
+
+function getPublisherApplicationAction(basePath) {
+    if (!isStandardUser()) {
+        return "";
+    }
+
+    if (hasPendingPublisherRequest()) {
+        return `
+            <button
+                class="btn btn-primary meetdo-btn meetdo-btn-disabled"
+                type="button"
+                aria-disabled="true"
+                onclick="showPendingPublisherRequestMessage()"
+            >
+                Become a publisher
+            </button>
+        `;
+    }
+
+    return `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`;
+}
+
+function showPendingPublisherRequestMessage() {
+    const existingMessage = document.getElementById("meetdo-navbar-message");
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    const message = document.createElement("div");
+    message.id = "meetdo-navbar-message";
+    message.className = "meetdo-navbar-message";
+    message.textContent = "You already have a publisher request under review.";
+    document.body.appendChild(message);
+
+    window.setTimeout(() => {
+        message.remove();
+    }, 3200);
 }
 
 function toggleMeetDoNavbar(button) {
