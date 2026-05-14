@@ -245,8 +245,8 @@ async function cancelPublisherRequest() {
   if (confirmButton) confirmButton.disabled = true;
 
   try {
-    const response = await fetch(`${getMeetDoApiUrl()}/user/request-publisher`, {
-      method: "DELETE",
+    const response = await fetch(`${getMeetDoApiUrl()}/user/request-publisher/cancel`, {
+      method: "POST",
       credentials: "include",
     });
     const result = await response.json().catch(() => ({}));

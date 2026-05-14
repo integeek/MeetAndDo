@@ -86,6 +86,12 @@ export class UserController {
     return this.userService.cancelPublisherRequest(req.user.id);
   }
 
+  @Post('request-publisher/cancel')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequestWithPost(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
+  }
+
   @Patch('me/password')
   @UseGuards(JwtAuthenticationGuard)
   changePassword(
