@@ -136,6 +136,14 @@ function getMyActivitiesHref(basePath) {
     );
 }
 
+function getMyRequestsHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "MyRequests.html",
+        "You must be logged in to access your requests.",
+    );
+}
+
 function getPublisherNavbarActions(basePath, variant = "auto") {
     if (variant !== "publisher" && !isPublisherUser()) {
         return "";
@@ -192,6 +200,7 @@ function UserNavbar(basePath, variant = "auto") {
     const publisherActions = getPublisherNavbarActions(basePath, variant);
     const reservationsHref = getMyReservationsHref(basePath);
     const activitiesHref = getMyActivitiesHref(basePath);
+    const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
     const publisherMenuItem = isPublisher
         ? `
@@ -255,6 +264,9 @@ function UserNavbar(basePath, variant = "auto") {
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="${requestsHref}">My requests</a>
                                 </li>
                                 ${publisherMenuItem}
                                 <li class="meetdo-profile-menu-divider" aria-hidden="true"></li>

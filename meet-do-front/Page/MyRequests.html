@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My requests</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../Style/MyRequests.css" />
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Script/MyRequests.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div id="navbar-container" class="navbar-container"></div>
+      <script>
+        document.getElementById("navbar-container").innerHTML = Navbar();
+      </script>
+    </header>
+
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1>My requests</h1>
+          <p class="page-subtitle mb-0">
+            Track the applications and account requests you have submitted.
+          </p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <div id="requests-list" class="requests-list" aria-live="polite">
+            <div class="requests-loading">Loading your requests...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div
+      id="request-modal"
+      class="request-modal d-none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="request-modal-title"
+    >
+      <div class="request-modal-card">
+        <div class="request-modal-header">
+          <div>
+            <p class="modal-kicker mb-2">Application details</p>
+            <h2 id="request-modal-title" class="mb-0">Activity creator application</h2>
+          </div>
+          <button
+            type="button"
+            id="request-modal-close"
+            class="request-modal-close"
+            aria-label="Close application details"
+          >
+            &times;
+          </button>
+        </div>
+        <div id="request-modal-body" class="request-modal-body"></div>
+        <div class="request-modal-footer">
+          <button type="button" id="request-modal-ok" class="buttonCo">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <footer id="footer-container" class="footer-container">
+      <script>
+        document.getElementById("footer-container").innerHTML = Footer("..");
+        if (window.initializeNavbar) {
+          window.initializeNavbar();
+        }
+      </script>
+    </footer>
+  </body>
+</html>
