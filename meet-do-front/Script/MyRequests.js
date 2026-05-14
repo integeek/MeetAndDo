@@ -63,6 +63,8 @@ function pickFirstValue(...values) {
   return values.find((value) => typeof value === "string" && value.trim()) || "";
 }
 
+let pendingCancelRequest = null;
+
 function normalizePublisherApplicationDetails(profile) {
   const rawDetails = parseJsonObject(profile?.publisher_request_details);
   const nestedApplication = parseJsonObject(rawDetails.application);
@@ -196,7 +198,7 @@ function renderRequests(profile) {
       openRequestModal(request, profile);
     });
     actionContainer.querySelector(".request-cancel-button")?.addEventListener("click", (event) => {
-      cancelPublisherRequest(profile, event.currentTarget, request.id);
+      openCancelRequestModal(profile, event.currentTarget, request.id);
     });
   });
 }
@@ -209,12 +211,38 @@ function setRequestFeedback(requestId, message = "", status = "") {
   feedback.className = `request-action-feedback${status ? ` is-${status}` : ""}`;
 }
 
-async function cancelPublisherRequest(profile, button, requestId) {
-  const confirmed = window.confirm("Cancel your publisher application?");
-  if (!confirmed) return;
+function setCancelModalFeedback(message = "", status = "") {
+  const feedback = document.getElementById("request-cancel-feedback");
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.className = `request-action-feedback${status ? ` is-${status}` : ""}`;
+}
+
+function openCancelRequestModal(profile, button, requestId) {
+  pendingCancelRequest = { profile, button, requestId };
+  setCancelModalFeedback();
+  document.getElementById("request-cancel-confirm")?.removeAttribute("disabled");
+  document.getElementById("request-cancel-modal")?.classList.remove("d-none");
+  document.body.classList.add("request-modal-open");
+}
+
+function closeCancelRequestModal() {
+  document.getElementById("request-cancel-modal")?.classList.add("d-none");
+  document.body.classList.remove("request-modal-open");
+  pendingCancelRequest = null;
+}
+
+async function cancelPublisherRequest() {
+  if (!pendingCancelRequest) return;
+
+  const { profile, button, requestId } = pendingCancelRequest;
+  const confirmButton = document.getElementById("request-cancel-confirm");
 
   setRequestFeedback(requestId, "Cancelling your request...", "loading");
+  setCancelModalFeedback("Cancelling your request...", "loading");
   if (button) button.disabled = true;
+  if (confirmButton) confirmButton.disabled = true;
 
   try {
     const response = await fetch(`${getMeetDoApiUrl()}/user/request-publisher`, {
@@ -233,13 +261,18 @@ async function cancelPublisherRequest(profile, button, requestId) {
 
     clearStoredPublisherApplicationDetails(profile?.id);
     setRequestFeedback(requestId, "Your request has been cancelled.", "success");
+    setCancelModalFeedback("Your request has been cancelled.", "success");
 
     setTimeout(() => {
+      closeCancelRequestModal();
       renderRequests(result.user || { ...profile, publisher_request: false });
     }, 500);
   } catch (error) {
+    const message = error.message || "Unable to cancel your request.";
     setRequestFeedback(requestId, error.message || "Unable to cancel your request.", "error");
+    setCancelModalFeedback(message, "error");
     if (button) button.disabled = false;
+    if (confirmButton) confirmButton.disabled = false;
   }
 }
 
@@ -371,9 +404,17 @@ async function loadRequests() {
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("request-modal-close")?.addEventListener("click", closeRequestModal);
+  document.getElementById("request-cancel-close")?.addEventListener("click", closeCancelRequestModal);
+  document.getElementById("request-cancel-keep")?.addEventListener("click", closeCancelRequestModal);
+  document.getElementById("request-cancel-confirm")?.addEventListener("click", cancelPublisherRequest);
   document.getElementById("request-modal")?.addEventListener("click", (event) => {
     if (event.target.id === "request-modal") {
       closeRequestModal();
+    }
+  });
+  document.getElementById("request-cancel-modal")?.addEventListener("click", (event) => {
+    if (event.target.id === "request-cancel-modal") {
+      closeCancelRequestModal();
     }
   });
 

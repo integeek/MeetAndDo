@@ -135,33 +135,62 @@ h1 {
   margin: 0;
 }
 
-.request-cancel-button {
+.request-cancel-button,
+.request-danger-button,
+.request-secondary-button {
   width: 100%;
-  height: 100%;
   padding: 10px 20px;
-  border: 1px solid #dc2626;
   border-radius: 10px;
-  color: #dc2626;
-  background: #fff;
   font-size: 16px;
   cursor: pointer;
   transition:
     background-color 0.18s ease,
     color 0.18s ease,
+    border-color 0.18s ease,
     transform 0.18s ease;
 }
 
+.request-cancel-button,
+.request-danger-button {
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  background: #fff;
+}
+
+.request-cancel-button {
+  height: 100%;
+}
+
 .request-cancel-button:hover,
-.request-cancel-button:focus {
+.request-cancel-button:focus,
+.request-danger-button:hover,
+.request-danger-button:focus {
   color: #fff;
   background: #dc2626;
 }
 
-.request-cancel-button:active {
+.request-secondary-button {
+  border: 1px solid #d0d7e2;
+  color: #172033;
+  background: #fff;
+}
+
+.request-secondary-button:hover,
+.request-secondary-button:focus {
+  border-color: #004aad;
+  color: #004aad;
+  background: #f5f8ff;
+}
+
+.request-cancel-button:active,
+.request-danger-button:active,
+.request-secondary-button:active {
   transform: translateY(1px);
 }
 
-.request-cancel-button:disabled {
+.request-cancel-button:disabled,
+.request-danger-button:disabled,
+.request-secondary-button:disabled {
   cursor: default;
   opacity: 0.7;
 }
@@ -312,6 +341,41 @@ h1 {
   min-width: 190px;
 }
 
+.request-cancel-card {
+  width: min(480px, 100%);
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.request-cancel-body {
+  padding: 24px;
+}
+
+.request-cancel-body p {
+  margin: 0;
+  color: #475467;
+  line-height: 1.55;
+}
+
+.request-cancel-body .request-action-feedback {
+  margin-top: 14px;
+}
+
+.request-cancel-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}
+
+.request-cancel-footer button {
+  width: auto;
+  min-height: 44px;
+  min-width: 140px;
+}
+
 @media (max-width: 640px) {
   .request-card-main,
   .request-modal-header {
@@ -325,5 +389,13 @@ h1 {
   .request-detail-list div {
     grid-template-columns: 1fr;
     gap: 5px;
+  }
+
+  .request-cancel-footer {
+    flex-direction: column;
+  }
+
+  .request-cancel-footer button {
+    width: 100%;
   }
 }

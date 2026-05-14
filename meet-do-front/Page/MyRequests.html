@@ -78,6 +78,46 @@
       </div>
     </div>
 
+    <div
+      id="request-cancel-modal"
+      class="request-modal request-cancel-modal d-none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="request-cancel-title"
+    >
+      <div class="request-cancel-card">
+        <div class="request-modal-header">
+          <div>
+            <p class="modal-kicker mb-2">Cancel request</p>
+            <h2 id="request-cancel-title" class="mb-0">Cancel publisher application?</h2>
+          </div>
+          <button
+            type="button"
+            id="request-cancel-close"
+            class="request-modal-close"
+            aria-label="Close cancellation confirmation"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="request-cancel-body">
+          <p>
+            This will remove your pending publisher application. You can submit
+            a new application later if needed.
+          </p>
+          <p id="request-cancel-feedback" class="request-action-feedback" aria-live="polite"></p>
+        </div>
+        <div class="request-cancel-footer">
+          <button type="button" id="request-cancel-keep" class="request-secondary-button">
+            Keep request
+          </button>
+          <button type="button" id="request-cancel-confirm" class="request-danger-button">
+            Cancel request
+          </button>
+        </div>
+      </div>
+    </div>
+
     <footer id="footer-container" class="footer-container">
       <script>
         document.getElementById("footer-container").innerHTML = Footer("..");
