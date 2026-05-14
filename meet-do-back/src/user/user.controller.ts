@@ -13,6 +13,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PublisherApplicationDto } from './dto/publisher-application.dto';
 import JwtAuthenticationGuard from 'src/authentication/guard/jwt-authentication.guard';
 import type RequestWithUser from 'src/authentication/requestWithUser.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,19 +26,6 @@ interface UploadedMulterFile {
   mimetype: string;
   size: number;
   buffer: Buffer;
-}
-
-interface PublisherApplicationBody {
-  firstname?: string;
-  lastname?: string;
-  address?: string;
-  application?: {
-    experienceLevel?: string;
-    activityCategory?: string;
-    motivation?: string;
-    activityPlan?: string;
-    links?: string;
-  };
 }
 
 const ALLOWED_AVATAR_TYPES = [
@@ -86,7 +74,7 @@ export class UserController {
   @UseGuards(JwtAuthenticationGuard)
   requestPublisher(
     @Req() req: RequestWithUser,
-    @Body() body: PublisherApplicationBody,
+    @Body() body: PublisherApplicationDto,
   ) {
     return this.userService.requestPublisher(req.user.id, body);
   }

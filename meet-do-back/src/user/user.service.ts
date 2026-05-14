@@ -2,6 +2,10 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  PublisherApplicationDetailsDto,
+  PublisherApplicationDto,
+} from './dto/publisher-application.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -171,18 +175,14 @@ export class UserService {
 
   async requestPublisher(
     id: number,
-    data: {
-      firstname?: string;
-      lastname?: string;
-      address?: string;
-      application?: Record<string, string | undefined>;
-    } = {},
+    data: PublisherApplicationDto = {},
   ) {
+    const applicationDetails = this.sanitizePublisherApplication(
+      data.application,
+    );
     const updateData = {
       publisher_request: true,
-      publisher_request_details: this.sanitizePublisherApplication(
-        data.application,
-      ),
+      publisher_request_details: applicationDetails,
       publisher_request_submitted_at: new Date().toISOString(),
       ...(data.firstname ? { firstname: data.firstname.trim() } : {}),
       ...(data.lastname ? { lastname: data.lastname.trim() } : {}),
@@ -210,10 +210,10 @@ export class UserService {
   }
 
   private sanitizePublisherApplication(
-    application?: Record<string, string | undefined>,
+    application?: PublisherApplicationDetailsDto,
   ) {
     const safeApplication = application ?? {};
-    const fields = [
+    const fields: Array<keyof PublisherApplicationDetailsDto> = [
       'experienceLevel',
       'activityCategory',
       'motivation',
