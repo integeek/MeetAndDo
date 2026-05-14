@@ -27,6 +27,19 @@ interface UploadedMulterFile {
   buffer: Buffer;
 }
 
+interface PublisherApplicationBody {
+  firstname?: string;
+  lastname?: string;
+  address?: string;
+  application?: {
+    experienceLevel?: string;
+    activityCategory?: string;
+    motivation?: string;
+    activityPlan?: string;
+    links?: string;
+  };
+}
+
 const ALLOWED_AVATAR_TYPES = [
   'image/jpeg',
   'image/png',
@@ -71,8 +84,11 @@ export class UserController {
 
   @Post('request-publisher')
   @UseGuards(JwtAuthenticationGuard)
-  requestPublisher(@Req() req: RequestWithUser) {
-    return this.userService.requestPublisher(req.user.id);
+  requestPublisher(
+    @Req() req: RequestWithUser,
+    @Body() body: PublisherApplicationBody,
+  ) {
+    return this.userService.requestPublisher(req.user.id, body);
   }
 
   @Patch('me/password')

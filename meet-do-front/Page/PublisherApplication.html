@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Become a publisher</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../Style/PublisherApplication.css" />
+    <link rel="stylesheet" href="../Component/Footer/Footer.css" />
+    <link rel="stylesheet" href="../Component/Navbar/Navbar.css" />
+    <link rel="stylesheet" href="../Component/Button/BlueButton.css" />
+  </head>
+  <body>
+    <header>
+      <div id="navbar-container" class="navbar-container"></div>
+    </header>
+
+    <main class="container px-3 px-md-4 px-lg-5 py-4 py-md-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1>Become a publisher</h1>
+          <p class="page-subtitle mb-0">
+            Complete your profile so the admin team can review your application.
+          </p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center pt-4">
+        <div class="col-12 col-lg-10">
+          <form id="publisher-application-form" class="publisher-form row g-4" novalidate>
+            <div class="col-12 col-md-6">
+              <label for="publisher-firstname" class="form-label fw-semibold">
+                First name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="publisher-firstname"
+                name="firstname"
+                autocomplete="given-name"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="publisher-lastname" class="form-label fw-semibold">
+                Last name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="publisher-lastname"
+                name="lastname"
+                autocomplete="family-name"
+                required
+              />
+            </div>
+
+            <div class="col-12">
+              <label for="publisher-address" class="form-label fw-semibold">
+                Address or operating area <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="publisher-address"
+                name="address"
+                autocomplete="street-address"
+                placeholder="E.g. Paris and nearby cities"
+                required
+              />
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="publisher-experience" class="form-label fw-semibold">
+                Experience level <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select form-select-lg"
+                id="publisher-experience"
+                name="experienceLevel"
+                required
+              >
+                <option value="">Choose one</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Professional">Professional</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label for="publisher-category" class="form-label fw-semibold">
+                Main activity category <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select form-select-lg"
+                id="publisher-category"
+                name="activityCategory"
+                required
+              >
+                <option value="">Choose a category</option>
+                <option value="Sports">Sports</option>
+                <option value="Art">Art</option>
+                <option value="Travel">Travel</option>
+                <option value="Science">Science</option>
+                <option value="Music">Music</option>
+                <option value="Reading">Reading</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label for="publisher-motivation" class="form-label fw-semibold">
+                Why do you want to become a publisher?
+                <span class="text-danger">*</span>
+              </label>
+              <textarea
+                class="form-control"
+                id="publisher-motivation"
+                name="motivation"
+                rows="5"
+                minlength="40"
+                placeholder="Tell us what motivates you and what you want to bring to the Meet & Do community."
+                required
+              ></textarea>
+              <div class="form-text">Minimum 40 characters.</div>
+            </div>
+
+            <div class="col-12">
+              <label for="publisher-activity-plan" class="form-label fw-semibold">
+                What kind of activities would you like to publish?
+                <span class="text-danger">*</span>
+              </label>
+              <textarea
+                class="form-control"
+                id="publisher-activity-plan"
+                name="activityPlan"
+                rows="5"
+                minlength="40"
+                placeholder="Describe your planned activities, the audience, and how you would organize them."
+                required
+              ></textarea>
+              <div class="form-text">Minimum 40 characters.</div>
+            </div>
+
+            <div class="col-12">
+              <label for="publisher-links" class="form-label fw-semibold">
+                Website, portfolio, or social links
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="publisher-links"
+                name="links"
+                placeholder="Optional"
+              />
+            </div>
+
+            <div class="col-12 pt-2">
+              <div id="publisher-submit-button" class="submit-button-wrap"></div>
+              <p
+                id="publisher-submit-feedback"
+                class="form-text mt-3 mb-0"
+                aria-live="polite"
+              ></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer id="footer-container" class="footer-container"></footer>
+    <script src="../Script/PublisherApplication.js"></script>
+    <script src="../Component/Footer/Footer.js"></script>
+    <script src="../Component/Navbar/Navbar.js"></script>
+    <script src="../Component/Navbar/NavAction.js"></script>
+    <script src="../Component/Button/BlueButton.js"></script>
+    <script>
+      const navbarContainer = document.getElementById("navbar-container");
+      const footerContainer = document.getElementById("footer-container");
+
+      if (navbarContainer) {
+        navbarContainer.innerHTML = Navbar();
+      }
+
+      if (footerContainer) {
+        footerContainer.innerHTML = Footer("..");
+      }
+
+      if (window.initializeNavbar) {
+        window.initializeNavbar();
+      }
+    </script>
+  </body>
+</html>

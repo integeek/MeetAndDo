@@ -42,13 +42,14 @@ function getCurrentRequests(profile) {
     return [
       {
         id: "activity-creator-application",
-        title: "Activity creator application",
+        title: "Publisher application",
         description:
-          "Your request to become an activity creator is waiting for an administrator review.",
+          "Your request to become a publisher is waiting for an administrator review.",
         status: "Pending review",
         statusClass: "pending",
         submittedLabel: "Requested from your account",
-        submittedAt: profile.created_at,
+        submittedAt: profile.publisher_request_submitted_at || profile.created_at,
+        details: profile.publisher_request_details || {},
       },
     ];
   }
@@ -139,11 +140,33 @@ function openRequestModal(request, profile) {
       </div>
       <div>
         <dt>Next step</dt>
-        <dd>An administrator will review your application before your account can create activities.</dd>
+        <dd>An administrator will review your application before your account can publish activities.</dd>
       </div>
+      ${renderApplicationDetails(request.details)}
     </dl>
   `;
   modal.classList.remove("d-none");
+}
+
+function renderApplicationDetails(details = {}) {
+  const items = [
+    ["Experience", details.experienceLevel],
+    ["Category", details.activityCategory],
+    ["Motivation", details.motivation],
+    ["Activity plan", details.activityPlan],
+    ["Links", details.links],
+  ].filter(([, value]) => value);
+
+  if (!items.length) {
+    return "";
+  }
+
+  return items.map(([label, value]) => `
+    <div>
+      <dt>${escapeHtml(label)}</dt>
+      <dd>${escapeHtml(value)}</dd>
+    </div>
+  `).join("");
 }
 
 function closeRequestModal() {

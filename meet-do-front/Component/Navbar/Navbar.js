@@ -105,6 +105,14 @@ function getCreateActivityHref(basePath) {
     return `${basePath}/Page/Login.html?${params.toString()}`;
 }
 
+function getPublisherApplicationHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "PublisherApplication.html",
+        "You must be logged in to apply as a publisher.",
+    );
+}
+
 function getAuthenticatedPageHref(basePath, targetPath, authMessage) {
     const userId = getAuthenticatedUserId();
 
@@ -202,6 +210,9 @@ function UserNavbar(basePath, variant = "auto") {
     const activitiesHref = getMyActivitiesHref(basePath);
     const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
+    const publisherApplicationAction = isPublisher
+        ? ""
+        : `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`;
     const publisherMenuItem = isPublisher
         ? `
                                 <li>
@@ -240,6 +251,7 @@ function UserNavbar(basePath, variant = "auto") {
 
                     <div class="meetdo-auth-actions">
                         ${publisherActions}
+                        ${publisherApplicationAction}
                         <div class="dropdown meetdo-profile-dropdown">
                             <a
                                 class="btn btn-primary meetdo-btn meetdo-profile-btn dropdown-toggle"
