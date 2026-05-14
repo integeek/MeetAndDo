@@ -50,6 +50,11 @@ function getPublisherApplicationStorageKey(userId) {
   return `meetando_publisher_application_${userId || "current"}`;
 }
 
+function clearStoredPublisherApplicationDetails(userId) {
+  localStorage.removeItem(getPublisherApplicationStorageKey("current"));
+  localStorage.removeItem(getPublisherApplicationStorageKey(userId));
+}
+
 function getStoredPublisherApplicationDetails(userId) {
   return parseJsonObject(localStorage.getItem(getPublisherApplicationStorageKey(userId)));
 }
@@ -158,6 +163,7 @@ function renderRequestCard(request) {
         <span>${formatDate(request.submittedAt)}</span>
       </div>
       <div class="request-actions" id="request-action-${escapeHtml(request.id)}"></div>
+      <p class="request-action-feedback" id="request-feedback-${escapeHtml(request.id)}" aria-live="polite"></p>
     </article>
   `;
 }
@@ -178,11 +184,63 @@ function renderRequests(profile) {
     const actionContainer = document.getElementById(`request-action-${request.id}`);
     if (!actionContainer) return;
 
-    actionContainer.innerHTML = BoutonBleu("View application");
-    actionContainer.querySelector("button")?.addEventListener("click", () => {
+    actionContainer.innerHTML = `
+      <div class="request-action-item request-action-view">
+        ${BoutonBleu("View application")}
+      </div>
+      <div class="request-action-item">
+        <button class="request-cancel-button" type="button">Cancel request</button>
+      </div>
+    `;
+    actionContainer.querySelector(".request-action-view button")?.addEventListener("click", () => {
       openRequestModal(request, profile);
     });
+    actionContainer.querySelector(".request-cancel-button")?.addEventListener("click", (event) => {
+      cancelPublisherRequest(profile, event.currentTarget, request.id);
+    });
   });
+}
+
+function setRequestFeedback(requestId, message = "", status = "") {
+  const feedback = document.getElementById(`request-feedback-${requestId}`);
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.className = `request-action-feedback${status ? ` is-${status}` : ""}`;
+}
+
+async function cancelPublisherRequest(profile, button, requestId) {
+  const confirmed = window.confirm("Cancel your publisher application?");
+  if (!confirmed) return;
+
+  setRequestFeedback(requestId, "Cancelling your request...", "loading");
+  if (button) button.disabled = true;
+
+  try {
+    const response = await fetch(`${getMeetDoApiUrl()}/user/request-publisher`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(result.message || "Unable to cancel your request.");
+    }
+
+    if (result.user) {
+      localStorage.setItem("meetando_current_user", JSON.stringify(result.user));
+    }
+
+    clearStoredPublisherApplicationDetails(profile?.id);
+    setRequestFeedback(requestId, "Your request has been cancelled.", "success");
+
+    setTimeout(() => {
+      renderRequests(result.user || { ...profile, publisher_request: false });
+    }, 500);
+  } catch (error) {
+    setRequestFeedback(requestId, error.message || "Unable to cancel your request.", "error");
+    if (button) button.disabled = false;
+  }
 }
 
 function openRequestModal(request, profile) {

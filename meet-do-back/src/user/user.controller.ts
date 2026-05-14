@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Body,
+  Delete,
   Patch,
   UseGuards,
   Req,
@@ -77,6 +78,12 @@ export class UserController {
     @Body() body: PublisherApplicationDto,
   ) {
     return this.userService.requestPublisher(req.user.id, body);
+  }
+
+  @Delete('request-publisher')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequest(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
   }
 
   @Patch('me/password')

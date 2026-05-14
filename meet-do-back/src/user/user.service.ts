@@ -209,6 +209,32 @@ export class UserService {
     return { message: 'Publisher application sent successfully.', user };
   }
 
+  async cancelPublisherRequest(id: number) {
+    const { data: user, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .update({
+        publisher_request: false,
+        publisher_request_details: null,
+        publisher_request_submitted_at: null,
+      })
+      .eq('id', id)
+      .select(
+        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, publisher_request_details, publisher_request_submitted_at, avatar_url',
+      )
+      .single();
+
+    if (error) {
+      this.logger.error(`cancelPublisherRequest: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return { message: 'Publisher application cancelled successfully.', user };
+  }
+
   private sanitizePublisherApplication(
     application?: PublisherApplicationDetailsDto,
   ) {

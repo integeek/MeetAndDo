@@ -117,13 +117,73 @@ h1 {
 }
 
 .request-actions {
-  max-width: 220px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 460px;
+}
+
+.request-action-item {
+  flex: 1 1 180px;
+  min-width: 0;
 }
 
 .request-actions .buttonCo,
+.request-cancel-button,
 .request-modal-footer .buttonCo {
   min-height: 44px;
   margin: 0;
+}
+
+.request-cancel-button {
+  width: 100%;
+  height: 100%;
+  padding: 10px 20px;
+  border: 1px solid #dc2626;
+  border-radius: 10px;
+  color: #dc2626;
+  background: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.request-cancel-button:hover,
+.request-cancel-button:focus {
+  color: #fff;
+  background: #dc2626;
+}
+
+.request-cancel-button:active {
+  transform: translateY(1px);
+}
+
+.request-cancel-button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.request-action-feedback {
+  min-height: 22px;
+  margin: 12px 0 0;
+  color: #667085;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.request-action-feedback.is-success {
+  color: #065f46;
+}
+
+.request-action-feedback.is-error {
+  color: #991b1b;
+}
+
+.request-action-feedback.is-loading {
+  color: #004aad;
 }
 
 .request-modal {
