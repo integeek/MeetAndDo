@@ -74,6 +74,15 @@ function isPublisherUser() {
     return role === "publisher";
 }
 
+function isStandardUser() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "user";
+}
+
+function hasPendingPublisherRequest() {
+    return getStoredAuthenticatedUser()?.publisher_request === true;
+}
+
 function getUserAccountHref(basePath) {
     const userId = getAuthenticatedUserId();
 
@@ -105,6 +114,14 @@ function getCreateActivityHref(basePath) {
     return `${basePath}/Page/Login.html?${params.toString()}`;
 }
 
+function getPublisherApplicationHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "PublisherApplication.html",
+        "You must be logged in to apply as a publisher.",
+    );
+}
+
 function getAuthenticatedPageHref(basePath, targetPath, authMessage) {
     const userId = getAuthenticatedUserId();
 
@@ -133,6 +150,14 @@ function getMyActivitiesHref(basePath) {
         basePath,
         "MyActivity.html",
         "You must be logged in to access your activities.",
+    );
+}
+
+function getMyRequestsHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "MyRequests.html",
+        "You must be logged in to access your requests.",
     );
 }
 
@@ -192,7 +217,9 @@ function UserNavbar(basePath, variant = "auto") {
     const publisherActions = getPublisherNavbarActions(basePath, variant);
     const reservationsHref = getMyReservationsHref(basePath);
     const activitiesHref = getMyActivitiesHref(basePath);
+    const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
+    const publisherApplicationAction = getPublisherApplicationAction(basePath);
     const publisherMenuItem = isPublisher
         ? `
                                 <li>
@@ -231,6 +258,7 @@ function UserNavbar(basePath, variant = "auto") {
 
                     <div class="meetdo-auth-actions">
                         ${publisherActions}
+                        ${publisherApplicationAction}
                         <div class="dropdown meetdo-profile-dropdown">
                             <a
                                 class="btn btn-primary meetdo-btn meetdo-profile-btn dropdown-toggle"
@@ -256,6 +284,9 @@ function UserNavbar(basePath, variant = "auto") {
                                 <li>
                                     <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item" href="${requestsHref}">My requests</a>
+                                </li>
                                 ${publisherMenuItem}
                                 <li class="meetdo-profile-menu-divider" aria-hidden="true"></li>
                                 <li>
@@ -270,6 +301,44 @@ function UserNavbar(basePath, variant = "auto") {
             </div>
         </nav>
     `;
+}
+
+function getPublisherApplicationAction(basePath) {
+    if (!isStandardUser()) {
+        return "";
+    }
+
+    if (hasPendingPublisherRequest()) {
+        return `
+            <button
+                class="btn btn-primary meetdo-btn meetdo-btn-disabled"
+                type="button"
+                aria-disabled="true"
+                onclick="showPendingPublisherRequestMessage()"
+            >
+                Become a publisher
+            </button>
+        `;
+    }
+
+    return `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`;
+}
+
+function showPendingPublisherRequestMessage() {
+    const existingMessage = document.getElementById("meetdo-navbar-message");
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    const message = document.createElement("div");
+    message.id = "meetdo-navbar-message";
+    message.className = "meetdo-navbar-message";
+    message.textContent = "You already have a publisher request under review.";
+    document.body.appendChild(message);
+
+    window.setTimeout(() => {
+        message.remove();
+    }, 3200);
 }
 
 function toggleMeetDoNavbar(button) {

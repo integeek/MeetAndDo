@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Body,
+  Delete,
   Patch,
   UseGuards,
   Req,
@@ -13,6 +14,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PublisherApplicationDto } from './dto/publisher-application.dto';
 import JwtAuthenticationGuard from 'src/authentication/guard/jwt-authentication.guard';
 import type RequestWithUser from 'src/authentication/requestWithUser.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -71,8 +73,23 @@ export class UserController {
 
   @Post('request-publisher')
   @UseGuards(JwtAuthenticationGuard)
-  requestPublisher(@Req() req: RequestWithUser) {
-    return this.userService.requestPublisher(req.user.id);
+  requestPublisher(
+    @Req() req: RequestWithUser,
+    @Body() body: PublisherApplicationDto,
+  ) {
+    return this.userService.requestPublisher(req.user.id, body);
+  }
+
+  @Delete('request-publisher')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequest(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
+  }
+
+  @Post('request-publisher/cancel')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequestWithPost(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
   }
 
   @Patch('me/password')

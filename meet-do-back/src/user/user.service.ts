@@ -2,6 +2,10 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  PublisherApplicationDetailsDto,
+  PublisherApplicationDto,
+} from './dto/publisher-application.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -62,7 +66,7 @@ export class UserService {
       .getAdminClient()
       .from('users')
       .select(
-        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, avatar_url',
+        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, publisher_request_details, publisher_request_submitted_at, avatar_url',
       )
       .eq('id', id)
       .maybeSingle();
@@ -155,7 +159,7 @@ export class UserService {
       .update(data)
       .eq('id', id)
       .select(
-        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, avatar_url',
+        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, publisher_request_details, publisher_request_submitted_at, avatar_url',
       )
       .single();
 
@@ -169,12 +173,31 @@ export class UserService {
     return updated;
   }
 
-  async requestPublisher(id: number) {
-    const { error } = await this.supabaseService
+  async requestPublisher(
+    id: number,
+    data: PublisherApplicationDto = {},
+  ) {
+    const applicationDetails = this.sanitizePublisherApplication(
+      data.application,
+    );
+    const updateData = {
+      publisher_request: true,
+      publisher_request_details: applicationDetails,
+      publisher_request_submitted_at: new Date().toISOString(),
+      ...(data.firstname ? { firstname: data.firstname.trim() } : {}),
+      ...(data.lastname ? { lastname: data.lastname.trim() } : {}),
+      ...(data.address ? { address: data.address.trim() } : {}),
+    };
+
+    const { data: user, error } = await this.supabaseService
       .getAdminClient()
       .from('users')
-      .update({ publisher_request: true })
-      .eq('id', id);
+      .update(updateData)
+      .eq('id', id)
+      .select(
+        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, publisher_request_details, publisher_request_submitted_at, avatar_url',
+      )
+      .single();
 
     if (error) {
       this.logger.error(`requestPublisher: ${error.message}`);
@@ -183,7 +206,54 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return { message: 'Demande envoyée avec succès.' };
+    return { message: 'Publisher application sent successfully.', user };
+  }
+
+  async cancelPublisherRequest(id: number) {
+    const { data: user, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .update({
+        publisher_request: false,
+        publisher_request_details: null,
+        publisher_request_submitted_at: null,
+      })
+      .eq('id', id)
+      .select(
+        'id, firstname, lastname, email, role, address, enabled, created_at, publisher_request, publisher_request_details, publisher_request_submitted_at, avatar_url',
+      )
+      .single();
+
+    if (error) {
+      this.logger.error(`cancelPublisherRequest: ${error.message}`);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return { message: 'Publisher application cancelled successfully.', user };
+  }
+
+  private sanitizePublisherApplication(
+    application?: PublisherApplicationDetailsDto,
+  ) {
+    const safeApplication = application ?? {};
+    const fields: Array<keyof PublisherApplicationDetailsDto> = [
+      'experienceLevel',
+      'activityCategory',
+      'motivation',
+      'activityPlan',
+      'links',
+    ];
+
+    return fields.reduce<Record<string, string>>((acc, field) => {
+      const value = safeApplication[field];
+      if (typeof value === 'string' && value.trim()) {
+        acc[field] = value.trim();
+      }
+      return acc;
+    }, {});
   }
 
   async changePassword(

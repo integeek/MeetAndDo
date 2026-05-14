@@ -103,9 +103,9 @@ export class DashboardService {
   async getPublisherRequests() {
     const { data, error } = await this.db
       .from('users')
-      .select('id, firstname, lastname, email, created_at')
+      .select('id, firstname, lastname, email, address, created_at, publisher_request_details, publisher_request_submitted_at')
       .eq('publisher_request', true)
-      .order('created_at', { ascending: false });
+      .order('publisher_request_submitted_at', { ascending: false });
     if (error) { this.logger.error(`getPublisherRequests: ${error.message}`); return []; }
     return data ?? [];
   }
