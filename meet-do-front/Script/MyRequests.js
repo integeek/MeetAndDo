@@ -31,6 +31,80 @@ function formatDate(value) {
   });
 }
 
+function parseJsonObject(value) {
+  if (!value) return {};
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  return typeof value === "object" ? value : {};
+}
+
+function getPublisherApplicationStorageKey(userId) {
+  return `meetando_publisher_application_${userId || "current"}`;
+}
+
+function getStoredPublisherApplicationDetails(userId) {
+  return parseJsonObject(localStorage.getItem(getPublisherApplicationStorageKey(userId)));
+}
+
+function pickFirstValue(...values) {
+  return values.find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function normalizePublisherApplicationDetails(profile) {
+  const rawDetails = parseJsonObject(profile?.publisher_request_details);
+  const nestedApplication = parseJsonObject(rawDetails.application);
+  const storedDetails = {
+    ...getStoredPublisherApplicationDetails("current"),
+    ...getStoredPublisherApplicationDetails(profile?.id),
+  };
+  const details = {
+    ...storedDetails,
+    ...nestedApplication,
+    ...rawDetails,
+  };
+
+  return {
+    experienceLevel: pickFirstValue(
+      details.experienceLevel,
+      details.experience_level,
+      details.experience,
+    ),
+    activityCategory: pickFirstValue(
+      details.activityCategory,
+      details.activity_category,
+      details.category,
+      details.theme,
+    ),
+    motivation: pickFirstValue(
+      details.motivation,
+      details.reason,
+      details.why,
+    ),
+    activityPlan: pickFirstValue(
+      details.activityPlan,
+      details.activity_plan,
+      details.plan,
+      details.activities,
+    ),
+    links: pickFirstValue(
+      details.links,
+      details.link,
+      details.website,
+      details.portfolio,
+      details.socialLinks,
+      details.social_links,
+    ),
+  };
+}
+
 function getCurrentRequests(profile) {
   const role = String(profile?.role || "").toLowerCase();
 
@@ -49,7 +123,7 @@ function getCurrentRequests(profile) {
         statusClass: "pending",
         submittedLabel: "Requested from your account",
         submittedAt: profile.publisher_request_submitted_at || profile.created_at,
-        details: profile.publisher_request_details || {},
+        details: normalizePublisherApplicationDetails(profile),
       },
     ];
   }
@@ -114,6 +188,8 @@ function renderRequests(profile) {
 function openRequestModal(request, profile) {
   const modal = document.getElementById("request-modal");
   const body = document.getElementById("request-modal-body");
+  const detailsButton = document.getElementById("request-modal-details");
+  const detailsFooter = document.querySelector(".request-modal-footer");
   if (!modal || !body) return;
 
   body.innerHTML = `
@@ -142,35 +218,64 @@ function openRequestModal(request, profile) {
         <dt>Next step</dt>
         <dd>An administrator will review your application before your account can publish activities.</dd>
       </div>
-      ${renderApplicationDetails(request.details)}
     </dl>
   `;
+
+  if (detailsButton) {
+    detailsButton.textContent = "View more details";
+    detailsButton.disabled = false;
+    detailsButton.classList.remove("d-none");
+    detailsButton.onclick = () => showFullApplicationDetails(request, profile);
+  }
+
+  detailsFooter?.classList.remove("d-none");
+  document.body.classList.add("request-modal-open");
   modal.classList.remove("d-none");
 }
 
-function renderApplicationDetails(details = {}) {
-  const items = [
-    ["Experience", details.experienceLevel],
-    ["Category", details.activityCategory],
-    ["Motivation", details.motivation],
-    ["Activity plan", details.activityPlan],
-    ["Links", details.links],
-  ].filter(([, value]) => value);
+function renderFullApplicationDetails(request, profile) {
+  const details = request.details || {};
+  const formFields = [
+    ["First name", profile?.firstname],
+    ["Last name", profile?.lastname],
+    ["Address or operating area", profile?.address],
+    ["Experience level", details.experienceLevel],
+    ["Main activity category", details.activityCategory],
+    ["Why do you want to become a publisher?", details.motivation],
+    ["What kind of activities would you like to publish?", details.activityPlan],
+    ["Website, portfolio, or social links", details.links],
+  ];
 
-  if (!items.length) {
-    return "";
-  }
-
-  return items.map(([label, value]) => `
+  return formFields.map(([label, value]) => `
     <div>
       <dt>${escapeHtml(label)}</dt>
-      <dd>${escapeHtml(value)}</dd>
+      <dd>${escapeHtml(value || "Not provided")}</dd>
     </div>
   `).join("");
 }
 
+function showFullApplicationDetails(request, profile) {
+  const body = document.getElementById("request-modal-body");
+  const detailsButton = document.getElementById("request-modal-details");
+  const detailsFooter = document.querySelector(".request-modal-footer");
+  if (!body || !detailsButton) return;
+
+  body.innerHTML = `
+    <div class="request-full-details request-full-details-visible">
+      <h3>Full application</h3>
+      <dl class="request-detail-list">
+        ${renderFullApplicationDetails(request, profile)}
+      </dl>
+    </div>
+  `;
+  body.scrollTop = 0;
+  detailsButton.classList.add("d-none");
+  detailsFooter?.classList.add("d-none");
+}
+
 function closeRequestModal() {
   document.getElementById("request-modal")?.classList.add("d-none");
+  document.body.classList.remove("request-modal-open");
 }
 
 async function loadRequests() {
@@ -208,7 +313,6 @@ async function loadRequests() {
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("request-modal-close")?.addEventListener("click", closeRequestModal);
-  document.getElementById("request-modal-ok")?.addEventListener("click", closeRequestModal);
   document.getElementById("request-modal")?.addEventListener("click", (event) => {
     if (event.target.id === "request-modal") {
       closeRequestModal();

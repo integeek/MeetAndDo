@@ -17,6 +17,25 @@ function getFormValue(form, name) {
   return String(new FormData(form).get(name) || "").trim();
 }
 
+function getPublisherApplicationStorageKey(userId) {
+  return `meetando_publisher_application_${userId || "current"}`;
+}
+
+function parseJsonObject(value) {
+  if (!value) return {};
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  return typeof value === "object" ? value : {};
+}
+
 function fillPublisherForm(profile) {
   const fields = {
     "publisher-firstname": profile?.firstname,
@@ -31,7 +50,7 @@ function fillPublisherForm(profile) {
     }
   });
 
-  const details = profile?.publisher_request_details || {};
+  const details = parseJsonObject(profile?.publisher_request_details);
   const detailFields = {
     "publisher-experience": details.experienceLevel,
     "publisher-category": details.activityCategory,
@@ -133,6 +152,12 @@ async function submitPublisherApplication(event) {
     if (result.user) {
       localStorage.setItem("meetando_current_user", JSON.stringify(result.user));
     }
+
+    const storageUserId = result.user?.id || JSON.parse(localStorage.getItem("meetando_current_user") || "{}")?.id;
+    localStorage.setItem(
+      getPublisherApplicationStorageKey(storageUserId),
+      JSON.stringify(payload.application),
+    );
 
     setPublisherFeedback("Your application has been sent. You can track it from My requests.", "success");
     setTimeout(() => {

@@ -8,6 +8,10 @@ body {
   background: #fff;
 }
 
+body.request-modal-open {
+  overflow: hidden;
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.5rem);
@@ -130,19 +134,26 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow: hidden;
   background: rgba(15, 23, 42, 0.5);
+  overscroll-behavior: contain;
 }
 
 .request-modal-card {
+  display: flex;
+  flex-direction: column;
   width: min(560px, 100%);
+  height: min(720px, calc(100vh - 40px));
   max-height: calc(100vh - 40px);
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
 }
 
 .request-modal-header {
+  flex-shrink: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -175,6 +186,11 @@ h1 {
 }
 
 .request-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 24px;
 }
 
@@ -209,7 +225,23 @@ h1 {
   line-height: 1.5;
 }
 
+.request-full-details {
+  margin: 0;
+}
+
+.request-full-details h3 {
+  margin: 0 0 16px;
+  color: #172033;
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.request-full-details-visible .request-detail-list div {
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
 .request-modal-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   padding: 0 24px 24px;
@@ -217,7 +249,7 @@ h1 {
 
 .request-modal-footer .buttonCo {
   width: auto;
-  min-width: 130px;
+  min-width: 190px;
 }
 
 @media (max-width: 640px) {
