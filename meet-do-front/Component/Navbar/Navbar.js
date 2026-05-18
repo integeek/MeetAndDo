@@ -3,7 +3,7 @@ function Navbar(options = {}) {
     let variant = "auto";
 
     if (typeof options === "string") {
-        if (["auto", "guest", "user", "publisher", "creator"].includes(options)) {
+        if (["auto", "guest", "user", "publisher", "admin", "creator"].includes(options)) {
             variant = options;
         } else {
             basePath = options;
@@ -14,14 +14,16 @@ function Navbar(options = {}) {
     }
 
     if (variant === "auto") {
-        variant = getAuthenticatedUserId() ? (isPublisherUser() ? "publisher" : "user") : "guest";
+        variant = getAuthenticatedUserId()
+            ? (isAdminUser() ? "admin" : (isPublisherUser() ? "publisher" : "user"))
+            : "guest";
     }
 
     if (variant === "guest") {
         return GuestNavbar(basePath);
     }
 
-    if (variant === "user" || variant === "publisher") {
+    if (variant === "user" || variant === "publisher" || variant === "admin") {
         return UserNavbar(basePath, variant);
     }
 
@@ -72,6 +74,11 @@ function escapeHtmlAttribute(value) {
 function isPublisherUser() {
     const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
     return role === "publisher";
+}
+
+function isAdminUser() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "admin";
 }
 
 function isStandardUser() {
@@ -172,6 +179,14 @@ function getPublisherNavbarActions(basePath, variant = "auto") {
     `;
 }
 
+function getAdminNavbarActions(basePath, variant = "auto") {
+    if (variant !== "admin" && !isAdminUser()) {
+        return "";
+    }
+
+    return `<a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Dashboard.html">Dashboard</a>`;
+}
+
 function GuestNavbar(basePath) {
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
@@ -215,10 +230,12 @@ function UserNavbar(basePath, variant = "auto") {
     const fallbackAvatarUrl = escapeHtmlAttribute(`${basePath}/Assets/img/icon-profil.png`);
     const hasCustomAvatar = avatarUrl !== `${basePath}/Assets/img/icon-profil.png`;
     const publisherActions = getPublisherNavbarActions(basePath, variant);
+    const adminActions = getAdminNavbarActions(basePath, variant);
     const reservationsHref = getMyReservationsHref(basePath);
     const activitiesHref = getMyActivitiesHref(basePath);
     const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
+    const isAdmin = variant === "admin" || isAdminUser();
     const publisherApplicationAction = getPublisherApplicationAction(basePath);
     const publisherMenuItem = isPublisher
         ? `
@@ -227,6 +244,13 @@ function UserNavbar(basePath, variant = "auto") {
                                 </li>
         `
         : "";
+    const requestsMenuItem = isAdmin
+        ? ""
+        : `
+                                <li>
+                                    <a class="dropdown-item" href="${requestsHref}">My requests</a>
+                                </li>
+        `;
 
     return `
         <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
@@ -257,6 +281,7 @@ function UserNavbar(basePath, variant = "auto") {
                     </ul>
 
                     <div class="meetdo-auth-actions">
+                        ${adminActions}
                         ${publisherActions}
                         ${publisherApplicationAction}
                         <div class="dropdown meetdo-profile-dropdown">
@@ -284,9 +309,7 @@ function UserNavbar(basePath, variant = "auto") {
                                 <li>
                                     <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="${requestsHref}">My requests</a>
-                                </li>
+                                ${requestsMenuItem}
                                 ${publisherMenuItem}
                                 <li class="meetdo-profile-menu-divider" aria-hidden="true"></li>
                                 <li>

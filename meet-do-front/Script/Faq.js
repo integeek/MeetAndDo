@@ -17,6 +17,7 @@ async function loadFaq() {
 function renderFaq(items) {
   const container = document.getElementById('faq-container');
   container.innerHTML = '';
+  const admin = isAdmin();
 
   items.forEach((item) => {
     const div = document.createElement('div');
@@ -25,12 +26,14 @@ function renderFaq(items) {
       <button class="faq-btn" aria-expanded="false">
         <span class="faq-question">${item.question}</span>
         <div class="faq-btn-actions">
+          ${admin ? `
           <span class="faq-btn-edit" title="Edit">
             <image class="icon icon-pen" src="../Assets/img/icon-pen.svg"></image>
           </span>
           <span class="faq-btn-delete" title="Delete">
             <image class="icon icon-trash" src="../Assets/img/icon-trash.svg"></image>
           </span>
+          ` : ''}
           <svg class="faq-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -55,25 +58,26 @@ function renderFaq(items) {
       }
     });
 
-    div.querySelector('.faq-btn-edit').addEventListener('click', (e) => {
-      e.stopPropagation();
-      currentEditId = item.id;
-      document.getElementById('edit-faq-question-input').value = item.question;
-      document.getElementById('edit-faq-answer-input').value = item.answer;
-      openPopUp('edit-faq-popup');
-    });
+    if (admin) {
+      div.querySelector('.faq-btn-edit').addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentEditId = item.id;
+        document.getElementById('edit-faq-question-input').value = item.question;
+        document.getElementById('edit-faq-answer-input').value = item.answer;
+        openPopUp('edit-faq-popup');
+      });
 
-    div.querySelector('.faq-btn-delete').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (confirm('Delete this question ?')) {
-        deleteFaq(item.id);
-      }
-    });
+      div.querySelector('.faq-btn-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm('Delete this question ?')) {
+          deleteFaq(item.id);
+        }
+      });
+    }
 
     container.appendChild(div);
   });
 }
-
 loadFaq();
 
 function openPopUp(id) {
@@ -152,4 +156,29 @@ async function deleteFaq(id) {
   } catch (err) {
     alert('Unable to delete the question. Please try again.');
   }
+}
+
+function getStoredAuthenticatedUser() {
+    try {
+        const rawUser = localStorage.getItem("meetando_current_user");
+        if (!rawUser) {
+          return null;
+        }
+
+        const user = JSON.parse(rawUser);
+        return user && typeof user === "object" ? user : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function isAdmin() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "admin";
+}
+
+const boutonContainer = document.getElementById('boutonContainer');
+if (isAdmin()) {
+    boutonContainer.innerHTML = BoutonBleu("Create a question");
+    boutonContainer.onclick = () => openPopUp('edit-email-popup');
 }

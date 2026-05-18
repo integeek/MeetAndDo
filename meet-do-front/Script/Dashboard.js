@@ -1716,44 +1716,30 @@ async function renderPublisherActivitesTab() {
     <div class="dash-loader"><div class="dash-spinner"></div><p>Loading…</p></div>`;
 
   try {
-    const historique = await appelApi('/dashboard/publisher/historique');
+    const data = await appelApi('/review/publisher');
     renderSidebar();
-    afficherPublisherReviews(historique);
+    afficherPublisherReviews(data);
   } catch (e) {
     main.innerHTML = `<div class="dash-loader"><p style="color:var(--text-muted)">${escapeHtml(e.message)}</p></div>`;
   }
 }
 
-function afficherPublisherReviews(historique) {
+function afficherPublisherReviews(data) {
   const main = document.getElementById('dash-main');
   if (!main) return;
 
-  // Only keep entries that have a user_rating
-  const avecNote = historique.filter((r) => r.user_rating != null);
+  const { reviews: groupes = [], stats = {} } = data || {};
+  const total    = stats.total ?? 0;
+  const moyenne  = stats.average ?? 0;
+  const positifs = stats.positive ?? 0;
+  const ratedAct = stats.ratedActivities ?? 0;
 
-  // Global stats
-  const total    = avecNote.length;
-  const moyenne  = total ? (avecNote.reduce((s, r) => s + Number(r.user_rating), 0) / total) : 0;
-  const positifs = avecNote.filter((r) => Number(r.user_rating) >= 4).length;
-  const dist     = [5, 4, 3, 2, 1].map((n) => ({
-    n, count: avecNote.filter((r) => Number(r.user_rating) === n).length,
+  // Flatten all reviews for distribution bars
+  const allReviews = groupes.flatMap((g) => g.reviews ?? []);
+  const dist    = [5, 4, 3, 2, 1].map((n) => ({
+    n, count: allReviews.filter((r) => Number(r.note) === n).length,
   }));
   const maxDist = Math.max(1, ...dist.map((d) => d.count));
-
-  // Group reviews by activity
-  const parActivite = {};
-  avecNote.forEach((r) => {
-    const actId    = r.event?.id_activity ?? 'unknown';
-    const actTitle = r.event?.activity?.title ?? '—';
-    const actImg   = r.event?.activity?.images;
-    const actTheme = r.event?.activity?.theme;
-    if (!parActivite[actId]) {
-      parActivite[actId] = { actId, actTitle, actImg, actTheme, reviews: [] };
-    }
-    parActivite[actId].reviews.push(r);
-  });
-
-  const groupes = Object.values(parActivite).sort((a, b) => b.reviews.length - a.reviews.length);
 
   // Star rendering helper
   const renderStars = (n) => {
@@ -1773,29 +1759,34 @@ function afficherPublisherReviews(historique) {
       <span style="width:20px;color:var(--text-muted)">${d.count}</span>
     </div>`).join('');
 
-  const carteGroupes = groupes.length
-    ? groupes.map((g) => {
-        const img      = Array.isArray(g.actImg) && g.actImg[0] ? g.actImg[0] : null;
-        const avgAct   = g.reviews.reduce((s, r) => s + Number(r.user_rating), 0) / g.reviews.length;
-        const lignes   = g.reviews
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const sorted = [...groupes].sort((a, b) => (b.reviews?.length ?? 0) - (a.reviews?.length ?? 0));
+
+  const carteGroupes = sorted.length
+    ? sorted.map((g) => {
+        const img    = Array.isArray(g.images) && g.images[0] ? g.images[0] : null;
+        const avgAct = g.average_rating ?? (g.reviews.length
+          ? g.reviews.reduce((s, r) => s + Number(r.note), 0) / g.reviews.length
+          : 0);
+        const lignes = [...(g.reviews ?? [])]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .map((r) => `
-            <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;
+            <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.6rem 0;
                         border-bottom:1px solid var(--border)">
               <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;
                           background:var(--accent-soft);display:flex;align-items:center;
                           justify-content:center;font-size:.75rem;font-weight:600;color:var(--accent)">
-                U${r.id_user ?? '?'}
+                ${r.auteur ? escapeHtml(r.auteur.charAt(0).toUpperCase()) : '?'}
               </div>
               <div style="flex:1;min-width:0">
-                <div style="display:flex;gap:.25rem;margin-bottom:.2rem">
-                  ${renderStars(r.user_rating)}
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem">
+                  <div style="display:flex;gap:.15rem">${renderStars(r.note)}</div>
+                  <span style="font-weight:700;font-size:.9rem;color:#f59e0b">${Number(r.note).toFixed(1)}</span>
                 </div>
+                ${r.commentaire ? `<p style="font-size:.82rem;margin:.2rem 0 .25rem;color:var(--text)">${escapeHtml(r.commentaire)}</p>` : ''}
                 <div style="font-size:.72rem;color:var(--text-muted)">
-                  ${formatDate(r.date)} · Group of ${r.group_size ?? 1}
+                  ${r.auteur ? escapeHtml(r.auteur) + ' · ' : ''}${r.created_at ? formatDate(r.created_at) : ''}
                 </div>
               </div>
-              <span style="font-weight:700;font-size:1rem;color:#f59e0b">${Number(r.user_rating).toFixed(1)}</span>
             </div>`).join('');
 
         return `
@@ -1803,13 +1794,13 @@ function afficherPublisherReviews(historique) {
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
               <div style="width:48px;height:48px;border-radius:12px;overflow:hidden;flex-shrink:0;
                           background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.5rem">
-                ${img ? `<img src="${escapeHtml(img)}" style="width:100%;height:100%;object-fit:cover" alt="">` : emojiTheme(g.actTheme)}
+                ${img ? `<img src="${escapeHtml(img)}" style="width:100%;height:100%;object-fit:cover" alt="">` : emojiTheme(g.theme)}
               </div>
               <div style="flex:1;min-width:0">
-                <div style="font-weight:600;font-size:.95rem;margin-bottom:.2rem">${escapeHtml(g.actTitle)}</div>
+                <div style="font-weight:600;font-size:.95rem;margin-bottom:.2rem">${escapeHtml(g.title ?? '—')}</div>
                 <div style="display:flex;align-items:center;gap:.5rem">
                   ${renderStars(avgAct)}
-                  <span style="font-size:.78rem;color:var(--text-muted)">${avgAct.toFixed(1)} · ${g.reviews.length} review(s)</span>
+                  <span style="font-size:.78rem;color:var(--text-muted)">${Number(avgAct).toFixed(1)} · ${g.reviews.length} review(s)</span>
                 </div>
               </div>
             </div>
@@ -1830,10 +1821,10 @@ function afficherPublisherReviews(historique) {
     </header>
 
     <div class="kpi-grid mb-6 animate-in">
-      ${KpiCard({ icone: '⭐', titre: 'Average rating',   valeur: total ? moyenne.toFixed(2) + ' / 5' : '—',        couleur: '#fef3c7', couleurIcone: '#d97706' })}
-      ${KpiCard({ icone: '💬', titre: 'Total reviews',    valeur: total,                                             couleur: '#dbeafe', couleurIcone: '#2563eb' })}
+      ${KpiCard({ icone: '⭐', titre: 'Average rating',   valeur: total ? Number(moyenne).toFixed(2) + ' / 5' : '—', couleur: '#fef3c7', couleurIcone: '#d97706' })}
+      ${KpiCard({ icone: '💬', titre: 'Total reviews',    valeur: total,                                              couleur: '#dbeafe', couleurIcone: '#2563eb' })}
       ${KpiCard({ icone: '👍', titre: 'Positive (4-5★)',  valeur: total ? Math.round((positifs / total) * 100) + '%' : '—', couleur: '#d1fae5', couleurIcone: '#059669' })}
-      ${KpiCard({ icone: '📊', titre: 'Rated activities', valeur: groupes.length,                                    couleur: '#ede9fe', couleurIcone: '#7c3aed' })}
+      ${KpiCard({ icone: '📊', titre: 'Rated activities', valeur: ratedAct,                                           couleur: '#ede9fe', couleurIcone: '#7c3aed' })}
     </div>
 
     ${total ? `
@@ -1909,11 +1900,19 @@ function afficherPublisherHistorique(items) {
             </td>
             <td style="font-weight:700;color:var(--accent)">${formatPrix(revenu)}</td>
             <td>
-              ${r.user_rating
-                ? `<span class="badge-status badge-actif" style="font-size:.7rem">
-                    ${r.user_rating === 'like' ? '👍 Loved' : r.user_rating === 'recommend' ? '⭐ Recommended' : '👎 Not liked'}
-                  </span>`
-                : '<span style="color:var(--text-muted);font-size:.78rem">—</span>'}
+              ${(() => {
+                  const avg = r.event?.activity?.average_rating;
+                  if (avg == null) return '<span style="color:var(--text-muted);font-size:.78rem">—</span>';
+                  const appreciated = Number(avg) > 3;
+                  return `<div style="display:flex;flex-direction:column;gap:.3rem">
+                    <span style="font-size:.82rem;font-weight:700;color:#f59e0b">${Number(avg).toFixed(1)} / 5</span>
+                    <span style="font-size:.72rem;font-weight:600;padding:.15rem .5rem;border-radius:999px;width:fit-content;
+                                 background:${appreciated ? '#d1fae5' : '#fee2e2'};
+                                 color:${appreciated ? '#065f46' : '#991b1b'}">
+                      ${appreciated ? 'Apprécié' : 'Pas apprécié'}
+                    </span>
+                  </div>`;
+                })()}
             </td>
           </tr>`;
       }).join('')
