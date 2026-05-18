@@ -381,7 +381,7 @@ function renderActivityReviews(activity) {
         <p class="mb-3 text-secondary">
           Be the first participant to share your experience and help others decide.
         </p>
-        <div id="activity-first-review-button">${BoutonBleu("Leave the first review")}</div>
+        ${BoutonBleu("Leave the first review")}
       </div>
     `;
   }
@@ -475,39 +475,6 @@ function renderActivity(activity) {
   document.getElementById("activity-price").textContent =
     `Price: ${activity.price} EUR`;
   document.getElementById("activity-reviews-rating").textContent =
-    activity.average_rating != null ? `${activity.average_rating} / 5` : "No ratings yet";
-  document.getElementById("activity-reviews-list").innerHTML = (
-    activity.reviews || []
-  )
-    .map(
-      (avis) => `
-        <div class="card border-0 bg-body-tertiary mb-3">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-              <p class="mb-0 fw-semibold">${avis.auteur}</p>
-              <span class="d-flex align-items-center gap-2 fw-semibold">
-                <span class="review-star-icon" aria-hidden="true">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"
-                    />
-                  </svg>
-                </span>
-                ${avis.note} / 5
-              </span>
-            </div>
-            <p class="mb-0">${avis.commentaire}</p>
-          </div>
-        </div>
-      `,
-    )
-    .join("");
     hasReviews && averageRating !== null
       ? `${averageRating.toFixed(1)} / 5`
       : "No reviews yet";
@@ -591,9 +558,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resolvedActivityId = activity?.id || activityId;
   renderActivity(activity);
 
+  // Initialize the report modal
   initReportModal();
-  initReviewModal(resolvedActivityId);
-  initReservationModal(resolvedActivityId, activity);
   initCreatorContactButton(resolvedActivityId, activity);
   initReservationModal(resolvedActivityId, activity, {
     openOnLoad: params.get("join") === "1",
@@ -657,161 +623,6 @@ function initReportModal() {
   }
 }
 
-let reviewModal = null;
-
-function renderReviewsList(reviews, averageRating) {
-  const ratingEl = document.getElementById("activity-reviews-rating");
-  const listEl = document.getElementById("activity-reviews-list");
-  if (ratingEl) {
-    ratingEl.textContent =
-      averageRating != null ? `${averageRating} / 5` : "No ratings yet";
-  }
-  if (!listEl) return;
-  if (!reviews.length) {
-    listEl.innerHTML = `<p class="text-muted fst-italic">No reviews yet. Be the first!</p>`;
-    return;
-  }
-  listEl.innerHTML = reviews
-    .map(
-      (avis) => `
-        <div class="card border-0 bg-body-tertiary mb-3">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-              <p class="mb-0 fw-semibold">${avis.auteur}</p>
-              <span class="d-flex align-items-center gap-2 fw-semibold">
-                <span class="review-star-icon" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
-                  </svg>
-                </span>
-                ${avis.note} / 5
-              </span>
-            </div>
-            <p class="mb-0">${avis.commentaire || ""}</p>
-          </div>
-        </div>`,
-    )
-    .join("");
-}
-
-function initReviewModal(resolvedActivityId) {
-  const reviewBtn = document.querySelector(
-    "#activity-review-button .buttonCo",
-  );
-  const modalEl = document.getElementById("leaveReviewModal");
-  if (modalEl) reviewModal = new bootstrap.Modal(modalEl);
-
-  if (reviewBtn) {
-    reviewBtn.addEventListener("click", () => {
-      reviewModal?.show();
-    });
-  }
-
-  const firstReviewBtn = document.querySelector(
-    "#activity-first-review-button .buttonCo",
-  );
-  if (firstReviewBtn) {
-    firstReviewBtn.addEventListener("click", () => {
-      reviewModal?.show();
-    });
-  }
-
-  // Star interaction
-  const stars = document.querySelectorAll(".review-star");
-  const noteInput = document.getElementById("review-note");
-
-  stars.forEach((star) => {
-    star.addEventListener("mouseenter", () => {
-      const val = Number(star.dataset.value);
-      stars.forEach((s) => {
-        s.classList.toggle("hovered", Number(s.dataset.value) <= val);
-        s.classList.remove("active");
-      });
-    });
-    star.addEventListener("mouseleave", () => {
-      const current = Number(noteInput?.value || 0);
-      stars.forEach((s) => {
-        s.classList.remove("hovered");
-        s.classList.toggle("active", Number(s.dataset.value) <= current);
-      });
-    });
-    star.addEventListener("click", () => {
-      const val = Number(star.dataset.value);
-      if (noteInput) noteInput.value = val;
-      stars.forEach((s) =>
-        s.classList.toggle("active", Number(s.dataset.value) <= val),
-      );
-    });
-  });
-
-  const submitBtn = document.getElementById("review-submit-btn");
-  const reviewForm = document.getElementById("review-form");
-
-  if (submitBtn) {
-    submitBtn.addEventListener("click", async () => {
-      const note = Number(document.getElementById("review-note")?.value || 0);
-      const commentaire =
-        document.getElementById("review-commentaire")?.value?.trim() || "";
-
-      if (!note) {
-        alert("Please select a star rating.");
-        return;
-      }
-      if (!commentaire) {
-        alert("Please write a comment.");
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending…";
-
-      try {
-        const currentUser = getStoredAuthenticatedUser();
-        const token = currentUser?.token || currentUser?.access_token;
-        const res = await fetch("http://localhost:3000/review", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            id_activity: Number(resolvedActivityId),
-            rating: note,
-            comment: commentaire,
-          }),
-        });
-
-        if (res.ok) {
-          reviewForm.reset();
-          document.getElementById("review-note").value = "0";
-          stars.forEach((s) => s.classList.remove("active", "hovered"));
-          reviewModal?.hide();
-
-          // Refresh reviews list
-          const freshReviews = await fetch(
-            `http://localhost:3000/review/activity/${resolvedActivityId}`,
-          ).then((r) => r.json()).catch(() => []);
-          const freshActivity = await getActivity(resolvedActivityId).catch(() => null);
-          renderReviewsList(
-            freshReviews,
-            freshActivity?.average_rating ?? null,
-          );
-        } else {
-          const err = await res.json().catch(() => ({}));
-          alert(err.message || "Unable to submit review. Please try again.");
-        }
-      } catch (_) {
-        alert("Unable to submit review. Please try again.");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit review";
-      }
-    });
-  }
-}
-
-function initReservationModal(activityId, activity) {
 function initReservationModal(activityId, activity, options = {}) {
   const joinButton = document.querySelector(
     "#activity-participate-button .buttonCo",
@@ -1217,70 +1028,4 @@ async function submitReservations() {
       confirmButton.textContent = "Confirm reservation";
     }
   }
-}
-
-function calculateReservationTotal() {
-  const selectedItems = getSelectedReservationItems();
-  const pricePerPlace = currentReservationActivity?.price || 0;
-  return selectedItems.reduce((sum, { quantity }) => sum + quantity * pricePerPlace, 0);
-}
-
-function formatCardNumber(input) {
-  input.value = input.value.replace(/\D/g, '').substring(0, 16).replace(/(.{4})/g, '$1 ').trim();
-}
-
-function formatExpiry(input) {
-  let v = input.value.replace(/\D/g, '');
-  if (v.length >= 2) {
-    v = v.slice(0, 2) + ' / ' + v.slice(2, 4);
-  }
-  input.value = v;
-}
-
-function showPaymentSection(totalAmount) {
-  document.getElementById('payment-total').textContent = `${totalAmount.toFixed(2)} €`;
-  document.getElementById('payment-feedback').textContent = '';
-  document.getElementById('pay-card').value = '';
-  document.getElementById('pay-expiry').value = '';
-  document.getElementById('pay-cvc').value = '';
-  document.getElementById('pay-name').value = '';
-  document.getElementById('payment-section').classList.remove('d-none');
-  const confirmButton = document.getElementById('reservation-confirm-button');
-  confirmButton.textContent = 'Pay';
-  confirmButton.onclick = handleSimulatedPayment;
-  confirmButton.disabled = true;
-  ['pay-card', 'pay-expiry', 'pay-cvc', 'pay-name'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', updatePayButtonState);
-  });
-}
-
-async function handleSimulatedPayment() {
-  const btn = document.getElementById('reservation-confirm-button');
-  const feedback = document.getElementById('payment-feedback');
-  btn.disabled = true;
-  btn.textContent = 'Processing...';
-  feedback.textContent = 'Verifying card...';
-  feedback.className = 'mt-2 small text-muted';
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  document.getElementById('payment-section').classList.add('d-none');
-  btn.textContent = 'Confirm reservation';
-  btn.disabled = false;
-  await submitReservations();
-  const modal = bootstrap.Modal.getInstance(document.getElementById('reservationEventsModal'));
-  modal?.hide();
-}
-
-function updatePayButtonState() {
-  const confirmButton = document.getElementById('reservation-confirm-button');
-  if (!confirmButton) {
-    return;
-  }
-  const card = document.getElementById('pay-card')?.value.replace(/\s/g, '') || '';
-  const expiry = document.getElementById('pay-expiry')?.value || '';
-  const cvc = document.getElementById('pay-cvc')?.value || '';
-  const name = document.getElementById('pay-name')?.value.trim() || '';
-  const isValid = card.length === 16 && expiry.length === 7 && cvc.length >= 3 && name.length > 0;
-  confirmButton.disabled = !isValid;
-}
 }
