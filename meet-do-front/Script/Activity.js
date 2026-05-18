@@ -1283,3 +1283,4 @@ function updatePayButtonState() {
   const isValid = card.length === 16 && expiry.length === 7 && cvc.length >= 3 && name.length > 0;
   confirmButton.disabled = !isValid;
 }
+}
