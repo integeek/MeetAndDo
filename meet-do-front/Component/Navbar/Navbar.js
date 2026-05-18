@@ -54,9 +54,33 @@ function getStoredAuthenticatedUser() {
     }
 }
 
+function getAuthenticatedUserAvatarUrl(basePath) {
+    const avatarUrl = getStoredAuthenticatedUser()?.avatar_url;
+    return typeof avatarUrl === "string" && avatarUrl.trim()
+        ? avatarUrl
+        : `${basePath}/Assets/img/icon-profil.png`;
+}
+
+function escapeHtmlAttribute(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+}
+
 function isPublisherUser() {
     const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
     return role === "publisher";
+}
+
+function isStandardUser() {
+    const role = String(getStoredAuthenticatedUser()?.role || "").toLowerCase();
+    return role === "user";
+}
+
+function hasPendingPublisherRequest() {
+    return getStoredAuthenticatedUser()?.publisher_request === true;
 }
 
 function getUserAccountHref(basePath) {
@@ -68,7 +92,7 @@ function getUserAccountHref(basePath) {
     }
 
     const params = new URLSearchParams({
-        authMessage: "Vous devez etre connecte pour acceder a votre profil.",
+        authMessage: "You must be logged in to access your profile.",
         redirect: "MyAccount.html",
     });
     return `${basePath}/Page/Login.html?${params.toString()}`;
@@ -84,10 +108,18 @@ function getCreateActivityHref(basePath) {
     }
 
     const params = new URLSearchParams({
-        authMessage: "Vous devez etre connecte pour creer une activite.",
+        authMessage: "You must be logged in to create an activity.",
         redirect: targetPath,
     });
     return `${basePath}/Page/Login.html?${params.toString()}`;
+}
+
+function getPublisherApplicationHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "PublisherApplication.html",
+        "You must be logged in to apply as a publisher.",
+    );
 }
 
 function getAuthenticatedPageHref(basePath, targetPath, authMessage) {
@@ -109,7 +141,7 @@ function getMyReservationsHref(basePath) {
     return getAuthenticatedPageHref(
         basePath,
         "MyReservations.html",
-        "Vous devez etre connecte pour acceder a vos reservations.",
+        "You must be logged in to access your reservations.",
     );
 }
 
@@ -117,7 +149,15 @@ function getMyActivitiesHref(basePath) {
     return getAuthenticatedPageHref(
         basePath,
         "MyActivity.html",
-        "Vous devez etre connecte pour acceder a vos activites.",
+        "You must be logged in to access your activities.",
+    );
+}
+
+function getMyRequestsHref(basePath) {
+    return getAuthenticatedPageHref(
+        basePath,
+        "MyRequests.html",
+        "You must be logged in to access your requests.",
     );
 }
 
@@ -134,9 +174,9 @@ function getPublisherNavbarActions(basePath, variant = "auto") {
 
 function GuestNavbar(basePath) {
     return `
-        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
+        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
             <div class="container-fluid meetdo-navbar-inner">
-                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Accueil">
+                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Home">
                     <img src="${basePath}/Assets/img/logoMeet&Do.png" id="logo" alt="Meet and Do">
                 </a>
 
@@ -145,7 +185,7 @@ function GuestNavbar(basePath) {
                     type="button"
                     aria-controls="meetdoNavbarGuest"
                     aria-expanded="false"
-                    aria-label="Afficher le menu"
+                    aria-label="Show menu"
                     onclick="toggleMeetDoNavbar(this)"
                 >
                     <span class="navbar-toggler-icon meetdo-toggler-icon"></span>
@@ -154,13 +194,13 @@ function GuestNavbar(basePath) {
                 <div class="collapse navbar-collapse meetdo-collapse" id="meetdoNavbarGuest">
                     <ul class="navbar-nav navLinks meetdo-main-links">
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Accueil</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Home</a>
                         </li>
                     </ul>
 
                     <div class="meetdo-auth-actions">
-                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Signup.html">S'inscrire</a>
-                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Login.html">Se connecter</a>
+                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Signup.html">Sign up</a>
+                        <a class="btn btn-primary meetdo-btn" href="${basePath}/Page/Login.html">Log in</a>
                     </div>
                 </div>
             </div>
@@ -170,10 +210,16 @@ function GuestNavbar(basePath) {
 
 function UserNavbar(basePath, variant = "auto") {
     const accountHref = getUserAccountHref(basePath);
+    const avatarUrl = getAuthenticatedUserAvatarUrl(basePath);
+    const escapedAvatarUrl = escapeHtmlAttribute(avatarUrl);
+    const fallbackAvatarUrl = escapeHtmlAttribute(`${basePath}/Assets/img/icon-profil.png`);
+    const hasCustomAvatar = avatarUrl !== `${basePath}/Assets/img/icon-profil.png`;
     const publisherActions = getPublisherNavbarActions(basePath, variant);
     const reservationsHref = getMyReservationsHref(basePath);
     const activitiesHref = getMyActivitiesHref(basePath);
+    const requestsHref = getMyRequestsHref(basePath);
     const isPublisher = variant === "publisher" || isPublisherUser();
+    const publisherApplicationAction = getPublisherApplicationAction(basePath);
     const publisherMenuItem = isPublisher
         ? `
                                 <li>
@@ -183,9 +229,9 @@ function UserNavbar(basePath, variant = "auto") {
         : "";
 
     return `
-        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Navigation principale">
+        <nav class="navbar navbar-expand-lg meetdo-navbar" aria-label="Main navigation">
             <div class="container-fluid meetdo-navbar-inner">
-                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Accueil">
+                <a class="navbar-brand meetdo-brand" href="${basePath}/Page/Home.html" aria-label="Meet and Do - Home">
                     <img src="${basePath}/Assets/img/logoMeet&Do.png" id="logo" alt="Meet and Do">
                 </a>
 
@@ -194,7 +240,7 @@ function UserNavbar(basePath, variant = "auto") {
                     type="button"
                     aria-controls="meetdoNavbarUser"
                     aria-expanded="false"
-                    aria-label="Afficher le menu"
+                    aria-label="Show menu"
                     onclick="toggleMeetDoNavbar(this)"
                 >
                     <span class="navbar-toggler-icon meetdo-toggler-icon"></span>
@@ -203,15 +249,16 @@ function UserNavbar(basePath, variant = "auto") {
                 <div class="collapse navbar-collapse meetdo-collapse" id="meetdoNavbarUser">
                     <ul class="navbar-nav navLinks meetdo-main-links">
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Accueil</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Home.html">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link meetdo-link" href="${basePath}/Page/Messagerie.html">Messagerie</a>
+                            <a class="nav-link meetdo-link" href="${basePath}/Page/Messagerie.html">Messages</a>
                         </li>
                     </ul>
 
                     <div class="meetdo-auth-actions">
                         ${publisherActions}
+                        ${publisherApplicationAction}
                         <div class="dropdown meetdo-profile-dropdown">
                             <a
                                 class="btn btn-primary meetdo-btn meetdo-profile-btn dropdown-toggle"
@@ -220,8 +267,15 @@ function UserNavbar(basePath, variant = "auto") {
                                 role="button"
                                 aria-expanded="false"
                             >
-                                <div>Profil</div>
-                                <img src="${basePath}/Assets/img/icon-profil.png" id="profilImg" alt="" aria-hidden="true">
+                                <div>Profile</div>
+                                <img
+                                    src="${escapedAvatarUrl}"
+                                    id="profilImg"
+                                    class="${hasCustomAvatar ? "has-avatar" : ""}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    onerror="this.onerror=null;this.src='${fallbackAvatarUrl}';this.classList.remove('has-avatar');"
+                                >
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end meetdo-profile-menu" aria-labelledby="profil">
                                 <li>
@@ -229,6 +283,9 @@ function UserNavbar(basePath, variant = "auto") {
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="${reservationsHref}">My reservations</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="${requestsHref}">My requests</a>
                                 </li>
                                 ${publisherMenuItem}
                                 <li class="meetdo-profile-menu-divider" aria-hidden="true"></li>
@@ -244,6 +301,44 @@ function UserNavbar(basePath, variant = "auto") {
             </div>
         </nav>
     `;
+}
+
+function getPublisherApplicationAction(basePath) {
+    if (!isStandardUser()) {
+        return "";
+    }
+
+    if (hasPendingPublisherRequest()) {
+        return `
+            <button
+                class="btn btn-primary meetdo-btn meetdo-btn-disabled"
+                type="button"
+                aria-disabled="true"
+                onclick="showPendingPublisherRequestMessage()"
+            >
+                Become a publisher
+            </button>
+        `;
+    }
+
+    return `<a class="btn btn-primary meetdo-btn" href="${getPublisherApplicationHref(basePath)}">Become a publisher</a>`;
+}
+
+function showPendingPublisherRequestMessage() {
+    const existingMessage = document.getElementById("meetdo-navbar-message");
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    const message = document.createElement("div");
+    message.id = "meetdo-navbar-message";
+    message.className = "meetdo-navbar-message";
+    message.textContent = "You already have a publisher request under review.";
+    document.body.appendChild(message);
+
+    window.setTimeout(() => {
+        message.remove();
+    }, 3200);
 }
 
 function toggleMeetDoNavbar(button) {

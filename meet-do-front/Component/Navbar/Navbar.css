@@ -5,6 +5,7 @@ body {
 }
 
 .navbar-container {
+    --meetdo-navbar-action-height: 44px;
     width: 100%;
     background: #ffffff;
     border-bottom: 1px solid #e7edf5;
@@ -124,7 +125,7 @@ body {
 }
 
 .meetdo-link {
-    min-height: 42px;
+    height: var(--meetdo-navbar-action-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -149,8 +150,8 @@ body {
     margin-left: auto;
 }
 
-.meetdo-btn {
-    min-height: 42px;
+.navbar-container .meetdo-btn {
+    height: var(--meetdo-navbar-action-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -166,16 +167,44 @@ body {
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.meetdo-btn:hover,
-.meetdo-btn:focus {
+.navbar-container .meetdo-btn:hover,
+.navbar-container .meetdo-btn:focus {
     background: #003b8a;
     border-color: #003b8a;
     color: #ffffff;
     transform: translateY(-1px);
 }
 
-.meetdo-btn:active {
+.navbar-container .meetdo-btn:active {
     transform: translateY(0);
+}
+
+.navbar-container .meetdo-btn-disabled,
+.navbar-container .meetdo-btn-disabled:hover,
+.navbar-container .meetdo-btn-disabled:focus {
+    border-color: #9aa9bd;
+    background: #9aa9bd;
+    color: #ffffff;
+    cursor: not-allowed;
+    opacity: 0.82;
+    transform: none;
+}
+
+.meetdo-navbar-message {
+    position: fixed;
+    top: 92px;
+    right: 24px;
+    z-index: 2000;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border: 1px solid #cfe0ff;
+    border-radius: 10px;
+    background: #f5f8ff;
+    color: #004aad;
+    box-shadow: 0 14px 36px rgba(23, 32, 51, 0.16);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
 }
 
 .meetdo-profile-btn {
@@ -264,11 +293,18 @@ body {
 }
 
 #profilImg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     object-fit: contain;
     display: block;
     filter: brightness(0) invert(1);
+}
+
+#profilImg.has-avatar {
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    object-fit: cover;
+    filter: none;
 }
 
 @media (max-width: 991px) {
@@ -304,8 +340,15 @@ body {
     }
 
     .meetdo-link,
-    .meetdo-btn {
+    .navbar-container .meetdo-btn {
         width: 100%;
+    }
+
+    .meetdo-navbar-message {
+        top: 84px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
     }
 
     .meetdo-profile-dropdown,
@@ -313,9 +356,15 @@ body {
         width: 100%;
     }
 
+    .meetdo-profile-dropdown {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .meetdo-profile-menu {
         position: static;
         margin-top: 0.45rem;
+        right: auto;
         box-shadow: none;
     }
 }

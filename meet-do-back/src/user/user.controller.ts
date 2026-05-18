@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
   Body,
+  Delete,
   Patch,
   UseGuards,
   Req,
@@ -12,6 +14,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PublisherApplicationDto } from './dto/publisher-application.dto';
 import JwtAuthenticationGuard from 'src/authentication/guard/jwt-authentication.guard';
 import type RequestWithUser from 'src/authentication/requestWithUser.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,6 +28,15 @@ interface UploadedMulterFile {
   size: number;
   buffer: Buffer;
 }
+
+const ALLOWED_AVATAR_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+];
+
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
 @Controller('user')
 export class UserController {
@@ -61,8 +73,23 @@ export class UserController {
 
   @Post('request-publisher')
   @UseGuards(JwtAuthenticationGuard)
-  requestPublisher(@Req() req: RequestWithUser) {
-    return this.userService.requestPublisher(req.user.id);
+  requestPublisher(
+    @Req() req: RequestWithUser,
+    @Body() body: PublisherApplicationDto,
+  ) {
+    return this.userService.requestPublisher(req.user.id, body);
+  }
+
+  @Delete('request-publisher')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequest(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
+  }
+
+  @Post('request-publisher/cancel')
+  @UseGuards(JwtAuthenticationGuard)
+  cancelPublisherRequestWithPost(@Req() req: RequestWithUser) {
+    return this.userService.cancelPublisherRequest(req.user.id);
   }
 
   @Patch('me/password')
@@ -80,11 +107,46 @@ export class UserController {
 
   @Post('me/avatar')
   @UseGuards(JwtAuthenticationGuard)
-  @UseInterceptors(FileInterceptor('avatar', { storage: memoryStorage() }))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: memoryStorage(),
+      limits: {
+        files: 1,
+        fileSize: MAX_AVATAR_SIZE,
+      },
+    }),
+  )
   uploadAvatar(
     @Req() req: RequestWithUser,
     @UploadedFile() file: UploadedMulterFile,
   ) {
+    if (!file) {
+      throw new BadRequestException('Aucune image fournie');
+    }
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Format non autorisé. Utilisez une image JPG, PNG, GIF ou WebP.',
+      );
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      throw new BadRequestException("L'image doit faire moins de 5 Mo");
+    }
+
     return this.userService.uploadAvatar(req.user.id, file);
+  }
+
+  @UseGuards(JwtAuthenticationGuard)
+  @Patch('password')
+  async updatePassword(
+    @Req() request: RequestWithUser,
+    @Body() body: { oldPassword: string; password: string },
+  ) {
+    return this.userService.updatePassword(
+      request.user.id,
+      body.oldPassword,
+      body.password,
+    );
   }
 }

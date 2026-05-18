@@ -1,11 +1,11 @@
 function SearchBar(url) {
-return `
+  return `
     <div></div>
     <div class="search-bar">
         <input type="text" placeholder="Research" id="search-input">
         <button id="search-btn"><img src="../Assets/img/icon-search.svg" alt=""></button>
         <div class="separator"></div>
-        <button id="settings-btn"><img src="../Assets/img/icon-settings.svg" alt=""></button>
+        <button id="settings-btn"><img src="../Assets/img/icon-filter.svg" alt=""></button>
         <button id="position-btn">
             <img src="../Assets/img/icon-position.svg" alt="">
         </button>

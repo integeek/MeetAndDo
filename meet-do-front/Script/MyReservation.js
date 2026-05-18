@@ -15,22 +15,35 @@ function getMeetDoApiUrl() {
 
 function resaComponent(resa, index) {
   const activity = resa.event?.activity;
-  const imageUrl = activity?.image || '../Assets/img/placeholder.png';
+  const imageUrl = activity?.images?.[0] ?? activity?.image ?? '../Assets/img/placeholder.png';
+  const activityTitle = activity?.title || 'Activity';
+  const activityAddress = activity?.address ?? '-';
+  const activityPrice = activity?.price ?? '-';
+  const reservationDate = resa.event?.date
+    ? new Date(resa.event.date).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '-';
 
   return `
     <div class="reservation-item" id="reservation-item-${index}">
       <div class="item-header">
-        <h2>${activity?.title}</h2>
-        <img src="${imageUrl}" alt="${activity?.title}" class="photo-reservation">
+        <img src="${imageUrl}" alt="${activityTitle}" class="photo-reservation">
+      </div>
+      <div class="item-title-block">
+        <span class="reservation-badge">Booked</span>
+        <h2>${activityTitle}</h2>
       </div>
       <div class="item-main">
         <div class="item-adresse">
           <img src="../Assets/img/icon-pin.png" alt="position-icon">
-          <p>${activity?.address ?? '-'}</p>
+          <p>${activityAddress}</p>
         </div>
         <div class="item-date">
           <img src="../Assets/img/icon-calendar.svg" alt="calendar-icon">
-          <p>${new Date(resa.event?.date).toLocaleDateString('fr-FR')}</p>
+          <p>${reservationDate}</p>
         </div>
         <div class="item-places">
           <img src="../Assets/img/icon-group.svg" alt="group-icon">
@@ -38,12 +51,11 @@ function resaComponent(resa, index) {
         </div>
         <div class="item-prix">
           <img src="../Assets/img/icon-price.svg" alt="price-icon">
-          <p>${activity?.price ?? '-'} €</p>
+          <p>${activityPrice} €</p>
         </div>
       </div>
       <div class="item-footer">
         <div id="boutonbleu-${index}"></div>
-        <div id="boutonbleu1-${index}"></div>
         <div id="boutonrouge-${index}"></div>
       </div>
     </div>
@@ -54,11 +66,6 @@ function initButtons(resa, index) {
   document.getElementById(`boutonbleu-${index}`).innerHTML = BoutonBleu("View the activity");
   document.getElementById(`boutonbleu-${index}`).onclick = () => {
     window.location.href = `../Page/Activity.html?id=${resa.event?.id_activity}`;
-  };
-
-  document.getElementById(`boutonbleu1-${index}`).innerHTML = BoutonBleu("Change my reservation");
-  document.getElementById(`boutonbleu1-${index}`).onclick = () => {
-    openPopUp('edit-reservation-popup', resa.id);
   };
 
   document.getElementById(`boutonrouge-${index}`).innerHTML = BoutonRouge("Cancel my reservation");
@@ -81,7 +88,12 @@ async function loadReservations() {
   const container = document.getElementById('reservation-list');
 
   if (!reservations || reservations.length === 0) {
-    container.innerHTML = `<p>You have no reservation.</p>`;
+    container.innerHTML = `
+      <div class="reservation-empty">
+        <strong>No reservations yet</strong>
+        <span>Your booked activities will appear here.</span>
+      </div>
+    `;
     return;
   }
 
@@ -91,31 +103,52 @@ async function loadReservations() {
 
 let currentIdResa = null;
 
+function setCancelFeedback(message = '', status = '') {
+  const feedback = document.getElementById('cancel-feedback');
+  if (!feedback) return;
+
+  feedback.textContent = message;
+  feedback.className = `cancel-feedback${status ? ` is-${status}` : ''}`;
+}
+
 function openCancelPopUp(idResa) {
   currentIdResa = idResa;
   document.getElementById('cancel-input').value = '';
+  setCancelFeedback();
   openPopUp('cancel-popup');
 }
 
 async function cancelReservation() {
   const input = document.getElementById('cancel-input').value;
+  const confirmButton = document.querySelector('#bouton-confirmer button');
 
   if (!input || input !== 'CANCEL') {
-    alert('Please type CANCEL exactly to confirm.');
+    setCancelFeedback('Please type CANCEL exactly to confirm.', 'error');
     return;
   }
 
-  const response = await fetch(`${getMeetDoApiUrl()}/reservation/${currentIdResa}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
+  setCancelFeedback('Cancelling your reservation...', 'loading');
+  if (confirmButton) confirmButton.disabled = true;
 
-  if (response.ok) {
-    alert('Reservation successfully cancelled.');
-    closePopUp('cancel-popup');
-    loadReservations();
-  } else {
-    alert('Error during cancellation.');
+  try {
+    const response = await fetch(`${getMeetDoApiUrl()}/reservation/${currentIdResa}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      setCancelFeedback('Reservation successfully cancelled.', 'success');
+      setTimeout(() => {
+        closePopUp('cancel-popup');
+        loadReservations();
+      }, 700);
+    } else {
+      setCancelFeedback('Error during cancellation. Please try again.', 'error');
+    }
+  } catch {
+    setCancelFeedback('Network error. Please try again.', 'error');
+  } finally {
+    if (confirmButton) confirmButton.disabled = false;
   }
 }
 document.addEventListener('DOMContentLoaded', () => {

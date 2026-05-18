@@ -6,10 +6,18 @@ CREATE TABLE IF NOT EXISTS users (
   password   VARCHAR(255) NOT NULL,
   role       VARCHAR(50) NOT NULL DEFAULT 'USER',
   address    TEXT,
+  publisher_request BOOLEAN NOT NULL DEFAULT false,
+  publisher_request_details JSONB,
+  publisher_request_submitted_at TIMESTAMPTZ,
   verification_token VARCHAR(255),
   enabled    BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW()
 ); 
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS publisher_request BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS publisher_request_details JSONB,
+  ADD COLUMN IF NOT EXISTS publisher_request_submitted_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS activity (
   id  SERIAL PRIMARY KEY,

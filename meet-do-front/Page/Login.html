@@ -29,48 +29,62 @@
             document.getElementById('navbar-container').innerHTML = Navbar();
         </script>
     </header>
-    <main>
-        <div class="parentDiv">
-            <div class="containerLogin">
-                <h1>Login</h1>
+    <main class="auth-main">
+        <section class="auth-shell" aria-label="Login">
+            <div class="auth-panel auth-intro">
+                <p class="auth-eyebrow">Welcome back</p>
+                <h1>Sign in to Meet&Do</h1>
+                <p class="auth-copy">Find your activities, manage reservations, and keep every plan moving from one place.</p>
+                <div class="auth-highlights" aria-label="Meet&Do benefits">
+                    <span>Curated local experiences</span>
+                    <span>Fast reservations</span>
+                    <span>Secure member access</span>
+                </div>
+            </div>
+            <div class="auth-panel containerLogin">
+                <div class="auth-heading">
+                    <p class="auth-eyebrow">Member access</p>
+                    <h2>Login</h2>
+                    <p>Enter your credentials to continue.</p>
+                </div>
                 <form id="loginForm">
-                    <p>Email</p>
-                    <input class="textbox" type="text" name="email" placeholder="email@address.com" required>
-                    <p>Password</p>
-                    <div id="containerPassword">
-                        <input class="textbox" type="password" id="password" name="password" placeholder="********" required>
-                        <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show/Hide" >
+                    <label class="field-label" for="loginEmail">Email</label>
+                    <input class="textbox" id="loginEmail" type="text" name="email" placeholder="email@address.com" autocomplete="email" required>
+                    <label class="field-label" for="password">Password</label>
+                    <div id="containerPassword" class="password-field">
+                        <input class="textbox" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                        <img class="togglePassword" src="../assets/img/icon-eye-open.png" alt="Show or hide password" >
                     </div>
-                    <p id="forgotPassword">Forgot your password ?</p>
+                    <p id="forgotPassword">Forgot your password?</p>
                     <div id="forgotModal" class="modal" style="display:none;">
                         <div class="modal-content">
                             <span id="closeModal" class="close">&times;</span>
                             <h2>Reset password</h2>
                             <p>Enter your email address to receive a reset link.</p>
                             <input class="textbox" type="email" id="forgotEmail" name="forgotEmail" placeholder="email@address.com">
-                            <div class="erreurModal" style="color: red; margin-bottom: 1rem;"></div>
-                            <div class="successModal" style="color: green; margin-bottom: 1rem;"></div>
+                            <div class="erreurModal"></div>
+                            <div class="successModal"></div>
                             <div id="sendResetLink"></div>
                             <script>
                                 document.getElementById('sendResetLink').innerHTML = BoutonBleu("Send Reset Link");
                             </script>                        
                         </div>
                     </div>
-                    <div>
-                        <p id="noAccount">No account ?</p> <a  id="signup" href="Signup.html">Signup</a>
+                    <div class="auth-switch">
+                        <p id="noAccount">No account yet?</p> <a id="signup" href="Signup.html">Create one</a>
                     </div>
-                    <div class="erreur" style="color: red; margin-bottom: 1rem;">
+                    <div class="erreur">
                     </div>
-                    <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
+                    <div class="success">
                     </div>
                     
                     <div id="boutonContainer"></div>
                     <script>
-                        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Login");
+                        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Sign in");
                     </script>
                 </form>
             </div>
-        </div>
+        </section>
     </main> 
     <footer id="footer-container" class="footer-container">
         <script>

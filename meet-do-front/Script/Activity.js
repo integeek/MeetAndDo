@@ -9,8 +9,10 @@ const MOCK_ACTIVITY = {
   description:
     "Join us for a delicious and creative workshop where you will learn how to make tasty homemade macarons. Guided by an experienced pastry chef, you will discover the secrets of a perfect shell and leave with your own creations.",
   creator: {
+    id: 12,
     first_name: "Jean",
     last_name: "Dupont",
+    role: "publisher",
     rating: 4.8,
     photo:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
@@ -22,6 +24,7 @@ const MOCK_ACTIVITY = {
   ],
   reviews: [
     {
+      id_user: 21,
       auteur: "Alice",
       note: 5,
       commentaire:
@@ -70,6 +73,7 @@ const RESERVATION_API_URL = "http://localhost:3000/reservation";
 const AUTH_API_URL = "http://localhost:3000/authentication";
 const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 const AUTH_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+const CREATOR_AVATAR_PLACEHOLDER = "../Assets/img/icon-profil.png";
 
 let currentReservationEvents = [];
 let selectedReservationQuantities = new Map();
@@ -128,9 +132,22 @@ function getAuthenticatedUserId(user) {
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 
+function intToUUID(id) {
+  return `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
+}
+
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
     authMessage: "You must be logged in to reserve an event.",
+    redirect: `Activity.html?id=${activityId}&join=1`,
+  });
+
+  window.location.href = `Login.html?${params.toString()}`;
+}
+
+function redirectToLoginForContact(activityId) {
+  const params = new URLSearchParams({
+    authMessage: "You must be logged in to contact the activity creator.",
     redirect: `Activity.html?id=${activityId}`,
   });
 
@@ -282,7 +299,164 @@ function renderReportButton() {
   `;
 }
 
+function hasActivityReviews(activity) {
+  return Array.isArray(activity.reviews) && activity.reviews.length > 0;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getUserProfileHref(userId, profile = {}) {
+  const numericUserId = Number(userId);
+  if (!Number.isInteger(numericUserId) || numericUserId <= 0) return "";
+
+  const params = new URLSearchParams({ userId: String(numericUserId) });
+  const firstName = profile.firstname || profile.first_name;
+  const lastName = profile.lastname || profile.last_name;
+  const avatar = profile.avatar_url || profile.photo;
+  const role = profile.role;
+  const name = profile.name || profile.auteur;
+
+  if (firstName) params.set("firstname", firstName);
+  if (lastName) params.set("lastname", lastName);
+  if (!firstName && !lastName && name) params.set("name", name);
+  if (avatar) params.set("avatar", avatar);
+  if (role) params.set("role", role);
+
+  return `UserProfile.html?${params.toString()}`;
+}
+
+function getCreatorId(activity) {
+  const creatorId = Number(
+    activity?.id_user ??
+      activity?.creator?.id ??
+      activity?.creator?.id_user ??
+      activity?.creator?.userId,
+  );
+
+  return Number.isInteger(creatorId) && creatorId > 0 ? creatorId : null;
+}
+
+function getReviewUserId(review) {
+  const reviewUserId = Number(
+    review?.id_user ?? review?.userId ?? review?.idUser ?? review?.author_id,
+  );
+
+  return Number.isInteger(reviewUserId) && reviewUserId > 0
+    ? reviewUserId
+    : null;
+}
+
+function getActivityAverageRating(activity) {
+  const average = Number(activity.average_rating);
+
+  if (Number.isFinite(average)) {
+    return average;
+  }
+
+  const notes = (activity.reviews || [])
+    .map((review) => Number(review.note))
+    .filter(Number.isFinite);
+
+  if (!notes.length) {
+    return null;
+  }
+
+  return notes.reduce((total, note) => total + note, 0) / notes.length;
+}
+
+function renderActivityReviews(activity) {
+  const reviews = Array.isArray(activity.reviews) ? activity.reviews : [];
+
+  if (!reviews.length) {
+    return `
+      <div class="activity-reviews-empty">
+        <p class="mb-2 fw-semibold">No reviews yet for this activity.</p>
+        <p class="mb-3 text-secondary">
+          Be the first participant to share your experience and help others decide.
+        </p>
+        <div id="activity-first-review-button">${BoutonBleu("Leave the first review")}</div>
+      </div>
+    `;
+  }
+
+  return reviews
+    .map((avis) => {
+      const reviewUserId = getReviewUserId(avis);
+      const reviewAuthor = escapeHtml(avis.auteur || "Participant");
+      const authorContent = reviewUserId
+        ? `<a class="review-author-link" href="${getUserProfileHref(reviewUserId, avis)}">${reviewAuthor}</a>`
+        : reviewAuthor;
+
+      return `
+        <div class="card border-0 bg-body-tertiary mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+              <p class="mb-0 fw-semibold">${authorContent}</p>
+              <span class="d-flex align-items-center gap-2 fw-semibold">
+                <span class="review-star-icon" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"
+                    />
+                  </svg>
+                </span>
+                ${escapeHtml(avis.note)} / 5
+              </span>
+            </div>
+            <p class="mb-0">${escapeHtml(avis.commentaire)}</p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function setCreatorAvatar(photoUrl) {
+  const avatar = document.getElementById("creator-avatar");
+  if (!avatar) return;
+
+  avatar.onerror = () => {
+    avatar.onerror = null;
+    avatar.src = CREATOR_AVATAR_PLACEHOLDER;
+  };
+  avatar.src = photoUrl || CREATOR_AVATAR_PLACEHOLDER;
+}
+
+function getCreatorName(creator) {
+  const firstName = creator?.first_name || creator?.firstname || "";
+  const lastName = creator?.last_name || creator?.lastname || "";
+  return `${firstName} ${lastName}`.trim();
+}
+
+function getCreatorRatingText(creator) {
+  const rating = Number(creator?.rating);
+  return Number.isFinite(rating)
+    ? `Rating: ${rating.toFixed(1)} / 5`
+    : "This creator has no reviews yet.";
+}
+
 function renderActivity(activity) {
+  const hasReviews = hasActivityReviews(activity);
+  const averageRating = getActivityAverageRating(activity);
+  const creatorId = getCreatorId(activity);
+  const creatorProfileHref = getUserProfileHref(creatorId, {
+    ...activity.creator,
+    role: activity.creator?.role || "publisher",
+  });
+
   document.getElementById("activity-title").textContent = activity.title;
   document.getElementById("activity-report-button").innerHTML =
     renderReportButton();
@@ -334,15 +508,20 @@ function renderActivity(activity) {
       `,
     )
     .join("");
+    hasReviews && averageRating !== null
+      ? `${averageRating.toFixed(1)} / 5`
+      : "No reviews yet";
+  document.getElementById("activity-reviews-list").innerHTML =
+    renderActivityReviews(activity);
   document.getElementById("activity-created-by").textContent =
     "Activity created by";
-  document.getElementById("creator-avatar").src = activity.creator?.photo || "";
-  document.getElementById("creator-name").textContent = activity.creator
-    ? `${activity.creator.first_name || ""} ${activity.creator.last_name || ""}`
-    : "";
-  document.getElementById("creator-rating").textContent = activity.creator
-    ? `Rating: ${activity.creator.rating} / 5`
-    : "";
+  setCreatorAvatar(activity.creator?.photo || activity.creator?.avatar_url);
+  const creatorNameElement = document.getElementById("creator-name");
+  creatorNameElement.textContent =
+    getCreatorName(activity.creator) || "Activity creator";
+  document.getElementById("creator-rating").textContent =
+    getCreatorRatingText(activity.creator);
+  bindCreatorProfileLink(creatorProfileHref);
   document.getElementById("activity-images").innerHTML = `
     <div
       id="activityCarousel"
@@ -387,6 +566,23 @@ function renderActivity(activity) {
   document.title = activity.title;
 }
 
+function bindCreatorProfileLink(profileHref) {
+  const avatar = document.getElementById("creator-avatar");
+  const name = document.getElementById("creator-name");
+
+  [avatar, name].forEach((element) => {
+    if (!element) return;
+
+    element.classList.toggle("creator-profile-link", Boolean(profileHref));
+    element.title = profileHref ? "View profile" : "";
+    element.onclick = profileHref
+      ? () => {
+          window.location.href = profileHref;
+        }
+      : null;
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   // Get the ID from the URL: ?id=1
   const params = new URLSearchParams(window.location.search);
@@ -398,6 +594,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   initReportModal();
   initReviewModal(resolvedActivityId);
   initReservationModal(resolvedActivityId, activity);
+  initCreatorContactButton(resolvedActivityId, activity);
+  initReservationModal(resolvedActivityId, activity, {
+    openOnLoad: params.get("join") === "1",
+  });
 });
 
 let reportModal = null;
@@ -507,6 +707,15 @@ function initReviewModal(resolvedActivityId) {
     });
   }
 
+  const firstReviewBtn = document.querySelector(
+    "#activity-first-review-button .buttonCo",
+  );
+  if (firstReviewBtn) {
+    firstReviewBtn.addEventListener("click", () => {
+      reviewModal?.show();
+    });
+  }
+
   // Star interaction
   const stars = document.querySelectorAll(".review-star");
   const noteInput = document.getElementById("review-note");
@@ -603,6 +812,7 @@ function initReviewModal(resolvedActivityId) {
 }
 
 function initReservationModal(activityId, activity) {
+function initReservationModal(activityId, activity, options = {}) {
   const joinButton = document.querySelector(
     "#activity-participate-button .buttonCo",
   );
@@ -614,7 +824,7 @@ function initReservationModal(activityId, activity) {
 
   if (!joinButton || !modalElement) return;
 
-  joinButton.addEventListener("click", async () => {
+  const openReservationModal = async () => {
     const currentUser = await getCurrentUser();
 
     if (!getAuthenticatedUserId(currentUser)) {
@@ -631,7 +841,9 @@ function initReservationModal(activityId, activity) {
     const events = await getActivityEvents(activityId, activity);
     currentReservationEvents = events;
     renderReservationEvents(events);
-  });
+  };
+
+  joinButton.addEventListener("click", openReservationModal);
 
   document
     .getElementById("reservation-review-button")
@@ -640,6 +852,55 @@ function initReservationModal(activityId, activity) {
   document
     .getElementById("reservation-confirm-button")
     ?.addEventListener("click", submitReservations);
+
+  if (options.openOnLoad) {
+    openReservationModal();
+  }
+}
+
+function initCreatorContactButton(activityId, activity) {
+  const contactButton = document.querySelector(
+    "#creator-contact-button .buttonCo",
+  );
+  const feedback = document.getElementById("creator-contact-feedback");
+
+  if (!contactButton) return;
+
+  contactButton.addEventListener("click", async (event) => {
+    event.preventDefault();
+    feedback?.classList.add("d-none");
+
+    const currentUser = await getCurrentUser();
+    const currentUserId = getAuthenticatedUserId(currentUser);
+    const creatorId = getCreatorId(activity);
+
+    if (!currentUserId) {
+      redirectToLoginForContact(activityId);
+      return;
+    }
+
+    if (!creatorId) {
+      if (feedback) {
+        feedback.textContent =
+          "This creator profile is not available for the moment.";
+        feedback.classList.remove("d-none");
+      }
+      return;
+    }
+
+    if (creatorId === currentUserId) {
+      if (feedback) {
+        feedback.textContent =
+          "You cannot contact yourself because you are the creator of this activity.";
+        feedback.classList.remove("d-none");
+      }
+      return;
+    }
+
+    window.location.href = `Messagerie.html?userId=${encodeURIComponent(
+      intToUUID(creatorId),
+    )}`;
+  });
 }
 
 function renderReservationEventsLoading() {
@@ -951,4 +1212,5 @@ async function submitReservations() {
       confirmButton.textContent = "Confirm reservation";
     }
   }
+}
 }

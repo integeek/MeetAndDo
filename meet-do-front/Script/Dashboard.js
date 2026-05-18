@@ -1585,8 +1585,8 @@ function renderMonCompte() {
           <li>Receive bookings in real time</li>
           <li>Access your performance statistics</li>
         </ul>
-        <button type="button" class="btn-primary" id="btn-request-publisher">
-          <i class="bi bi-send-fill"></i> Send my request
+        <button type="button" class="btn-primary" id="btn-open-publisher-application">
+          <i class="bi bi-file-earmark-text-fill"></i> Complete my application
         </button>`}
     </div>` : '';
 
@@ -3632,6 +3632,26 @@ function rafraichirThemePills(categoryKey) {
 //  ONGLET VALIDATION (admin — demandes éditeur)
 // ============================================================
 
+function renderPublisherApplicationDetails(details = {}) {
+  const items = [
+    ['Experience', details.experienceLevel],
+    ['Category', details.activityCategory],
+    ['Motivation', details.motivation],
+    ['Activity plan', details.activityPlan],
+    ['Links', details.links],
+  ].filter(([, value]) => value);
+
+  if (!items.length) {
+    return '<div style="font-size:.78rem;color:var(--text-muted)">No application details provided.</div>';
+  }
+
+  return items.map(([label, value]) => `
+    <div style="font-size:.78rem;color:var(--text-muted);line-height:1.45;margin-bottom:.3rem">
+      <strong style="color:var(--text)">${label}:</strong> ${escapeHtml(truncate(value, 140))}
+    </div>
+  `).join('');
+}
+
 async function renderValidationTab() {
   const main = document.getElementById('dash-main');
   if (!main) return;
@@ -3658,10 +3678,12 @@ async function renderValidationTab() {
                 <div>
                   <div style="font-weight:600;font-size:.85rem">${u.firstname || ''} ${u.lastname || ''}</div>
                   <div style="font-size:.72rem;color:var(--text-muted)">${u.email}</div>
+                  ${u.address ? `<div style="font-size:.72rem;color:var(--text-muted)">${escapeHtml(u.address)}</div>` : ''}
                 </div>
               </div>
             </td>
-            <td style="font-size:.8rem;color:var(--text-muted)">${formatDate(u.created_at)}</td>
+            <td>${renderPublisherApplicationDetails(u.publisher_request_details || {})}</td>
+            <td style="font-size:.8rem;color:var(--text-muted)">${formatDate(u.publisher_request_submitted_at || u.created_at)}</td>
             <td>
               <div style="display:flex;gap:.5rem">
                 <button type="button" class="btn-primary" style="padding:.35rem .9rem;font-size:.75rem"
@@ -3675,7 +3697,7 @@ async function renderValidationTab() {
               </div>
             </td>
           </tr>`).join('')
-      : '<tr><td colspan="3" style="color:var(--text-muted);padding:2rem;text-align:center">No pending requests.</td></tr>';
+      : '<tr><td colspan="4" style="color:var(--text-muted);padding:2rem;text-align:center">No pending requests.</td></tr>';
 
     main.innerHTML = `
       <header class="view-header animate-in">
@@ -3689,7 +3711,7 @@ async function renderValidationTab() {
         contenu: `
           <div class="dash-table-wrap">
             <table class="dash-table">
-              <thead><tr><th>User</th><th>Registered on</th><th>Actions</th></tr></thead>
+              <thead><tr><th>User</th><th>Application</th><th>Submitted on</th><th>Actions</th></tr></thead>
               <tbody>${lignes}</tbody>
             </table>
           </div>`,
@@ -4293,6 +4315,13 @@ function attachEventListeners() {
   }
 
   // Demande éditeur
+  const btnOpenPublisherApplication = document.getElementById('btn-open-publisher-application');
+  if (btnOpenPublisherApplication) {
+    btnOpenPublisherApplication.addEventListener('click', () => {
+      window.location.href = '../Page/PublisherApplication.html';
+    });
+  }
+
   const btnReq = document.getElementById('btn-request-publisher');
   if (btnReq) {
     btnReq.addEventListener('click', async () => {
