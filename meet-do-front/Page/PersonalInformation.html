@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your informations</title>
+    <title>Your information</title>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
@@ -30,36 +30,61 @@
             document.getElementById('navbar-container').innerHTML = Navbar();
         </script>
     </header>
-    <main>
-        <div class="containerLogin">
-            <h1>Your informations</h1>
-            <form id="personalInformationForm">
-                <p>Lastname *</p>
-                <input class="textbox" type="text" name="lastname" required>
-                <p>Firstname *</p>
-                <input class="textbox" type="text" name="firstname" required>
-                <p>Address (optional)</p>
-                <div id="containerAddress">
-                    <input class="textbox" type="text" name="address" id="address" placeholder="Entrez une adresse...">
-                    <img id="iconAddress" src="../Assets/img/icon-pin.png" alt="Adresse">
-                    <ul id="suggestions"></ul>
+    <main class="auth-main">
+        <section class="auth-shell" aria-label="Personal information">
+            <div class="auth-panel auth-intro">
+                <p class="auth-eyebrow">Almost there</p>
+                <h1>Complete your Meet&Do profile</h1>
+                <p class="auth-copy">Tell us who you are so hosts and participants can recognize you before the next activity.</p>
+                <div class="auth-highlights" aria-label="Profile benefits">
+                    <span>Personalized profile</span>
+                    <span>Local activity suggestions</span>
+                    <span>Ready to reserve</span>
                 </div>
+            </div>
+            <div class="auth-panel containerLogin">
+                <div class="auth-heading">
+                    <p class="auth-eyebrow">Profile setup</p>
+                    <h2>Your information</h2>
+                    <p>Add the details needed to finish creating your account.</p>
+                </div>
+                <form id="personalInformationForm" class="profile-form">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="field-label" for="firstname">Firstname *</label>
+                            <input class="textbox form-control" id="firstname" type="text" name="firstname" placeholder="Jane" autocomplete="given-name" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="field-label" for="lastname">Lastname *</label>
+                            <input class="textbox form-control" id="lastname" type="text" name="lastname" placeholder="Doe" autocomplete="family-name" required>
+                        </div>
+                    </div>
+                    <label class="field-label" for="address">Address <span>(optional)</span></label>
+                    <div id="containerAddress">
+                        <input class="textbox form-control" type="text" name="address" id="address" placeholder="Enter an address..." autocomplete="street-address">
+                        <img id="iconAddress" src="../Assets/img/icon-pin.png" alt="">
+                        <ul id="suggestions" aria-label="Address suggestions"></ul>
+                    </div>
 
-                <div class="erreur" style="color: red; margin-bottom: 1rem;">
-                </div>
-                <div class="success" style="color: black; margin-bottom: 1rem; font-weight: bold;">
-                </div>
-                <div id="boutonContainer"></div>
-                <script>
-                    document.getElementById('boutonContainer').innerHTML = BoutonBleu("Confirm");
-                </script>
-            </form>
-        </div>
+                    <div class="erreur" role="alert"></div>
+                    <div class="success" role="status"></div>
+                    <div id="boutonContainer"></div>
+                    <script>
+                        document.getElementById('boutonContainer').innerHTML = BoutonBleu("Confirm");
+                    </script>
+                </form>
+            </div>
+        </section>
     </main>
     <footer id="footer-container" class="footer-container">
         <script>
             document.getElementById('footer-container').innerHTML = Footer("..");
         </script>
     </footer>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
 </body>
 </html>
