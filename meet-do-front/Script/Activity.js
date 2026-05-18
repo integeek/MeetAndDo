@@ -68,6 +68,7 @@ const MOCK_ACTIVITY = {
   ],
 };
 
+const REVIEW_API_URL = "http://localhost:3000/review";
 const EVENT_API_URL = "http://localhost:3000/event";
 const RESERVATION_API_URL = "http://localhost:3000/reservation";
 const AUTH_API_URL = "http://localhost:3000/authentication";
@@ -371,6 +372,67 @@ function getActivityAverageRating(activity) {
   return notes.reduce((total, note) => total + note, 0) / notes.length;
 }
 
+function renderReviewsList(reviews, averageRating) {
+  const reviewsEl = document.getElementById("activity-reviews-list");
+  const ratingEl = document.getElementById("activity-reviews-rating");
+
+  if (ratingEl) {
+    ratingEl.textContent =
+      reviews.length && averageRating !== null
+        ? `${Number(averageRating).toFixed(1)} / 5`
+        : "No reviews yet";
+  }
+
+  if (!reviewsEl) return;
+
+  if (!reviews.length) {
+    reviewsEl.innerHTML = `
+      <div class="activity-reviews-empty">
+        <p class="mb-2 fw-semibold">No reviews yet for this activity.</p>
+        <p class="mb-3 text-secondary">
+          Be the first participant to share your experience and help others decide.
+        </p>
+        <div id="activity-first-review-button">${BoutonBleu("Leave the first review")}</div>
+      </div>
+    `;
+    const firstReviewBtn = reviewsEl.querySelector("#activity-first-review-button .buttonCo");
+    if (firstReviewBtn && window._reviewModal) {
+      firstReviewBtn.addEventListener("click", () => window._reviewModal.show());
+    }
+    return;
+  }
+
+  reviewsEl.innerHTML = reviews
+    .map((avis) => {
+      const reviewUserId = getReviewUserId(avis);
+      const reviewAuthor = escapeHtml(avis.auteur || "Participant");
+      const authorContent = reviewUserId
+        ? `<a class="review-author-link" href="${getUserProfileHref(reviewUserId, avis)}">${reviewAuthor}</a>`
+        : reviewAuthor;
+      const note = Number(avis.note);
+
+      return `
+        <div class="card border-0 bg-body-tertiary mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+              <p class="mb-0 fw-semibold">${authorContent}</p>
+              <span class="d-flex align-items-center gap-2 fw-semibold">
+                <span class="review-star-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                </span>
+                ${Number.isFinite(note) ? note : "—"} / 5
+              </span>
+            </div>
+            <p class="mb-0">${escapeHtml(avis.commentaire)}</p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 function renderActivityReviews(activity) {
   const reviews = Array.isArray(activity.reviews) ? activity.reviews : [];
 
@@ -381,7 +443,7 @@ function renderActivityReviews(activity) {
         <p class="mb-3 text-secondary">
           Be the first participant to share your experience and help others decide.
         </p>
-        ${BoutonBleu("Leave the first review")}
+        <div id="activity-first-review-button">${BoutonBleu("Leave the first review")}</div>
       </div>
     `;
   }
@@ -393,6 +455,7 @@ function renderActivityReviews(activity) {
       const authorContent = reviewUserId
         ? `<a class="review-author-link" href="${getUserProfileHref(reviewUserId, avis)}">${reviewAuthor}</a>`
         : reviewAuthor;
+      const note = Number(avis.note);
 
       return `
         <div class="card border-0 bg-body-tertiary mb-3">
@@ -401,19 +464,11 @@ function renderActivityReviews(activity) {
               <p class="mb-0 fw-semibold">${authorContent}</p>
               <span class="d-flex align-items-center gap-2 fw-semibold">
                 <span class="review-star-icon" aria-hidden="true">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"
-                    />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="m12 17.27l6.18 3.73l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
                   </svg>
                 </span>
-                ${escapeHtml(avis.note)} / 5
+                ${Number.isFinite(note) ? note : "—"} / 5
               </span>
             </div>
             <p class="mb-0">${escapeHtml(avis.commentaire)}</p>
@@ -551,23 +606,38 @@ function bindCreatorProfileLink(profileHref) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Get the ID from the URL: ?id=1
   const params = new URLSearchParams(window.location.search);
-  const activityId = params.get("id") || 1; // Default to 1 if no ID is provided
+  const activityId = params.get("id") || 1;
   const activity = await getActivity(activityId);
   const resolvedActivityId = activity?.id || activityId;
   renderActivity(activity);
 
-  // Initialize the report modal
   initReportModal();
   initCreatorContactButton(resolvedActivityId, activity);
   initReservationModal(resolvedActivityId, activity, {
     openOnLoad: params.get("join") === "1",
   });
+  initReviewModal(resolvedActivityId);
+
+  // Fetch real reviews from backend
+  try {
+    const response = await fetch(`${REVIEW_API_URL}/activity/${resolvedActivityId}`);
+    if (response.ok) {
+      const reviews = await response.json();
+      const avgRating =
+        reviews.length
+          ? reviews.reduce((s, r) => s + Number(r.note), 0) / reviews.length
+          : null;
+      renderReviewsList(reviews, avgRating);
+    }
+  } catch (err) {
+    console.warn("Could not load reviews:", err);
+  }
 });
 
 let reportModal = null;
 let reservationEventsModal = null;
+let reviewModal = null;
 
 function initReportModal() {
   // Get the Report button and attach an event listener
@@ -1093,4 +1163,97 @@ function updatePayButtonState() {
   const name = document.getElementById('pay-name')?.value.trim() || '';
   const isValid = card.length === 16 && expiry.length === 7 && cvc.length >= 3 && name.length > 0;
   confirmButton.disabled = !isValid;
+}
+function initReviewModal(activityId) {
+  const modalElement = document.getElementById("leaveReviewModal");
+  if (!modalElement) return;
+
+  reviewModal = new bootstrap.Modal(modalElement);
+  window._reviewModal = reviewModal;
+
+  // Open modal from "Leave a review" button
+  const reviewButton = document.querySelector("#activity-review-button .buttonCo");
+  if (reviewButton) {
+    reviewButton.addEventListener("click", () => reviewModal.show());
+  }
+
+  // Reset modal state each time it opens
+  modalElement.addEventListener("show.bs.modal", () => {
+    document.getElementById("review-note").value = "0";
+    document.getElementById("review-comment").value = "";
+    const feedback = document.getElementById("review-feedback");
+    if (feedback) { feedback.textContent = ""; feedback.className = "mb-0 small"; }
+    document.querySelectorAll(".review-star").forEach((s) => s.classList.remove("active", "hovered"));
+  });
+
+  // Star hover & click
+  const stars = document.querySelectorAll(".review-star");
+  stars.forEach((star) => {
+    star.addEventListener("mouseover", () => {
+      const val = Number(star.dataset.value);
+      stars.forEach((s) => s.classList.toggle("hovered", Number(s.dataset.value) <= val));
+    });
+    star.addEventListener("mouseout", () => {
+      stars.forEach((s) => s.classList.remove("hovered"));
+    });
+    star.addEventListener("click", () => {
+      const val = Number(star.dataset.value);
+      document.getElementById("review-note").value = val;
+      stars.forEach((s) => s.classList.toggle("active", Number(s.dataset.value) <= val));
+    });
+  });
+
+  // Submit
+  const submitBtn = document.getElementById("review-submit-btn");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", async () => {
+      const rating = Number(document.getElementById("review-note").value);
+      const comment = document.getElementById("review-comment").value.trim();
+      const feedback = document.getElementById("review-feedback");
+
+      if (!rating) {
+        if (feedback) { feedback.textContent = "Please select a rating."; feedback.className = "mb-0 small text-danger"; }
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const response = await fetch(REVIEW_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ id_activity: Number(activityId), rating, comment }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || `HTTP ${response.status}`);
+        }
+
+        if (feedback) { feedback.textContent = "Review submitted!"; feedback.className = "mb-0 small text-success"; }
+
+        // Refresh reviews
+        setTimeout(async () => {
+          reviewModal.hide();
+          try {
+            const r = await fetch(`${REVIEW_API_URL}/activity/${activityId}`);
+            if (r.ok) {
+              const reviews = await r.json();
+              const avg = reviews.length
+                ? reviews.reduce((s, rv) => s + Number(rv.note), 0) / reviews.length
+                : null;
+              renderReviewsList(reviews, avg);
+            }
+          } catch (_) { /* ignore */ }
+        }, 800);
+      } catch (error) {
+        if (feedback) { feedback.textContent = error.message || "Unable to submit review."; feedback.className = "mb-0 small text-danger"; }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+      }
+    });
+  }
 }
