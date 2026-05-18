@@ -358,6 +358,53 @@
               aria-live="polite"
             ></div>
           </div>
+          <div class="modal-body">
+            <p id="reservation-events-feedback" class="mb-3 text-secondary">
+              Choose an event to reserve your spot.
+            </p>
+            <div
+              id="reservation-events-list"
+              class="reservation-events-list"
+              role="list"
+            ></div>
+            <div
+              id="reservation-summary"
+              class="reservation-summary d-none"
+              aria-live="polite"
+            ></div>
+
+            <div id="payment-section" class="d-none mt-3">
+              <hr>
+
+              <div class="alert alert-light d-flex justify-content-between mb-3">
+                <span>Total</span>
+                <strong id="payment-total">–</strong>
+              </div>
+
+              <div id="stripe-fields">
+                <div class="mb-2">
+                  <label class="form-label small">Card number</label>
+                  <input class="form-control" id="pay-card" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCardNumber(this)">
+                </div>
+                <div class="row g-2">
+                  <div class="col">
+                    <label class="form-label small">Expiration</label>
+                    <input class="form-control" id="pay-expiry" placeholder="MM / AA" maxlength="7" oninput="formatExpiry(this)">
+                  </div>
+                  <div class="col">
+                    <label class="form-label small">CVC</label>
+                    <input class="form-control" id="pay-cvc" placeholder="123" maxlength="4">
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <label class="form-label small">Name on the card</label>
+                  <input class="form-control" id="pay-name" placeholder="Jean Dupont">
+                </div>
+              </div>
+
+              <p id="payment-feedback" class="mt-2 small mb-0"></p>
+              <p class="mt-1 small text-muted mb-0">Simulation - no real data transmitted</p>
+            </div>
           <div class="modal-footer">
             <button
               type="button"
@@ -381,6 +428,60 @@
             >
               Confirm reservation
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Paiement sécurisé</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="payment-modal-body">
+            <div class="btn-group w-100 mb-3">
+              <button class="btn btn-outline-secondary active" id="tab-stripe" onclick="selectPaymentProvider('stripe')">Credit card</button>
+              <button class="btn btn-outline-secondary" id="tab-paypal" onclick="selectPaymentProvider('paypal')">PayPal</button>
+            </div>
+
+            <div id="amount-summary" class="alert alert-light d-flex justify-content-between mb-3">
+              <span>Total</span>
+              <strong id="payment-total">–</strong>
+            </div>
+
+            <div id="stripe-fields">
+              <div class="mb-2">
+                <label class="form-label small">Card number</label>
+                <input class="form-control" id="pay-card" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCardNumber(this)">
+              </div>
+              <div class="row g-2">
+                <div class="col">
+                  <label class="form-label small">Expiration</label>
+                  <input class="form-control" id="pay-expiry" placeholder="MM / AA" maxlength="7" oninput="formatExpiry(this)">
+                </div>
+                <div class="col">
+                  <label class="form-label small">CVC</label>
+                  <input class="form-control" id="pay-cvc" placeholder="123" maxlength="4">
+                </div>
+              </div>
+              <div class="mt-2">
+                <label class="form-label small">Name on the card</label>
+                <input class="form-control" id="pay-name" placeholder="Jean Dupont">
+              </div>
+            </div>
+
+            <div id="paypal-fields" class="d-none text-center py-3 text-muted">
+              <p>You will be redirected to PayPal to pay <strong id="paypal-amount"></strong>.</p>
+            </div>
+
+            <p id="payment-feedback" class="mt-2 small text-muted"></p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancer</button>
+            <button class="btn btn-primary" id="pay-now-btn" onclick="handleSimulatedPayment()">Pay</button>
           </div>
         </div>
       </div>

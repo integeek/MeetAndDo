@@ -1137,7 +1137,12 @@ function renderReservationSummary() {
   `;
 
   reviewButton?.classList.add("d-none");
-  confirmButton?.classList.remove("d-none");
+
+  showPaymentSection(calculateReservationTotal());
+  if (confirmButton) {
+    confirmButton.classList.remove("d-none");
+    confirmButton.onclick = handleSimulatedPayment;
+  }
 }
 
 async function submitReservations() {
@@ -1213,4 +1218,68 @@ async function submitReservations() {
     }
   }
 }
+
+function calculateReservationTotal() {
+  const selectedItems = getSelectedReservationItems();
+  const pricePerPlace = currentReservationActivity?.price || 0;
+  return selectedItems.reduce((sum, { quantity }) => sum + quantity * pricePerPlace, 0);
+}
+
+function formatCardNumber(input) {
+  input.value = input.value.replace(/\D/g, '').substring(0, 16).replace(/(.{4})/g, '$1 ').trim();
+}
+
+function formatExpiry(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length >= 2) {
+    v = v.slice(0, 2) + ' / ' + v.slice(2, 4);
+  }
+  input.value = v;
+}
+
+function showPaymentSection(totalAmount) {
+  document.getElementById('payment-total').textContent = `${totalAmount.toFixed(2)} €`;
+  document.getElementById('payment-feedback').textContent = '';
+  document.getElementById('pay-card').value = '';
+  document.getElementById('pay-expiry').value = '';
+  document.getElementById('pay-cvc').value = '';
+  document.getElementById('pay-name').value = '';
+  document.getElementById('payment-section').classList.remove('d-none');
+  const confirmButton = document.getElementById('reservation-confirm-button');
+  confirmButton.textContent = 'Pay';
+  confirmButton.onclick = handleSimulatedPayment;
+  confirmButton.disabled = true;
+  ['pay-card', 'pay-expiry', 'pay-cvc', 'pay-name'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updatePayButtonState);
+  });
+}
+
+async function handleSimulatedPayment() {
+  const btn = document.getElementById('reservation-confirm-button');
+  const feedback = document.getElementById('payment-feedback');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  feedback.textContent = 'Verifying card...';
+  feedback.className = 'mt-2 small text-muted';
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  document.getElementById('payment-section').classList.add('d-none');
+  btn.textContent = 'Confirm reservation';
+  btn.disabled = false;
+  await submitReservations();
+  const modal = bootstrap.Modal.getInstance(document.getElementById('reservationEventsModal'));
+  modal?.hide();
+}
+
+function updatePayButtonState() {
+  const confirmButton = document.getElementById('reservation-confirm-button');
+  if (!confirmButton) {
+    return;
+  }
+  const card = document.getElementById('pay-card')?.value.replace(/\s/g, '') || '';
+  const expiry = document.getElementById('pay-expiry')?.value || '';
+  const cvc = document.getElementById('pay-cvc')?.value || '';
+  const name = document.getElementById('pay-name')?.value.trim() || '';
+  const isValid = card.length === 16 && expiry.length === 7 && cvc.length >= 3 && name.length > 0;
+  confirmButton.disabled = !isValid;
 }
