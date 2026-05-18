@@ -115,6 +115,19 @@ export class EventService {
     return event;
   }
 
+  async findOneWithDetails(id: number) {
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from('event')
+      .select('id, date, id_activity, activity(title, address, id_user)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data) throw new NotFoundException('Event not found');
+    return data;
+  }
+
   async update(id: number, updateEventDto: UpdateEventDto) {
     const { data, error } = await this.supabaseService
       .getAdminClient()
