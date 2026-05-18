@@ -14,7 +14,6 @@ import { ActivityModule } from './activity/activity.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { EventModule } from './event/event.module';
 import { ContactModule } from './contact/contact.module';
-import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -49,7 +48,6 @@ import { ReviewModule } from './review/review.module';
     ReservationModule,
     EventModule,
     ContactModule,
-    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
