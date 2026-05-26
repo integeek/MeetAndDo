@@ -1,14 +1,15 @@
 import {
   Controller,
   Post,
+  Patch,
   Get,
   Query,
   Param,
+  ParseIntPipe,
   UploadedFile,
   UseInterceptors,
   UseGuards,
   BadRequestException,
-  Body,
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,14 +26,11 @@ const ALLOWED_TYPES = [
   'text/plain',
 ];
 
-const MAX_SIZE = 5 * 1024 * 1024; 
+const MAX_SIZE = 5 * 1024 * 1024;
+
 @Controller('messaging')
 export class MessagingController {
   constructor(private readonly messagingService: MessagingService) {}
-
-  // ----------------------------------------------------------------
-  //  Upload pièce jointe
-  // ----------------------------------------------------------------
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -49,10 +47,6 @@ export class MessagingController {
     return { url };
   }
 
-  // ----------------------------------------------------------------
-  //  Recherche d'utilisateurs (pour nouvelle conversation / groupe)
-  // ----------------------------------------------------------------
-
   @Get('users/search')
   @UseGuards(JwtAuthenticationGuard)
   async searchUsers(
@@ -60,17 +54,31 @@ export class MessagingController {
     @Req() req: RequestWithUser,
   ) {
     if (!query || query.trim().length < 2) return [];
-    const currentUUID = this.messagingService.intToUUID(req.user.id);
-    return this.messagingService.searchUsers(query.trim(), currentUUID);
+    return this.messagingService.searchUsers(query.trim(), req.user.id);
   }
 
-  // ----------------------------------------------------------------
-  //  Récupérer un utilisateur par UUID (pour afficher son nom)
-  // ----------------------------------------------------------------
-
-  @Get('users/:uuid')
+  @Get('users/:id')
   @UseGuards(JwtAuthenticationGuard)
-  async getUserByUUID(@Param('uuid') uuid: string) {
-    return this.messagingService.getUserByUUID(uuid);
+  async getUserById(@Param('id', ParseIntPipe) id: number) {
+    return this.messagingService.getUserById(id);
+  }
+
+  @Patch('conversations/:id/avatar')
+  @UseGuards(JwtAuthenticationGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async updateGroupAvatar(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
+  ) {
+    if (!file) throw new BadRequestException('No file provided');
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.mimetype))
+      throw new BadRequestException('Only images are allowed');
+    if (file.size > MAX_SIZE) throw new BadRequestException('File too large (max 5 MB)');
+
+    const url = await this.messagingService.uploadFile(file);
+    if (!url) throw new BadRequestException('Upload failed');
+
+    await this.messagingService.updateGroupAvatar(id, url);
+    return { url };
   }
 }
