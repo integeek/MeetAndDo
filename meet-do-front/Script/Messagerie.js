@@ -52,13 +52,6 @@ const DOM = {
   btnAttachRemove:     document.getElementById('attachment-remove'),
 };
 
-// ================================================================
-//  UTILITAIRES UUID
-// ================================================================
-
-function intToUUID(id) {
-  return `00000000-0000-0000-0000-${String(id).padStart(12, '0')}`;
-}
 
 // ================================================================
 //  INIT COMPOSANTS NAVBAR / FOOTER
@@ -156,11 +149,11 @@ async function initUser() {
     }
 
     state.currentUser   = user;
-    state.currentUserId = intToUUID(user.id);
+    state.currentUserId = user.id;
 
     // Mettre en cache le nom de l'utilisateur courant
     const name = [user.firstname, user.lastname].filter(Boolean).join(' ') || user.email;
-    state.userCache[state.currentUserId] = {
+    state.userCache[user.id] = {
       name,
       email: user.email,
       firstname: user.firstname,
@@ -178,15 +171,15 @@ async function initUser() {
 //  CACHE DES NOMS D'UTILISATEURS
 // ================================================================
 
-async function loadUserName(uuid) {
-  if (state.userCache[uuid]) return state.userCache[uuid].name;
+async function loadUserName(id) {
+  if (state.userCache[id]) return state.userCache[id].name;
   try {
-    const res = await fetch(`${API_URL}/messaging/users/${uuid}`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/messaging/users/${id}`, { credentials: 'include' });
     if (res.ok) {
       const u = await res.json();
       if (u) {
-        const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || uuid.slice(0, 8);
-        state.userCache[uuid] = {
+        const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || String(id);
+        state.userCache[id] = {
           name,
           email: u.email,
           firstname: u.firstname,
@@ -195,30 +188,51 @@ async function loadUserName(uuid) {
           role: u.role,
         };
         renderConversationList(state.conversations);
-        updateHeaderIfNeeded(uuid, name);
+        updateHeaderIfNeeded(id, name);
+        rerenderActiveChatSender(id);
         return name;
       }
     }
   } catch { /* silencieux */ }
-  return uuid.slice(0, 8) + '…';
+  return String(id);
 }
 
-function updateHeaderIfNeeded(uuid, name) {
+function rerenderActiveChatSender(id) {
+  if (!state.activeConversationId) return;
+  const conv = state.conversations.find(c => c.id === state.activeConversationId);
+  if (!conv?.is_group) return;
+
+  const senderName = state.userCache[id]?.name || String(id);
+  const senderAvatarUrl = state.userCache[id]?.avatar_url || '';
+
+  DOM.chatMessages.querySelectorAll(`.msg-row[data-sender-id="${id}"]`).forEach(row => {
+    const avatar = row.querySelector('.msg-bubble-avatar');
+    const nameEl = row.querySelector('.msg-sender-name');
+    if (avatar) {
+      avatar.innerHTML = senderAvatarUrl
+        ? `<img src="${escapeHtml(senderAvatarUrl)}" alt="${escapeHtml(senderName)}" class="avatar-img" />`
+        : senderName.slice(0, 2).toUpperCase();
+    }
+    if (nameEl) nameEl.textContent = senderName;
+  });
+}
+
+function updateHeaderIfNeeded(id, name) {
   if (!state.activeConversationId) return;
   const conv = state.conversations.find(c => c.id === state.activeConversationId);
   if (!conv || conv.is_group) return;
   const otherId = conv.participant_1 === state.currentUserId ? conv.participant_2 : conv.participant_1;
-  if (otherId === uuid) {
+  if (otherId === id) {
     DOM.chatHeader.name.textContent   = name;
     DOM.chatHeader.avatar.textContent = name.slice(0, 2).toUpperCase();
   }
 }
 
-function getCachedName(uuid) {
-  if (!uuid) return '?';
-  if (state.userCache[uuid]) return state.userCache[uuid].name;
-  loadUserName(uuid); // chargement asynchrone
-  return uuid.slice(0, 8) + '…';
+function getCachedName(id) {
+  if (!id) return '?';
+  if (state.userCache[id]) return state.userCache[id].name;
+  loadUserName(id); // chargement asynchrone
+  return String(id);
 }
 
 // ================================================================
@@ -247,7 +261,7 @@ function initSocket() {
     const conversationIdToOpen = requestedId || savedId;
 
     if (conversationIdToOpen && !state.activeConversationId) {
-      const conv = data.find(c => c.id === conversationIdToOpen);
+      const conv = data.find(c => c.id === Number(conversationIdToOpen));
       if (conv) selectConversation(conv);
     }
   });
@@ -293,10 +307,10 @@ function getOtherParticipantId(conv) {
     : conv.participant_1;
 }
 
-function getUserProfileHref(uuid, profile = {}) {
-  if (!uuid) return '';
+function getUserProfileHref(id, profile = {}) {
+  if (!id) return '';
 
-  const params = new URLSearchParams({ uuid });
+  const params = new URLSearchParams({ userId: String(id) });
   const name = profile.name;
 
   if (profile.firstname) params.set('firstname', profile.firstname);
@@ -309,7 +323,8 @@ function getUserProfileHref(uuid, profile = {}) {
 }
 
 function openRequestedUserConversation() {
-  const requestedUserId = getRequestedUserId();
+  const raw = getRequestedUserId();
+  const requestedUserId = Number(raw);
 
   if (!requestedUserId || requestedUserId === state.currentUserId) return;
 
@@ -332,16 +347,21 @@ function renderConversationList(conversations) {
   }
 
   DOM.convList.innerHTML = filtered.map(conv => {
-    const { displayName, initials } = getConvDisplay(conv);
+    const { displayName, initials, avatarUrl } = getConvDisplay(conv);
     const lastMsg  = conv.last_message || 'New conversation';
     const time     = conv.last_message_at ? formatTime(conv.last_message_at) : '';
     const isActive = conv.id === state.activeConversationId ? 'active' : '';
     const isGroup  = conv.is_group;
+    const avatarContent = avatarUrl
+      ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" class="avatar-img" />`
+      : isGroup
+        ? '<i class="bi bi-people-fill"></i>'
+        : initials;
 
     return `
       <li class="conv-item ${isActive}" role="listitem" data-id="${conv.id}">
         <div class="conv-avatar ${isGroup ? 'conv-avatar-group' : ''}">
-          ${isGroup ? '<i class="bi bi-people-fill"></i>' : initials}
+          ${avatarContent}
         </div>
         <div class="conv-info">
           <div class="conv-name">${escapeHtml(displayName)}</div>
@@ -355,7 +375,7 @@ function renderConversationList(conversations) {
 
   DOM.convList.querySelectorAll('.conv-item').forEach(item => {
     item.addEventListener('click', () => {
-      const conv = state.conversations.find(c => c.id === item.dataset.id);
+      const conv = state.conversations.find(c => c.id === Number(item.dataset.id));
       if (conv) selectConversation(conv);
     });
   });
@@ -363,12 +383,13 @@ function renderConversationList(conversations) {
 
 function getConvDisplay(conv) {
   if (conv.is_group) {
-    return { displayName: conv.group_name || 'Group', initials: 'G' };
+    return { displayName: conv.group_name || 'Group', initials: 'G', avatarUrl: conv.group_avatar || '' };
   }
   const otherId = getOtherParticipantId(conv);
   const name = getCachedName(otherId);
   const initials = name.slice(0, 2).toUpperCase();
-  return { displayName: name, initials };
+  const avatarUrl = state.userCache[otherId]?.avatar_url || '';
+  return { displayName: name, initials, avatarUrl };
 }
 
 // ================================================================
@@ -385,15 +406,30 @@ async function selectConversation(conv) {
     if (otherId && !state.userCache[otherId]) await loadUserName(otherId);
   }
 
-  const { displayName, initials } = getConvDisplay(conv);
+  const { displayName, initials, avatarUrl } = getConvDisplay(conv);
   const otherId = getOtherParticipantId(conv);
   const profileHref = getUserProfileHref(otherId, {
     ...(state.userCache[otherId] || {}),
     name: displayName,
   });
-  DOM.chatHeader.name.textContent   = displayName;
-  DOM.chatHeader.avatar.textContent = conv.is_group ? '' : initials;
-  if (conv.is_group) DOM.chatHeader.avatar.innerHTML = '<i class="bi bi-people-fill"></i>';
+  DOM.chatHeader.name.textContent = displayName;
+  if (conv.is_group) {
+    const imgContent = avatarUrl
+      ? `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" class="avatar-img" />`
+      : '<i class="bi bi-people-fill"></i>';
+    DOM.chatHeader.avatar.innerHTML = `
+      ${imgContent}
+      <label class="avatar-edit-btn" title="Change group photo">
+        <i class="bi bi-camera-fill"></i>
+        <input type="file" accept="image/*" class="avatar-file-input" />
+      </label>`;
+    DOM.chatHeader.avatar.querySelector('.avatar-file-input')
+      .addEventListener('change', e => uploadGroupAvatar(conv.id, e.target.files[0]));
+  } else if (avatarUrl) {
+    DOM.chatHeader.avatar.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}" class="avatar-img" />`;
+  } else {
+    DOM.chatHeader.avatar.textContent = initials;
+  }
   DOM.chatHeader.status.textContent = conv.is_group ? 'Group' : 'Active';
   bindChatHeaderProfileLink(profileHref);
 
@@ -428,7 +464,14 @@ function bindChatHeaderProfileLink(profileHref) {
 //  MESSAGES
 // ================================================================
 
-function renderMessages(messages) {
+async function renderMessages(messages) {
+  // Pre-fetch all unknown sender names before rendering so IDs don't flash
+  const unknownIds = [...new Set(messages.map(m => m.sender_id))]
+    .filter(id => id && id !== state.currentUserId && !state.userCache[id]);
+  if (unknownIds.length > 0) {
+    await Promise.all(unknownIds.map(id => loadUserName(id)));
+  }
+
   DOM.chatMessages.innerHTML = '';
   let lastDate = null;
 
@@ -454,18 +497,23 @@ function appendMessage(msg, doScroll = true) {
   const row       = document.createElement('div');
   row.className   = `msg-row ${isSent ? 'sent' : 'recv'}`;
   row.dataset.msgId = msg.id;
+  row.dataset.senderId = msg.sender_id;
 
   const time     = formatTime(msg.created_at);
   const senderName = isSent ? '' : getCachedName(msg.sender_id);
   const initials = senderName.slice(0, 2).toUpperCase() || '?';
+  const senderAvatarUrl = isSent ? '' : (state.userCache[msg.sender_id]?.avatar_url || '');
   const bubbleContent = renderBubbleContent(msg.content);
 
   // In a group, show the sender name above the bubble
   const conv = state.conversations.find(c => c.id === msg.conversation_id);
   const showSenderName = !isSent && conv?.is_group;
+  const bubbleAvatar = senderAvatarUrl
+    ? `<img src="${escapeHtml(senderAvatarUrl)}" alt="${escapeHtml(senderName)}" class="avatar-img" />`
+    : initials;
 
   row.innerHTML = `
-    ${!isSent ? `<div class="msg-bubble-avatar">${initials}</div>` : ''}
+    ${!isSent ? `<div class="msg-bubble-avatar">${bubbleAvatar}</div>` : ''}
     <div class="msg-bubble">
       ${showSenderName ? `<div class="msg-sender-name">${escapeHtml(senderName)}</div>` : ''}
       ${bubbleContent}
@@ -656,8 +704,17 @@ function openNewConvModal() {
 
       <!-- Panneau Groupe -->
       <div id="tab-group" class="modal-tab-panel" style="display:none">
-        <input type="text" class="modal-input" id="modal-group-name"
-               placeholder="Group name…" autocomplete="off" />
+        <div class="modal-group-avatar-row">
+          <label class="modal-group-avatar-picker" id="modal-group-avatar-label" title="Add group photo">
+            <div class="modal-group-avatar-preview" id="modal-group-avatar-preview">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <span class="modal-group-avatar-hint"><i class="bi bi-camera-fill"></i> Photo</span>
+            <input type="file" accept="image/*" id="modal-group-avatar-input" style="display:none" />
+          </label>
+          <input type="text" class="modal-input modal-input-grow" id="modal-group-name"
+                 placeholder="Group name…" autocomplete="off" />
+        </div>
         <input type="text" class="modal-input" id="modal-search-group"
                placeholder="Add members (name or email)…" autocomplete="off" />
         <div id="modal-group-results" class="modal-results"></div>
@@ -672,9 +729,10 @@ function openNewConvModal() {
 
   document.body.appendChild(modal);
 
-  let currentTab     = 'direct';
-  let selectedDirect = null;      
-  let groupMembers   = [];         
+  let currentTab       = 'direct';
+  let selectedDirect   = null;
+  let groupMembers     = [];
+  let groupAvatarUrl   = null;         
 
   // ----- Onglets -----
   modal.querySelectorAll('.modal-tab').forEach(btn => {
@@ -685,6 +743,29 @@ function openNewConvModal() {
       modal.querySelector('#tab-direct').style.display = currentTab === 'direct' ? '' : 'none';
       modal.querySelector('#tab-group').style.display  = currentTab === 'group'  ? '' : 'none';
     });
+  });
+
+  // ----- Avatar groupe -----
+  modal.querySelector('#modal-group-avatar-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const preview = modal.querySelector('#modal-group-avatar-preview');
+    preview.innerHTML = '<div class="modal-avatar-loading"><i class="bi bi-hourglass-split"></i></div>';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch(`${API_URL}/messaging/upload`, { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Upload failed');
+      const { url } = await res.json();
+      groupAvatarUrl = url;
+      preview.innerHTML = `<img src="${escapeHtml(url)}" alt="group" class="avatar-img" />`;
+    } catch {
+      preview.innerHTML = '<i class="bi bi-people-fill"></i>';
+      groupAvatarUrl = null;
+      alert('Error uploading photo. Please try again.');
+    }
   });
 
   // ----- Recherche direct -----
@@ -707,10 +788,10 @@ function openNewConvModal() {
     const q = e.target.value.trim();
     if (q.length < 2) { modal.querySelector('#modal-group-results').innerHTML = ''; return; }
     searchTimer2 = setTimeout(() => searchAndRender(q, 'group', modal, result => {
-      if (!groupMembers.find(m => m.uuid === result.uuid)) {
+      if (!groupMembers.find(m => m.id === result.id)) {
         groupMembers.push(result);
         renderGroupMembers(groupMembers, modal, m => {
-          groupMembers = groupMembers.filter(x => x.uuid !== m.uuid);
+          groupMembers = groupMembers.filter(x => x.id !== m.id);
           renderGroupMembers(groupMembers, modal, () => {});
         });
       }
@@ -729,7 +810,7 @@ function openNewConvModal() {
       if (!selectedDirect) { alert('Please select a contact.'); return; }
       state.socket.emit('open_conversation', {
         userId1: state.currentUserId,
-        userId2: selectedDirect.uuid,
+        userId2: selectedDirect.id,
       });
       modal.remove();
     } else {
@@ -739,7 +820,8 @@ function openNewConvModal() {
       state.socket.emit('create_group', {
         name: groupName,
         creatorId: state.currentUserId,
-        memberIds: groupMembers.map(m => m.uuid),
+        memberIds: groupMembers.map(m => m.id),
+        avatarUrl: groupAvatarUrl || undefined,
       });
       modal.remove();
     }
@@ -761,7 +843,7 @@ async function searchAndRender(query, panel, modal, onSelect) {
     }
     container.innerHTML = users.map(u => {
       const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email;
-      return `<div class="modal-result-item" data-uuid="${u.uuid}" data-name="${escapeHtml(name)}">
+      return `<div class="modal-result-item" data-id="${u.id}" data-name="${escapeHtml(name)}">
         <div class="modal-result-avatar">${name.slice(0, 2).toUpperCase()}</div>
         <div>
           <div class="modal-result-name">${escapeHtml(name)}</div>
@@ -771,7 +853,7 @@ async function searchAndRender(query, panel, modal, onSelect) {
     }).join('');
     container.querySelectorAll('.modal-result-item').forEach(item => {
       item.addEventListener('click', () => {
-        onSelect({ uuid: item.dataset.uuid, name: item.dataset.name });
+        onSelect({ id: Number(item.dataset.id), name: item.dataset.name });
       });
     });
   } catch { /* silencieux */ }
@@ -785,10 +867,10 @@ function renderGroupMembers(members, modal, onRemove) {
     ${members.map(m => `
       <span class="modal-member-chip">
         ${escapeHtml(m.name)}
-        <button type="button" data-uuid="${m.uuid}" class="chip-remove">×</button>
+        <button type="button" data-id="${m.id}" class="chip-remove">×</button>
       </span>`).join('')}`;
   container.querySelectorAll('.chip-remove').forEach(btn => {
-    btn.addEventListener('click', () => onRemove({ uuid: btn.dataset.uuid }));
+    btn.addEventListener('click', () => onRemove({ id: Number(btn.dataset.id) }));
   });
 }
 
@@ -857,6 +939,50 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// ================================================================
+//  GROUPE — AVATAR
+// ================================================================
+
+async function uploadGroupAvatar(conversationId, file) {
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch(`${API_URL}/messaging/conversations/${conversationId}/avatar`, {
+      method: 'PATCH',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert(`Error updating group photo: ${body?.message || res.statusText}`);
+      return;
+    }
+
+    const { url } = await res.json();
+    const conv = state.conversations.find(c => c.id === conversationId);
+    if (conv) {
+      conv.group_avatar = url;
+      renderConversationList(state.conversations);
+      // Refresh the header avatar
+      const img = DOM.chatHeader.avatar.querySelector('img');
+      if (img) {
+        img.src = url;
+      } else {
+        const icon = DOM.chatHeader.avatar.querySelector('.bi-people-fill');
+        if (icon) {
+          icon.outerHTML = `<img src="${escapeHtml(url)}" alt="group" class="avatar-img" />`;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[uploadGroupAvatar]', err);
+  }
 }
 
 // ================================================================
