@@ -11,69 +11,50 @@ export class MessagingService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   // ================================================================
-  //  UTILITAIRES UUID ↔ INT
-  // ================================================================
-
-  intToUUID(id: number): string {
-    return `00000000-0000-0000-0000-${id.toString().padStart(12, '0')}`;
-  }
-
-  uuidToInt(uuid: string): number | null {
-    const match = uuid.match(/^00000000-0000-0000-0000-0*(\d+)$/);
-    return match ? parseInt(match[1], 10) : null;
-  }
-
-  // ================================================================
   //  UTILISATEURS
   // ================================================================
 
-  async getUserByUUID(uuid: string) {
-    const id = this.uuidToInt(uuid);
-    if (!id) return null;
+  async getUserById(id: number) {
     const { data } = await this.supabaseService
       .getAdminClient()
       .from('users')
-      .select('id, firstname, lastname, email')
+      .select('id, firstname, lastname, email, avatar_url')
       .eq('id', id)
       .single();
-    if (!data) return null;
-    return { ...data, uuid };
+    return data ?? null;
   }
 
-  async getUsersByUUIDs(uuids: string[]) {
-    const ids = uuids.map(u => this.uuidToInt(u)).filter(Boolean) as number[];
+  async getUsersByIds(ids: number[]) {
     if (!ids.length) return [];
     const { data } = await this.supabaseService
       .getAdminClient()
       .from('users')
-      .select('id, firstname, lastname, email')
+      .select('id, firstname, lastname, email, avatar_url')
       .in('id', ids);
-    return (data ?? []).map(u => ({ ...u, uuid: this.intToUUID(u.id) }));
+    return data ?? [];
   }
 
-  async searchUsers(query: string, currentUUID: string) {
-    const currentId = this.uuidToInt(currentUUID);
+  async searchUsers(query: string, currentId: number) {
     let req = this.supabaseService
       .getAdminClient()
       .from('users')
-      .select('id, firstname, lastname, email')
+      .select('id, firstname, lastname, email, avatar_url')
       .or(`firstname.ilike.%${query}%,lastname.ilike.%${query}%,email.ilike.%${query}%`)
       .limit(10);
 
     if (currentId) req = req.neq('id', currentId);
 
     const { data } = await req;
-    return (data ?? []).map(u => ({ ...u, uuid: this.intToUUID(u.id) }));
+    return data ?? [];
   }
 
   // ================================================================
   //  CONVERSATIONS 1-1
   // ================================================================
 
-  async getConversations(userId: string) {
+  async getConversations(userId: number) {
     const client = this.supabaseService.getAdminClient();
 
-    // Conversations directes 
     const { data: direct } = await client
       .from('conversations')
       .select('*')
@@ -81,7 +62,6 @@ export class MessagingService {
       .eq('is_group', false)
       .order('last_message_at', { ascending: false, nullsFirst: false });
 
-    // Conversations de groupe 
     const { data: memberRows } = await client
       .from('conversation_members')
       .select('conversation_id')
@@ -109,7 +89,7 @@ export class MessagingService {
     return all;
   }
 
-  async getOrCreateConversation(userId1: string, userId2: string) {
+  async getOrCreateConversation(userId1: number, userId2: number) {
     const client = this.supabaseService.getAdminClient();
 
     const { data: existing } = await client
@@ -136,7 +116,7 @@ export class MessagingService {
     return data;
   }
 
-  async getConversationById(conversationId: string) {
+  async getConversationById(conversationId: number) {
     const { data, error } = await this.supabaseService
       .getAdminClient()
       .from('conversations')
@@ -155,12 +135,22 @@ export class MessagingService {
   //  GROUPES
   // ================================================================
 
-  async createGroupConversation(name: string, creatorId: string, memberIds: string[]) {
+  async createGroupConversation(
+    name: string,
+    creatorId: number,
+    memberIds: number[],
+    avatarUrl?: string,
+  ) {
     const client = this.supabaseService.getAdminClient();
 
     const { data: conv, error } = await client
       .from('conversations')
-      .insert({ participant_1: creatorId, is_group: true, group_name: name })
+      .insert({
+        participant_1: creatorId,
+        is_group: true,
+        group_name: name,
+        group_avatar: avatarUrl ?? null,
+      })
       .select()
       .single();
 
@@ -171,13 +161,13 @@ export class MessagingService {
 
     const allMembers = Array.from(new Set([creatorId, ...memberIds]));
     await client.from('conversation_members').insert(
-      allMembers.map(user_id => ({ conversation_id: conv.id, user_id })),
+      allMembers.map((user_id) => ({ conversation_id: conv.id, user_id })),
     );
 
     return conv;
   }
 
-  async getGroupMembers(conversationId: string): Promise<string[]> {
+  async getGroupMembers(conversationId: number): Promise<number[]> {
     const { data } = await this.supabaseService
       .getAdminClient()
       .from('conversation_members')
@@ -190,7 +180,7 @@ export class MessagingService {
   //  MESSAGES
   // ================================================================
 
-  async getMessages(conversationId: string) {
+  async getMessages(conversationId: number) {
     const { data, error } = await this.supabaseService
       .getAdminClient()
       .from('messages')
@@ -223,7 +213,6 @@ export class MessagingService {
       return null;
     }
 
-    // Mettre à jour le résumé de la conversation
     const conv = await this.getConversationById(dto.conversationId);
     if (conv) {
       const update: any = {
@@ -243,7 +232,7 @@ export class MessagingService {
     return data;
   }
 
-  async markAsRead(conversationId: string, userId: string): Promise<void> {
+  async markAsRead(conversationId: number, userId: number): Promise<void> {
     const conv = await this.getConversationById(conversationId);
     if (!conv || conv.is_group) return;
 
@@ -252,6 +241,26 @@ export class MessagingService {
       .getAdminClient()
       .from('conversations')
       .update({ [field]: true })
+      .eq('id', conversationId);
+  }
+
+  async updateGroupAvatar(
+    conversationId: number,
+    avatarUrl: string,
+  ): Promise<void> {
+    const { data: conv } = await this.supabaseService
+      .getAdminClient()
+      .from('conversations')
+      .select('is_group')
+      .eq('id', conversationId)
+      .single();
+
+    if (!conv?.is_group) throw new Error('Not a group conversation');
+
+    await this.supabaseService
+      .getAdminClient()
+      .from('conversations')
+      .update({ group_avatar: avatarUrl })
       .eq('id', conversationId);
   }
 

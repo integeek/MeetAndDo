@@ -384,33 +384,25 @@ export class DashboardService {
   //  MESSAGERIE
   // ================================================================
 
-  private intToUUID(id: number): string {
-    return `00000000-0000-0000-0000-${id.toString().padStart(12, '0')}`;
-  }
-
   async getConversations(userId: number) {
-    const uuid = this.intToUUID(userId);
     const { data, error } = await this.db
       .from('conversations')
       .select('*')
-      .or(`participant_1.eq.${uuid},participant_2.eq.${uuid}`)
+      .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
       .order('last_message_at', { ascending: false, nullsFirst: false });
 
     if (error) { this.logger.error(`getConversations: ${error.message}`); return []; }
 
     return (data ?? []).map((conv: any) => {
-      const isP1 = conv.participant_1 === uuid;
-      const otherId: string = isP1 ? conv.participant_2 : conv.participant_1;
-      const match = otherId?.match(/^00000000-0000-0000-0000-0*(\d+)$/);
-      const otherUserId = match ? parseInt(match[1], 10) : null;
+      const isP1 = conv.participant_1 === userId;
+      const otherUserId: number = isP1 ? conv.participant_2 : conv.participant_1;
       return {
         id: conv.id,
         last_message: conv.last_message,
         last_message_at: conv.last_message_at,
-        is_mine: conv.last_sender_id === uuid,
+        is_mine: conv.last_sender_id === userId,
         is_read: isP1 ? (conv.is_read_by_p1 ?? true) : (conv.is_read_by_p2 ?? true),
         other_user_id: otherUserId,
-        other_user_uuid: otherId,
       };
     });
   }
