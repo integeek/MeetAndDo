@@ -219,37 +219,33 @@ export class DashboardService {
   // ================================================================
 
   async getReportedUsers() {
-    // Essai avec jointure et filtre type
-    const { data, error } = await this.db
+    const { data: reports, error } = await this.db
       .from('report')
-      .select(`*, reported:id_reported(id, firstname, lastname, email)`)
-      .eq('type', 'user');
+      .select('*')
+      .eq('type', 'user')
+      .order('date', { ascending: false });
 
-    if (error) {
-      // Fallback minimal : toute la table sans filtre ni order
-      const { data: d2, error: e2 } = await this.db
-        .from('report')
-        .select('*');
-      if (e2) { this.logger.error(`getReportedUsers: ${e2.message}`); return []; }
-      return (d2 ?? []).map((r: any) => ({
-        id: r.id,
-        reason: r.reason ?? r.motif ?? r.type_report ?? r.type ?? null,
-        description: r.description ?? r.message ?? null,
-        created_at: r.created_at ?? null,
-        id_reported: r.id_reported ?? null,
-        reported_firstname: null,
-        reported_lastname: null,
-      }));
+    if (error) { this.logger.error(`getReportedUsers: ${error.message}`); return []; }
+    if (!reports?.length) return [];
+
+    const userIds = [...new Set((reports as any[]).map((r) => r.id_reported).filter(Boolean))];
+    const usersMap: Record<number, any> = {};
+    if (userIds.length) {
+      const { data: users } = await this.db
+        .from('users')
+        .select('id, firstname, lastname, email')
+        .in('id', userIds);
+      for (const u of users ?? []) usersMap[u.id] = u;
     }
 
-    return (data ?? []).map((r: any) => ({
+    return (reports as any[]).map((r) => ({
       id: r.id,
-      reason: r.reason ?? r.motif ?? r.type_report ?? r.type ?? null,
-      description: r.description ?? r.message ?? null,
-      created_at: r.created_at ?? null,
+      reason: r.reason ?? null,
+      description: r.description ?? null,
+      created_at: r.date ?? null,
       id_reported: r.id_reported ?? null,
-      reported_firstname: r.reported?.firstname ?? null,
-      reported_lastname:  r.reported?.lastname  ?? null,
+      reported_firstname: usersMap[r.id_reported]?.firstname ?? null,
+      reported_lastname:  usersMap[r.id_reported]?.lastname  ?? null,
     }));
   }
 
@@ -271,36 +267,61 @@ export class DashboardService {
     return { message: 'Signalement retiré.' };
   }
 
-  async getReportedActivities() {
-    // Essai avec jointure et filtre type (sans order sur colonne potentiellement absente)
-    const { data, error } = await this.db
-      .from('report')
-      .select(`*, activity:id_activity(id, title)`)
-      .eq('type', 'activity');
+  async submitReport(dto: {
+    type: 'activity' | 'user';
+    id_activity?: number;
+    id_reported?: number;
+    reason: string;
+    description?: string;
+  }, reporterId: number) {
+    if (!dto.reason) throw new Error('La raison est requise.');
+    if (dto.type === 'activity' && !dto.id_activity) throw new Error('id_activity requis.');
+    if (dto.type === 'user' && !dto.id_reported) throw new Error('id_reported requis.');
+
+    const { error } = await this.db.from('report').insert({
+      type: dto.type,
+      id_activity: dto.id_activity ?? null,
+      id_reported: dto.id_reported ?? null,
+      id_user: reporterId,
+      reason: dto.reason,
+      description: dto.description ?? null,
+      date: new Date().toISOString(),
+    });
 
     if (error) {
-      // Fallback minimal sans filtre ni order
-      const { data: d2, error: e2 } = await this.db
-        .from('report')
-        .select('*');
-      if (e2) { this.logger.error(`getReportedActivities: ${e2.message}`); return []; }
-      return (d2 ?? []).map((r: any) => ({
-        id: r.id,
-        reason: r.reason ?? r.motif ?? r.type_report ?? r.type ?? null,
-        description: r.description ?? r.message ?? null,
-        created_at: r.created_at ?? null,
-        id_activity: r.id_activity ?? null,
-        activity_title: null,
-      }));
+      this.logger.error(`submitReport: ${error.message}`);
+      throw new Error('Impossible d\'enregistrer le signalement.');
+    }
+    return { message: 'Signalement enregistré. Merci.' };
+  }
+
+  async getReportedActivities() {
+    const { data: reports, error } = await this.db
+      .from('report')
+      .select('*')
+      .eq('type', 'activity')
+      .order('date', { ascending: false });
+
+    if (error) { this.logger.error(`getReportedActivities: ${error.message}`); return []; }
+    if (!reports?.length) return [];
+
+    const actIds = [...new Set((reports as any[]).map((r) => r.id_activity).filter(Boolean))];
+    const activitiesMap: Record<number, any> = {};
+    if (actIds.length) {
+      const { data: acts } = await this.db
+        .from('activity')
+        .select('id, title')
+        .in('id', actIds);
+      for (const a of acts ?? []) activitiesMap[a.id] = a;
     }
 
-    return (data ?? []).map((r: any) => ({
+    return (reports as any[]).map((r) => ({
       id: r.id,
-      reason: r.reason ?? r.motif ?? r.type_report ?? r.type ?? null,
-      description: r.description ?? r.message ?? null,
-      created_at: r.created_at ?? null,
+      reason: r.reason ?? null,
+      description: r.description ?? null,
+      created_at: r.date ?? null,
       id_activity: r.id_activity ?? null,
-      activity_title: r.activity?.title ?? null,
+      activity_title: activitiesMap[r.id_activity]?.title ?? null,
     }));
   }
 
