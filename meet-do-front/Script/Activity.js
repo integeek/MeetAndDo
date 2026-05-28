@@ -133,9 +133,6 @@ function getAuthenticatedUserId(user) {
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 
-function intToUUID(id) {
-  return `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
-}
 
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
@@ -881,9 +878,7 @@ function initCreatorContactButton(activityId, activity) {
       return;
     }
 
-    window.location.href = `Messagerie.html?userId=${encodeURIComponent(
-      intToUUID(creatorId),
-    )}`;
+    window.location.href = `Messagerie.html?userId=${encodeURIComponent(creatorId)}`;
   });
 }
 

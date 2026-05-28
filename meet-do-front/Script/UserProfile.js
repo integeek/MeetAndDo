@@ -3,8 +3,6 @@ const AUTH_USER_STORAGE_KEY = "meetando_current_user";
 
 let displayedProfileUser = null;
 let displayedProfileUserId = null;
-let displayedProfileUuid = null;
-
 function getMeetDoApiUrl() {
   const hostname = window.location.hostname;
   const apiHostname = hostname || "localhost";
@@ -12,28 +10,14 @@ function getMeetDoApiUrl() {
   return `http://${apiHostname}:3000`;
 }
 
-function intToUUID(id) {
-  return `00000000-0000-0000-0000-${String(id).padStart(12, "0")}`;
-}
-
-function uuidToInt(uuid) {
-  const match = String(uuid || "").match(/([0-9]+)$/);
-  if (!match) return null;
-
-  const userId = Number(match[1]);
-  return Number.isInteger(userId) && userId > 0 ? userId : null;
-}
-
 function getRequestedProfileIdentity() {
   const params = new URLSearchParams(window.location.search);
   const userId = Number(params.get("userId") || params.get("id"));
-  const uuid = params.get("uuid");
   const firstname = params.get("firstname") || "";
   const lastname = params.get("lastname") || "";
   const name = params.get("name") || "";
   const fallbackUser = {
-    id: Number.isInteger(userId) && userId > 0 ? userId : uuidToInt(uuid),
-    uuid,
+    id: Number.isInteger(userId) && userId > 0 ? userId : null,
     firstname,
     lastname,
     email: params.get("email") || "",
@@ -49,8 +33,7 @@ function getRequestedProfileIdentity() {
   }
 
   return {
-    userId: Number.isInteger(userId) && userId > 0 ? userId : uuidToInt(uuid),
-    uuid,
+    userId: Number.isInteger(userId) && userId > 0 ? userId : null,
     fallbackUser,
   };
 }
@@ -75,9 +58,6 @@ function getUserId(user, fallbackId = null) {
   return Number.isInteger(userId) && userId > 0 ? userId : fallbackId;
 }
 
-function getUserUuid(user, fallbackUuid = "") {
-  return user?.uuid || user?.user_uuid || fallbackUuid || "";
-}
 
 function isPublisher(user) {
   const role = String(user?.role || user?.user_role || "").toLowerCase();
@@ -123,25 +103,22 @@ async function fetchJson(url, options = {}) {
   return response.json();
 }
 
-async function getPublicUserProfile({ userId, uuid }) {
+async function getPublicUserProfile({ userId }) {
+  if (!userId) return null;
   const apiUrl = getMeetDoApiUrl();
-  const candidates = [];
 
-  if (userId) {
-    candidates.push(`${apiUrl}/user/${userId}`);
+  try {
+    const user = await fetchJson(`${apiUrl}/user/${userId}`);
+    if (user) return user;
+  } catch (error) {
+    console.warn("Unable to load user profile from /user/", userId, error);
   }
 
-  if (uuid || userId) {
-    candidates.push(`${apiUrl}/messaging/users/${uuid || intToUUID(userId)}`);
-  }
-
-  for (const url of candidates) {
-    try {
-      const user = await fetchJson(url);
-      if (user) return user;
-    } catch (error) {
-      console.warn("Unable to load user profile from", url, error);
-    }
+  try {
+    const user = await fetchJson(`${apiUrl}/messaging/users/${userId}`);
+    if (user) return user;
+  } catch (error) {
+    console.warn("Unable to load user profile from /messaging/users/", userId, error);
   }
 
   return null;
@@ -276,19 +253,12 @@ async function contactProfileUser() {
     return;
   }
 
-  const targetUuid =
-    displayedProfileUuid ||
-    getUserUuid(displayedProfileUser) ||
-    (displayedProfileUserId ? intToUUID(displayedProfileUserId) : "");
-
-  if (!targetUuid) {
+  if (!displayedProfileUserId) {
     setActionFeedback("This user cannot be contacted for the moment.");
     return;
   }
 
-  window.location.href = `Messagerie.html?userId=${encodeURIComponent(
-    targetUuid,
-  )}`;
+  window.location.href = `Messagerie.html?userId=${encodeURIComponent(displayedProfileUserId)}`;
 }
 
 function openReportModal() {
@@ -444,7 +414,7 @@ function showFeedback(message) {
 document.addEventListener("DOMContentLoaded", async () => {
   const identity = getRequestedProfileIdentity();
 
-  if (!identity.userId && !identity.uuid) {
+  if (!identity.userId) {
     showFeedback("Unable to load this profile because no user was provided.");
     return;
   }
@@ -459,7 +429,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userId = getUserId(user, identity.userId);
   displayedProfileUser = user;
   displayedProfileUserId = userId;
-  displayedProfileUuid = getUserUuid(user, identity.uuid);
   const activities = await getPublisherActivities(userId);
   const hasPublisherActivities = activities.length > 0;
 

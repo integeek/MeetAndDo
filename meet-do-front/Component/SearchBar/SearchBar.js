@@ -23,7 +23,7 @@ function SearchBar(url) {
     <div id="map-modal" class="popup hidden" style="width:80vw;max-width:700px;height:70vh;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
-                <h3>Carte des activités</h3>
+                <h3>Activity map</h3>
                 <div id="map-loading-indicator" style="display:flex;align-items:center;gap:8px;font-size:1rem;margin-top:2px;">
                     <span>Loading of places...</span>
                     <img src="../Assets/img/loader.gif" alt="Loading..." width="22" height="22">

@@ -285,6 +285,43 @@ footer {
   transform: scale(1.08);
 }
 
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+
+#chat-header-avatar {
+  position: relative;
+  cursor: default;
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  opacity: 0;
+  transition: opacity 0.18s;
+  cursor: pointer;
+}
+
+#chat-header-avatar:hover .avatar-edit-btn {
+  opacity: 1;
+}
+
+.avatar-file-input {
+  display: none;
+}
+
 .conv-info {
   flex: 1;
   min-width: 0;
@@ -1058,6 +1095,88 @@ footer {
   transition: opacity .15s, transform .15s;
 }
 .chip-remove:hover { opacity: 1; transform: scale(1.2); }
+
+
+.modal-group-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-input-grow {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.modal-group-avatar-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.modal-group-avatar-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-blue) 0%, #0072ff 100%);
+  color: #fff;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,74,173,.25);
+  transition: filter .18s;
+}
+
+.modal-group-avatar-picker:hover .modal-group-avatar-preview {
+  filter: brightness(.8);
+}
+
+.modal-group-avatar-preview::after {
+  content: '\F214';
+  font-family: 'Bootstrap-icons';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: rgba(0,0,0,.45);
+  color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .18s;
+}
+
+.modal-group-avatar-picker:hover .modal-group-avatar-preview::after {
+  opacity: 1;
+}
+
+.modal-group-avatar-hint {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--brand-blue);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.modal-avatar-loading {
+  font-size: 1.3rem;
+  will-change: transform;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
 
 /* =====================
    BURGER MENU
