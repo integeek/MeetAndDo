@@ -263,6 +263,23 @@ h1 {
   color: #111827;
 }
 
+.review-stars-container {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.review-star {
+  color: #d1d5db;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.review-star.active,
+.review-star.hovered {
+  color: #f59e0b;
+}
+
 @media (max-width: 575.98px) {
   .reservation-event-row {
     align-items: stretch;

@@ -679,7 +679,7 @@ export class DashboardService {
 
     const { data: activites, error: e1 } = await this.db
       .from('activity')
-      .select('id, title, price, address, images, theme')
+      .select('id, title, price, address, images, theme, average_rating')
       .eq('id_user', userId);
 
     if (e1 || !activites?.length) {
