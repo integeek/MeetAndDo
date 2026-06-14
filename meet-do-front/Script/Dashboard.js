@@ -1,7 +1,3 @@
-/* =====================================================
-   Meet&Do — Dashboard (vanilla JS + API réelle)
-   ===================================================== */
-
 function getMeetDoApiUrl() {
   const hostname = window.location.hostname;
   const apiHostname = hostname || 'localhost';
@@ -49,7 +45,6 @@ const MENUS = {
     { id: 'activities', icone: 'bi-calendar3',           label: 'My Activities' },
     { id: 'messaging',  icone: 'bi-chat-dots-fill',      label: 'Messaging' },
     { id: 'favorites',  icone: 'bi-heart-fill',          label: 'Favorites' },
-    { id: 'parrainage', icone: 'bi-people-fill',         label: 'Referral' },
     { id: 'account',    icone: 'bi-person-fill',         label: 'My Account' },
   ],
   publisher: [
@@ -60,7 +55,6 @@ const MENUS = {
     { id: 'stats',          icone: 'bi-bar-chart-fill',      label: 'Statistics' },
     { id: 'pub_activites',  icone: 'bi-star-fill',           label: 'Reviews' },
     { id: 'pub_historique', icone: 'bi-clock-history',       label: 'History' },
-    { id: 'parrainage',     icone: 'bi-people-fill',         label: 'Referral' },
   ],
 };
 
@@ -1418,139 +1412,6 @@ function afficherHistorique(items) {
       });
     });
   }
-}
-
-// ============================================================
-//  ONGLET PARRAINAGE
-// ============================================================
-
-async function renderParrainageTab() {
-  const main = document.getElementById('dash-main');
-  if (!main) return;
-
-  renderSidebar();
-
-  const profil = state.profil || {};
-  const userId = profil.id;
-  const code = `MEET${userId}`;
-  const link = `${window.location.origin}/meet-do-front/Page/Signup.html?ref=${code}`;
-  const points = profil.referral_points || 0;
-
-  const paliers = [
-    { pts: 50,  label: '5% discount',      icon: 'bi-tag-fill',        color: '#059669' },
-    { pts: 100, label: '10% discount',     icon: 'bi-percent',          color: '#2563eb' },
-    { pts: 200, label: 'Free activity',    icon: 'bi-gift-fill',        color: '#7c3aed' },
-    { pts: 500, label: 'VIP status 1 month', icon: 'bi-star-fill',     color: '#d97706' },
-  ];
-
-  main.innerHTML = `
-    <header class="view-header animate-in">
-      <div>
-        <h1 class="view-title">Referral</h1>
-        <p class="view-subtitle">Invite your friends and earn discounts.</p>
-      </div>
-    </header>
-
-    <div style="max-width:720px">
-
-      <!-- Points actuels -->
-      <div class="glass-card animate-in parr-hero">
-        <div class="parr-hero-icon"><i class="bi bi-people-fill"></i></div>
-        <div>
-          <div class="parr-pts-val">${points} pts</div>
-          <div class="parr-pts-label">Referral points earned</div>
-        </div>
-      </div>
-
-      <!-- Lien de parrainage -->
-      <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">🔗 Your referral link</div>
-        <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6">
-          Share this link. For each friend who signs up and makes their first booking,
-          you earn <strong>10 points</strong>.
-        </p>
-        <div class="parr-link-row">
-          <div class="parr-link-box" id="parr-link-text">${link}</div>
-          <button class="btn-primary parr-copy-btn" id="parr-copy" title="Copy link">
-            <i class="bi bi-clipboard-fill"></i> Copy
-          </button>
-        </div>
-        <div id="parr-copy-feedback" style="font-size:.78rem;color:#059669;margin-top:.5rem;min-height:1rem"></div>
-
-        <!-- Partage réseaux sociaux -->
-        <div class="parr-share-row">
-          <a class="parr-share-btn" style="background:#1877f2"
-             href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}" target="_blank">
-            <i class="bi bi-facebook"></i> Facebook
-          </a>
-          <a class="parr-share-btn" style="background:#0a66c2"
-             href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}" target="_blank">
-            <i class="bi bi-linkedin"></i> LinkedIn
-          </a>
-          <a class="parr-share-btn" style="background:#25d366"
-             href="https://wa.me/?text=${encodeURIComponent('Join Meet&Do with my link: ' + link)}" target="_blank">
-            <i class="bi bi-whatsapp"></i> WhatsApp
-          </a>
-        </div>
-      </div>
-
-      <!-- Paliers de récompenses -->
-      <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">🎁 Available rewards</div>
-        <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1.25rem">
-          Accumulate points to unlock exclusive benefits.
-        </p>
-        <div class="parr-paliers">
-          ${paliers.map(p => {
-            const atteint = points >= p.pts;
-            const pct = Math.min(100, Math.round((points / p.pts) * 100));
-            return `
-              <div class="parr-palier ${atteint ? 'atteint' : ''}">
-                <div class="parr-palier-icon" style="color:${p.color}">
-                  <i class="bi ${p.icon}"></i>
-                </div>
-                <div style="flex:1">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
-                    <div style="font-weight:600;font-size:.9rem">${p.label}</div>
-                    <div style="font-size:.78rem;color:var(--text-muted);font-weight:600">${p.pts} pts</div>
-                  </div>
-                  <div class="parr-progress-bar">
-                    <div class="parr-progress-fill" style="width:${pct}%;background:${p.color}"></div>
-                  </div>
-                  <div style="font-size:.72rem;color:var(--text-muted);margin-top:.3rem">
-                    ${atteint
-                      ? `<span style="color:${p.color};font-weight:600"><i class="bi bi-check-circle-fill"></i> Unlocked!</span>`
-                      : `${points}/${p.pts} pts — ${p.pts - points} pts to go`}
-                  </div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>
-
-      <!-- Comment ça marche -->
-      <div class="glass-card animate-in" style="margin-top:1.25rem">
-        <div class="card-title">❓ How does it work?</div>
-        <div class="parr-steps">
-          <div class="parr-step"><div class="parr-step-num">1</div><div>Copy your unique link above</div></div>
-          <div class="parr-step"><div class="parr-step-num">2</div><div>Share it with your friends via message, social media…</div></div>
-          <div class="parr-step"><div class="parr-step-num">3</div><div>Your friend signs up with your link</div></div>
-          <div class="parr-step"><div class="parr-step-num">4</div><div>They make their first booking → you earn <strong>10 pts</strong></div></div>
-          <div class="parr-step"><div class="parr-step-num">5</div><div>Use your points for discounts on your next booking</div></div>
-        </div>
-      </div>
-
-    </div>`;
-
-  document.getElementById('parr-copy')?.addEventListener('click', () => {
-    navigator.clipboard.writeText(link).then(() => {
-      const fb = document.getElementById('parr-copy-feedback');
-      if (fb) {
-        fb.innerHTML = '<i class="bi bi-check-circle-fill"></i> Link copied to clipboard!';
-        setTimeout(() => { if (fb) fb.innerHTML = ''; }, 3000);
-      }
-    });
-  });
 }
 
 // ============================================================

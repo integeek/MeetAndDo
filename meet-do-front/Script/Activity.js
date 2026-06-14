@@ -133,6 +133,29 @@ function getAuthenticatedUserId(user) {
   return Number.isInteger(userId) && userId > 0 ? userId : null;
 }
 
+async function userHasReservationForActivity(activityId) {
+  try {
+    const response = await fetch(`${RESERVATION_API_URL}/user`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const reservations = await response.json();
+    return Array.isArray(reservations) &&
+      reservations.some((reservation) => {
+        return (
+          Number(reservation?.event?.id_activity) === Number(activityId) ||
+          Number(reservation?.event?.activity?.id) === Number(activityId)
+        );
+      });
+  } catch (error) {
+    console.warn('Unable to check user reservations:', error);
+    return false;
+  }
+}
 
 function redirectToLoginForReservation(activityId) {
   const params = new URLSearchParams({
@@ -623,14 +646,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   const creatorId = getCreatorId(activity);
 
   renderActivity(activity);
+  document.getElementById("activity-review-button")?.style.setProperty("display", "none");
 
   const currentUser = await getCurrentUser();
   const currentUserId = getAuthenticatedUserId(currentUser);
+  const isActivityCreator = currentUserId && currentUserId === creatorId;
 
   // Hide review + report buttons if user is the activity creator
-  if (currentUserId && currentUserId === creatorId) {
-    document.getElementById("activity-review-button")?.style.setProperty("display", "none");
+  if (isActivityCreator) {
     document.getElementById("activity-report-button")?.style.setProperty("display", "none");
+  }
+
+  const canLeaveReview =
+    Boolean(currentUserId) &&
+    !isActivityCreator &&
+    (await userHasReservationForActivity(resolvedActivityId));
+
+  if (canLeaveReview) {
+    document.getElementById("activity-review-button")?.style.setProperty("display", "");
   }
 
   initReportModal(resolvedActivityId);
@@ -853,10 +886,6 @@ function initReservationModal(activityId, activity, options = {}) {
   document
     .getElementById("reservation-review-button")
     ?.addEventListener("click", renderReservationSummary);
-
-  document
-    .getElementById("reservation-confirm-button")
-    ?.addEventListener("click", submitReservations);
 
   if (options.openOnLoad) {
     openReservationModal();
