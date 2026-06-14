@@ -634,7 +634,7 @@ function renderPublisherView() {
         <tr>
           <td style="font-weight:600;font-size:.85rem">${a.title}</td>
           <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
-          <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
+          <td style="color:#f59e0b;font-weight:600">${a.average_rating ? Number(a.average_rating).toFixed(1) + ' ★' : '<span style="color:var(--text-muted,#9ca3af)">—</span>'}</td>
           <td><span class="badge-status ${a.is_visible ? 'badge-actif' : 'badge-inactif'}">${a.is_visible ? 'Visible' : 'Hidden'}</span></td>
           <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
           <td>
@@ -1992,7 +1992,7 @@ function afficherPublisherStats(stats) {
             </div>
           </td>
           <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
-          <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
+          <td style="color:#f59e0b;font-weight:600">${a.average_rating ? Number(a.average_rating).toFixed(1) + ' ★' : '<span style="color:var(--text-muted,#9ca3af)">—</span>'}</td>
           <td>
             <div style="display:flex;align-items:center;gap:.5rem">
               <div style="height:6px;border-radius:3px;background:var(--accent);width:${Math.max(8, (a.nbReservations / (top[0]?.nbReservations || 1)) * 80)}px"></div>
@@ -2174,7 +2174,7 @@ function rendreListingsTable(annonces, contenu) {
           <tr id="listing-row-${a.id}" style="transition:opacity .3s,transform .3s">
             <td style="font-weight:600;font-size:.85rem">${escapeHtml(a.title || '—')}</td>
             <td style="font-weight:700;color:var(--accent)">${formatPrix(a.price)}</td>
-            <td style="color:#f59e0b;font-weight:600">${(a.average_rating || 0).toFixed(1)} ★</td>
+            <td style="color:#f59e0b;font-weight:600">${a.average_rating ? Number(a.average_rating).toFixed(1) + ' ★' : '<span style="color:var(--text-muted,#9ca3af)">—</span>'}</td>
             <td>${statut}</td>
             <td style="font-size:.78rem;color:var(--text-muted)">${formatDate(a.created_at)}</td>
             <td style="font-size:.78rem;color:var(--text-muted)">${a.nb_evenements || 0} event(s)</td>

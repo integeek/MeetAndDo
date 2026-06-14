@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
@@ -15,17 +15,69 @@ export class ReviewService {
     dto: { id_activity: number; rating: number; comment: string },
     userId: number,
   ) {
-    const { error } = await this.db.from('review').upsert(
-      {
+    // Can't review your own activity
+    const { data: activity } = await this.db
+      .from('activity')
+      .select('id_user')
+      .eq('id', dto.id_activity)
+      .maybeSingle();
+
+    if (activity?.id_user === userId) {
+      throw new ForbiddenException('You cannot review your own activity.');
+    }
+
+    // Check if user already has a review (updating is always allowed)
+    const { data: existingReview } = await this.db
+      .from('review')
+      .select('id')
+      .eq('id_user', userId)
+      .eq('id_activity', dto.id_activity)
+      .maybeSingle();
+
+    if (!existingReview) {
+      // New review: must have a reservation for a past event of this activity
+      const now = new Date().toISOString();
+      const { data: pastEvents } = await this.db
+        .from('event')
+        .select('id')
+        .eq('id_activity', dto.id_activity)
+        .lt('date', now);
+
+      if (!pastEvents?.length) {
+        throw new ForbiddenException(
+          'No past events available for this activity yet.',
+        );
+      }
+
+      const eventIds = (pastEvents as { id: unknown }[]).map((e) => e.id);
+      const { count } = await this.db
+        .from('reservation')
+        .select('id', { count: 'exact', head: true })
+        .eq('id_user', userId)
+        .in('id_event', eventIds);
+
+      if (!count) {
+        throw new ForbiddenException(
+          'You can only review an activity after attending it.',
+        );
+      }
+    }
+
+    if (existingReview) {
+      const { error } = await this.db
+        .from('review')
+        .update({ rating: dto.rating, comment: dto.comment })
+        .eq('id', existingReview.id);
+      if (error) throw new Error(String(error.message));
+    } else {
+      const { error } = await this.db.from('review').insert({
         id_activity: dto.id_activity,
         id_user: userId,
         rating: dto.rating,
         comment: dto.comment,
-      },
-      { onConflict: 'id_user,id_activity' },
-    );
-
-    if (error) throw new Error(error.message);
+      });
+      if (error) throw new Error(String(error.message));
+    }
 
     await this.updateAverageRating(dto.id_activity);
     return { success: true };

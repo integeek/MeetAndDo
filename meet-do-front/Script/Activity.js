@@ -111,7 +111,7 @@ function getStoredAuthenticatedUser() {
 
 async function getCurrentUser() {
   try {
-    const response = await fetch(AUTH_API_URL, {
+    const response = await fetch(`${AUTH_API_URL}/me`, {
       credentials: "include",
     });
 
@@ -620,32 +620,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   const activityId = params.get("id") || 1;
   const activity = await getActivity(activityId);
   const resolvedActivityId = activity?.id || activityId;
+  const creatorId = getCreatorId(activity);
+
   renderActivity(activity);
 
-  initReportModal();
+  const currentUser = await getCurrentUser();
+  const currentUserId = getAuthenticatedUserId(currentUser);
+
+  // Hide review + report buttons if user is the activity creator
+  if (currentUserId && currentUserId === creatorId) {
+    document.getElementById("activity-review-button")?.style.setProperty("display", "none");
+    document.getElementById("activity-report-button")?.style.setProperty("display", "none");
+  }
+
+  initReportModal(resolvedActivityId);
   initCreatorContactButton(resolvedActivityId, activity);
   initReservationModal(resolvedActivityId, activity, {
     openOnLoad: params.get("join") === "1",
   });
+  initCreatorReportModal(creatorId, currentUserId);
   initReviewModal(resolvedActivityId);
 
-  // Fetch real reviews from backend
+  // Fetch real reviews and personalise UI
   try {
     const response = await fetch(`${REVIEW_API_URL}/activity/${resolvedActivityId}`);
     if (response.ok) {
       const reviews = await response.json();
-      const avgRating =
-        reviews.length
-          ? reviews.reduce((s, r) => s + Number(r.note), 0) / reviews.length
-          : null;
+      const avgRating = reviews.length
+        ? reviews.reduce((s, r) => s + Number(r.note), 0) / reviews.length
+        : null;
       renderReviewsList(reviews, avgRating);
+
+      if (currentUserId) {
+        const existingReview = reviews.find((r) => r.id_user === currentUserId);
+        if (existingReview) {
+          const reviewBtn = document.querySelector("#activity-review-button .buttonCo");
+          if (reviewBtn) reviewBtn.textContent = "Update my review";
+          window._existingUserReview = existingReview;
+        }
+      }
     }
   } catch (err) {
     console.warn("Could not load reviews:", err);
   }
-  initReportModal(resolvedActivityId);
-  initCreatorReportModal(activity?.creator?.id);
-  initReservationModal(resolvedActivityId, activity);
 });
 
 let reportModal = null;
@@ -721,13 +738,20 @@ function initReportModal(resolvedActivityId) {
   }
 }
 
-function initCreatorReportModal(creatorId) {
+function initCreatorReportModal(creatorId, currentUserId) {
   const modalElement = document.getElementById("reportCreatorModal");
   if (modalElement) {
     creatorReportModal = new bootstrap.Modal(modalElement);
   }
 
   const reportBtn = document.getElementById("creator-report-btn");
+
+  // Hide report button if user is viewing their own profile
+  if (reportBtn && currentUserId && currentUserId === Number(creatorId)) {
+    reportBtn.style.display = "none";
+    return;
+  }
+
   if (reportBtn) {
     reportBtn.addEventListener("click", () => {
       creatorReportModal?.show();
@@ -1275,13 +1299,25 @@ function initReviewModal(activityId) {
     reviewButton.addEventListener("click", () => reviewModal.show());
   }
 
-  // Reset modal state each time it opens
+  // Pre-populate or reset modal each time it opens
   modalElement.addEventListener("show.bs.modal", () => {
-    document.getElementById("review-note").value = "0";
-    document.getElementById("review-comment").value = "";
+    const existing = window._existingUserReview;
     const feedback = document.getElementById("review-feedback");
     if (feedback) { feedback.textContent = ""; feedback.className = "mb-0 small"; }
-    document.querySelectorAll(".review-star").forEach((s) => s.classList.remove("active", "hovered"));
+
+    if (existing) {
+      const existingRating = Number(existing.note || existing.rating || 0);
+      document.getElementById("review-note").value = existingRating;
+      document.getElementById("review-comment").value = existing.commentaire || existing.comment || "";
+      document.querySelectorAll(".review-star").forEach((s) => {
+        s.classList.toggle("active", Number(s.dataset.value) <= existingRating);
+        s.classList.remove("hovered");
+      });
+    } else {
+      document.getElementById("review-note").value = "0";
+      document.getElementById("review-comment").value = "";
+      document.querySelectorAll(".review-star").forEach((s) => s.classList.remove("active", "hovered"));
+    }
   });
 
   // Star hover & click

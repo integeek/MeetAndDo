@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
@@ -277,6 +277,9 @@ export class DashboardService {
     if (!dto.reason) throw new Error('La raison est requise.');
     if (dto.type === 'activity' && !dto.id_activity) throw new Error('id_activity requis.');
     if (dto.type === 'user' && !dto.id_reported) throw new Error('id_reported requis.');
+    if (dto.type === 'user' && dto.id_reported === reporterId) {
+      throw new BadRequestException('You cannot report yourself.');
+    }
 
     const { error } = await this.db.from('report').insert({
       type: dto.type,
